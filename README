@@ -1,0 +1,222 @@
+dzen
+=====
+A general purpose messaging, notification and launcher programm. 
+
+
+Features
+--------
+
+    * scritable in any language
+    * single line and/or multi 
+      line windows
+    * menu functionality
+    * flexible event/action 
+      mechanism
+    * hideable, collapsable
+
+
+Requirements
+------------
+In order to build dzen you need the Xlib and phtread header files.
+
+
+Installation
+------------
+Edit config.mk to match your local setup (dzen is installed into
+the /usr/local namespace by default).
+
+Afterwards enter the following command to build and install dzen (if
+necessary as root):
+
+    make clean install
+
+
+Running dzen
+------------
+dzen accepts a couple of options:
+
+    -fg     foreground color
+    -bg     background color
+    -fn     font 
+    -a      autohide, see 1)
+    -l      lines, see 2)
+    -e      events and actions, see 3)
+    -m      menu, see 4)
+    -p      persistent, never time out
+    -x      x position
+    -y      y position
+    -w      width
+    -v      version information
+
+Termination:
+------------
+dzen2 uses to different approaches to terminate itself:
+
+    * If EOF is received -> terminate
+        - unless the '-p' flag is set
+
+    * If mouse button3 is clicked -> terminate
+        - this is the default behaviour, see 3)
+
+
+Return values:
+--------------
+0               -   dzen received EOF
+1               -   some error occured, inspect the error message
+user defined    -   set with 'exit:retval' action, see 3)
+
+
+
+1) Option "-a": Autohide
+------------------------
+
+Hides the title window as soon as the pointer leaves it (default). This
+very much resembles autohiding panels known from most desktops.
+
+Note:   See the 3) for events/actions to use with autohide.
+
+
+2) Option "-l": Slave window
+--------------------------------
+
+Enables support for displaying multiple lines. The parameter to "-l"
+specifies the number of lines to be displayed.
+
+These lines of input are held in the slave window which becomes active as soon
+as the pointer enters the title (default action) window.
+
+If the mouse leaves the multiline window it will be hidden unless it is set
+sticky by clicking with Button2 into it (default action).
+
+Button4 and Button5 (mouse wheel) will scroll the multiline window up
+and down if the content exceeds the window height (default action).
+
+
+3) Option '-e': Events and actions
+----------------------------------
+
+dzen allows the user to associate actions to events.
+
+The command line syntax is as follow:
+-e 'event1=action1:option1:...option<n>,...,action<m>;...;event<l>'
+
+Every event can take any number of actions and every action can take any number
+of options. (Currently limited to 256 each)
+
+An example:
+    -e 'button1=exec:xterm:firefox;entertitle=uncollapse,unhide;button3=exit'
+
+    Meaning:
+
+    button1=exec:xterm:firefox;
+    on Button1 event (Button1 press on the mouse) execute xterm and
+    firefox. 
+    (Note: xterm and firefox are options to the exec action)
+
+    entertitle=uncollapse,unhide;
+    on entertitle (mouse pointer enters the title window) uncollapse
+    multiline window and unhide the title window
+
+    button3=exit
+    on button3 event exit dzen
+
+
+Supported events:
+    button1             Mouse button1 released 
+    button2             Mouse button2 released
+    button3             Mouse button3 released
+    button4             Mouse button4 released (usually scrollwheel)
+    button5             Mouse button5 released (usually scrollwheel)
+    entertitle          Mouse enters the title window
+    leavetitle          Mouse leaves the title window
+    enterslave          Mouse enters the ѕlave window
+    leaveslave          Mouse leaves the slave window
+    sigusr1             SIGUSR1 received 
+    sigusr2             SIGUSR2 received
+
+Supported actions:
+    exec:command1:..:n  execute all given options
+    menuexec            executes selected menu entry
+    exit:retval         exit dzen and return 'retval'
+    print:str1:...:n    write all given options to STDOUT
+    menuprint           write selected menu entry to STDOUT
+    collapse            collapse multiline window
+    uncollapse          uncollapse multiline window
+    stick               stick multiline window
+    unstick             unstick multiline window
+    togglestick         toggle sticky state
+    hide                hide title window
+    unhide              unhide title window
+    scrollup            scroll slave window one line up
+    scrolldown          scroll slave window one line down
+
+
+Note:   If no events/actions are specified dzen defaults to:
+
+        -e 'entertitle=uncollapse;leaveslave=collapse;
+            button1=menuexec;
+            button2=togglestick;button3=exit:13;
+            button4=scrollup;button5=scrolldown'
+
+        If you define any events/actions, there is no default behaviour,
+        i.e. you will need to specify _all_ events/actions you want to
+        use.
+
+
+Note:   The hide/unhide actions can only be used if '-a' is supplied on
+        the command line. This is subject to change as soon as a 
+        autohide action will be introduced.
+
+
+
+4) Option '-m', Menu
+--------------------
+
+If menu mode is activated the line under the pointer will be
+highlighted. 
+All actions beginning with "menu" work on the selected menu entry.
+
+Note:   Menu mode only makes sense if '-l <n>' is specified!
+
+
+
+Examples:
+---------
+
+* Display message and timeout after 10 seconds:
+    (echo "This is a message"; sleep 10) | dzen2 -bg darkred -fg grey80 -fn fixed 
+
+* Display message and never timeout:
+    echo "This is a message"| dzen2 -p
+
+* Display updating single line message:
+    for i in $(seq 1 20); do A=${A}'='; print $A; sleep 1; done | ./dzen2
+
+* Display header and multiline message:
+    (echo Header; cal; sleep 20) | dzen2 -l 8
+
+    Displays "Header" in the main alert window and
+    the output of cal in the 8 lines high multiline 
+    window.
+
+* Display updating messages:
+    (echo Header; while true; do echo test$((i++)); sleep 1; done) | dzen2 -l 12
+
+    The slave window will update contents if new input has arrived.
+
+* Display log files:
+    (su -c "echo LOGFILENAME; tail -f /var/log/messages") | dzen2 -l 20 -x 100 -y 300 -w 500
+
+* Monthly schedule with remind:
+    (echo Monthly Schedule; remind -c1 -m) | dzen2 -l 52 -w 410 -p -fn lime -bg '#e0e8ea' -fg black -x 635
+
+* Simple menu:
+    echo "Applications" | dzen2 -l 4 -p -m < menufile
+
+* Menu without any files:
+    {echo Menu; echo -e "xterm\nxclock\nxeyes\nxfontsel"} | dzen2 -l 4 -m -p
+
+* Extract PIDs from the process table
+
+    {echo Procs; ps -a} | dzen2 -m -l 12 -p -e 'button1=menuprint;button3=exit;
+            button4=scrollup;button5=scrolldown' | awk '{print $1}'
