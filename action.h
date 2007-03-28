@@ -4,8 +4,6 @@
  *
  */
 
-#include <pthread.h>
-
 /* Event, Action data structures */
 typedef struct AS As;
 typedef struct EV Ev;
