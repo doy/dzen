@@ -85,10 +85,10 @@ specifies the number of lines to be displayed.
 These lines of input are held in the slave window which becomes active as soon
 as the pointer enters the title (default action) window.
 
-If the mouse leaves the multiline window it will be hidden unless it is set
+If the mouse leaves the slave window it will be hidden unless it is set
 sticky by clicking with Button2 into it (default action).
 
-Button4 and Button5 (mouse wheel) will scroll the multiline window up
+Button4 and Button5 (mouse wheel) will scroll the slave window up
 and down if the content exceeds the window height (default action).
 
 
@@ -97,7 +97,7 @@ and down if the content exceeds the window height (default action).
 
 dzen allows the user to associate actions to events.
 
-The command line syntax is as follow:
+The command line syntax is as follows:
 -e 'event1=action1:option1:...option<n>,...,action<m>;...;event<l>'
 
 Every event can take any number of actions and every action can take any number
@@ -129,7 +129,7 @@ Supported events:
     button5             Mouse button5 released (usually scrollwheel)
     entertitle          Mouse enters the title window
     leavetitle          Mouse leaves the title window
-    enterslave          Mouse enters the ѕlave window
+    enterslave          Mouse enters the slave window
     leaveslave          Mouse leaves the slave window
     sigusr1             SIGUSR1 received 
     sigusr2             SIGUSR2 received
@@ -219,4 +219,5 @@ Examples:
 * Extract PIDs from the process table
 
     {echo Procs; ps -a} | dzen2 -m -l 12 -p -e 'button1=menuprint;button3=exit;
-            button4=scrollup;button5=scrolldown' | awk '{print $1}'
+            button4=scrollup;button5=scrolldown;entertitle=uncollapse;leaveslave=collapse' 
+            | awk '{print $1}'
