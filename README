@@ -46,6 +46,7 @@ dzen accepts a couple of options:
     -x      x position
     -y      y position
     -w      width
+    -tw     title window width
     -v      version information
 
 Termination:

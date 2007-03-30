@@ -143,7 +143,7 @@ static void
 x_draw_body(void) {
     dzen.x = 0;
     dzen.y = 0;
-    dzen.w = dzen.mw;
+    dzen.w = dzen.slave_win.width;
     dzen.h = dzen.mh;
     int i;
 
@@ -161,14 +161,14 @@ x_draw_body(void) {
 
     for(i=0; i < dzen.slave_win.max_lines; i++) {
         if(i < dzen.slave_win.last_line_vis) {
-            drawtext(dzen.slave_win.tbuf[i + dzen.slave_win.first_line_vis], 0, i+1);
+            drawtext(dzen.slave_win.tbuf[i + dzen.slave_win.first_line_vis], 0, i);
             XCopyArea(dzen.dpy, dzen.slave_win.drawable, dzen.slave_win.line[i], dzen.gc, 
-                    0, 0, dzen.mw, dzen.mh, 0, 0);
+                    0, 0, dzen.slave_win.width, dzen.mh, 0, 0);
         }
         else if(i < dzen.slave_win.max_lines) {
-            drawtext("", 0, i+1);
+            drawtext("", 0, i);
             XCopyArea(dzen.dpy, dzen.slave_win.drawable, dzen.slave_win.line[i], dzen.gc,
-                    0, 0, dzen.mw, dzen.mh, 0, 0);
+                    0, 0, dzen.slave_win.width, dzen.mh, 0, 0);
         }
     }
     pthread_mutex_unlock(&dzen.mt);

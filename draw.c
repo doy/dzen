@@ -29,11 +29,13 @@ void drawtext(const char *text, int reverse, int line) {
 
     mgc = reverse ? dzen.gc : dzen.rgc;
     /* title win */
-    if(line == -1) 
+    if(line == -1) {
         XFillRectangles(dzen.dpy, dzen.title_win.drawable, mgc, &r, 1);
+    }
     /* slave win */
-    else 
+    else {
         XFillRectangles(dzen.dpy, dzen.slave_win.drawable, mgc, &r, 1);
+    }
 
     if(!text)
         return;
@@ -58,7 +60,7 @@ void drawtext(const char *text, int reverse, int line) {
     }
 
     if(line != -1)
-        x = h;
+        x = h/2;
     else
         x = (dzen.w - textw(buf)+h)/2;
     y = dzen.font.ascent + (dzen.mh - h) / 2;

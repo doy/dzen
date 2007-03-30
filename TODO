@@ -13,5 +13,5 @@
 
 # user interface
 
-          o title and slave window should be allowed to have different bg/fg/font/width settings without making the command line arguments a mess
+          o title and slave window should be allowed to have different bg/fg/font/settings without making the command line arguments a mess
           o split lines longer than window width in multiple lines
