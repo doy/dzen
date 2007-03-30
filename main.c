@@ -265,7 +265,7 @@ x_create_windows(void) {
         dzen.slave_win.width = dzen.title_win.width;
     }
     if(dzen.slave_win.width != DisplayWidth(dzen.dpy, dzen.screen)) {
-        dzen.slave_win.x = dzen.title_win.x + dzen.title_win.width/2 - dzen.slave_win.width/2;
+        dzen.slave_win.x = dzen.title_win.x + (dzen.title_win.width- dzen.slave_win.width)/2;
         if(dzen.slave_win.x < 0)
             dzen.slave_win.x = 0;
         if(dzen.slave_win.width > DisplayWidth(dzen.dpy, dzen.screen))
@@ -378,14 +378,12 @@ main(int argc, char *argv[]) {
         }
         else if(!strncmp(argv[i], "-x", 3)) {
             if(++i < argc) dzen.title_win.x = dzen.slave_win.x = atoi(argv[i]);
-            //if(++i < argc) dzen.hx = atoi(argv[i]);
         }
         else if(!strncmp(argv[i], "-y", 3)) {
             if(++i < argc) dzen.hy = atoi(argv[i]);
         }
         else if(!strncmp(argv[i], "-w", 3)) {
             if(++i < argc) dzen.slave_win.width = atoi(argv[i]);
-            //if(++i < argc) dzen.hw = atoi(argv[i]);
         }
         else if(!strncmp(argv[i], "-tw", 3)) {
             if(++i < argc) dzen.title_win.width = atoi(argv[i]);

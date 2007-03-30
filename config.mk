@@ -15,10 +15,10 @@ INCS = -I. -I/usr/include -I${X11INC}
 LIBS = -L/usr/lib -lc -L${X11LIB} -lX11 -lpthread
 
 # flags
-CFLAGS = -Os ${INCS} -DVERSION=\"${VERSION}\"
-LDFLAGS = ${LIBS}
-#CFLAGS = -g -Wall -O2 ${INCS} -DVERSION=\"${VERSION}\" -DPOSIX_SOURCE
-#LDFLAGS = -g ${LIBS}
+#CFLAGS = -Os ${INCS} -DVERSION=\"${VERSION}\"
+#LDFLAGS = ${LIBS}
+CFLAGS = -g -Wall -Os ${INCS} -DVERSION=\"${VERSION}\" -DPOSIX_SOURCE
+LDFLAGS = -g ${LIBS}
 
 # Solaris
 #CFLAGS = -fast ${INCS} -DVERSION=\"${VERSION}\"

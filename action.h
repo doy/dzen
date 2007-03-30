@@ -4,6 +4,10 @@
  *
  */
 
+#define MAXEVENTS 32
+#define MAXACTIONS 256
+#define MAXOPTIONS 256
+
 /* Event, Action data structures */
 typedef struct AS As;
 typedef struct EV Ev;
@@ -30,16 +34,16 @@ struct action_lookup {
 };
 
 struct AS {
-    char *options[256];
+    char *options[MAXOPTIONS];
     int (*handler)(char **);
 };
 
 struct EV {
     int isset;
-    As *action[256];
+    As *action[MAXACTIONS];
 };
 
-extern Ev ev_table[256];
+extern Ev ev_table[MAXEVENTS];
 
 /* utility functions */
 void do_action(int);

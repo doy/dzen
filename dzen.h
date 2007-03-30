@@ -72,7 +72,6 @@ struct SW {
 /* TODO: Remove unused variables */
 struct DZEN {
     int x, y, w, h;
-    int sx, sy, sw, sh;
     Bool running;
     unsigned long norm[ColLast];
 
@@ -95,7 +94,7 @@ struct DZEN {
     Fnt font;
 
     /* position */
-    int hx, hy, hw;
+    int hy, hw;
     int cur_line;
 
     pthread_t read_thread;

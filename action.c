@@ -46,7 +46,7 @@ struct action_lookup  ac_lookup_table[] = {
     { 0, 0 }
 };
 
-Ev ev_table[256] = {{0}, {0}};
+Ev ev_table[MAXEVENTS] = {{0}, {0}};
 
 /* utilities */
 void
@@ -101,7 +101,7 @@ fill_ev_table(char *input)
             if (subtoken == NULL)
                 break;
             if( (str2 == token) && ((eid = get_ev_id(subtoken)) != -1))
-                0;
+                ;
             else if(eid == -1)
                 break;
 
