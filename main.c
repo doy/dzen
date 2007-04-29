@@ -451,7 +451,7 @@ main(int argc, char *argv[]) {
         XFreePixmap(dzen.dpy, dzen.slave_win.drawable);
         for(i=0; i < dzen.slave_win.max_lines; i++) 
             XDestroyWindow(dzen.dpy, dzen.slave_win.line[i]);
-        free(&dzen.slave_win.line);
+        free(dzen.slave_win.line);
         XDestroyWindow(dzen.dpy, dzen.slave_win.win);
     }
     XFreeGC(dzen.dpy, dzen.gc);
