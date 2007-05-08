@@ -180,7 +180,7 @@ x_draw_body(void) {
 int
 a_exposetitle(char * opt[]) {
     XCopyArea(dzen.dpy, dzen.title_win.drawable, dzen.title_win.win, 
-            dzen.gc, 0, 0, dzen.mw, dzen.mh, 0, 0);
+            dzen.gc, 0, 0, dzen.title_win.width, dzen.mh, 0, 0);
     return 0;
 }
 
@@ -276,7 +276,7 @@ a_scrolldown(char * opt[]) {
 int
 a_hide(char * opt[]) {
     if(dzen.title_win.autohide && !dzen.title_win.ishidden) {
-        XResizeWindow(dzen.dpy, dzen.title_win.win, dzen.mw, 1);
+        XResizeWindow(dzen.dpy, dzen.title_win.win, dzen.title_win.width, 1);
         dzen.title_win.ishidden = True;
     }
     return 0;
@@ -285,7 +285,7 @@ a_hide(char * opt[]) {
 int
 a_unhide(char * opt[]) {
     if(dzen.title_win.autohide && dzen.title_win.ishidden) {
-        XResizeWindow(dzen.dpy, dzen.title_win.win, dzen.mw, dzen.mh);
+        XResizeWindow(dzen.dpy, dzen.title_win.win, dzen.title_win.width, dzen.mh);
         dzen.title_win.ishidden = False;
     }
     return 0;
