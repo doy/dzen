@@ -2,7 +2,7 @@
   dzen, (c) 2007 by Robert Manea
 ==================================
 
-A general purpose messaging, notification and launcher programm. 
+A general purpose messaging, notification and launcher program. 
 Dzen can be used in a single line and/or multiple lines mode. 
 
 
@@ -10,7 +10,7 @@ Dzen can be used in a single line and/or multiple lines mode.
 Features
 --------
 
-    * scritable in any language
+    * scriptable in any language
     * single line and/or windows 
       holding multiple lines
     * menu functionality
@@ -38,7 +38,7 @@ necessary as root):
 Contact:
 --------
 Feature requests, patches or anything else related to dzen can be send
-to: rob dot manea at gmail dor com
+to: rob dot manea at gmail dot com
 
 
 Running dzen
@@ -199,7 +199,7 @@ Examples:
     echo "This is a message"| dzen2 -p
 
 * Display updating single line message:
-    for i in $(seq 1 20); do A=${A}'='; print $A; sleep 1; done | ./dzen2
+    for i in $(seq 1 20); do A=${A}'='; print $A; sleep 1; done | dzen2
 
 * Display header and a message with multiple lines:
     (echo Header; cal; sleep 20) | dzen2 -l 8
