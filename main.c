@@ -358,9 +358,11 @@ main(int argc, char *argv[]) {
         else if(!strncmp(argv[i], "-p", 3)) {
             dzen.slave_win.ispersistent = True;
         }
+        /*
         else if(!strncmp(argv[i], "-a", 3)) {
             dzen.title_win.autohide = True;
         }
+        */
         else if(!strncmp(argv[i], "-m", 3)) {
             dzen.slave_win.ismenu = True;
         }
@@ -434,9 +436,15 @@ main(int argc, char *argv[]) {
     /* reader */
     pthread_create(&dzen.read_thread, NULL, read_stdin, NULL);
 
+    /* actions to be done right after startup */
+    do_action(onstart);
+
     /* catch events */
     event_loop(NULL);
 
+    /* actions to be done right before quitting*/
+    do_action(onquit);
+    
     /* clean up */
     if(!dzen.running) 
         pthread_cancel(dzen.read_thread);
@@ -457,6 +465,7 @@ main(int argc, char *argv[]) {
     XFreeGC(dzen.dpy, dzen.gc);
     XDestroyWindow(dzen.dpy, dzen.title_win.win);
     XCloseDisplay(dzen.dpy);
+
 
     if(dzen.ret_val)
         return dzen.ret_val;

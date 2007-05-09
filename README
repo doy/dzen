@@ -1,14 +1,18 @@
-dzen
-=====
+==================================
+  dzen, (c) 2007 by Robert Manea
+==================================
+
 A general purpose messaging, notification and launcher programm. 
+Dzen can be used in a single line and/or multiple lines mode. 
+
 
 
 Features
 --------
 
     * scritable in any language
-    * single line and/or multi 
-      line windows
+    * single line and/or windows 
+      holding multiple lines
     * menu functionality
     * flexible event/action 
       mechanism
@@ -29,6 +33,12 @@ Afterwards enter the following command to build and install dzen (if
 necessary as root):
 
     make clean install
+
+
+Contact:
+--------
+Feature requests, patches or anything else related to dzen can be send
+to: rob dot manea at gmail dor com
 
 
 Running dzen
@@ -74,7 +84,9 @@ user defined    -   set with 'exit:retval' action, see 3)
 Hides the title window as soon as the pointer leaves it (default). This
 very much resembles autohiding panels known from most desktops.
 
-Note:   See the 3) for events/actions to use with autohide.
+Note:   This option is obsolete and will be removed in future versions as
+        the same behaviour can be achieved with the 'onstart=hide' combination,
+        see 3) for further details.
 
 
 2) Option "-l": Slave window
@@ -116,13 +128,15 @@ An example:
 
     entertitle=uncollapse,unhide;
     on entertitle (mouse pointer enters the title window) uncollapse
-    multiline window and unhide the title window
+    slave window and unhide the title window
 
     button3=exit
     on button3 event exit dzen
 
 
 Supported events:
+    onstart             Perform actions right after startup
+    onquit              Perform actions just before quitting
     button1             Mouse button1 released 
     button2             Mouse button2 released
     button3             Mouse button3 released
@@ -141,10 +155,10 @@ Supported actions:
     exit:retval         exit dzen and return 'retval'
     print:str1:...:n    write all given options to STDOUT
     menuprint           write selected menu entry to STDOUT
-    collapse            collapse multiline window
-    uncollapse          uncollapse multiline window
-    stick               stick multiline window
-    unstick             unstick multiline window
+    collapse            collapse slave window
+    uncollapse          uncollapse slave window
+    stick               stick slave window
+    unstick             unstick slave window
     togglestick         toggle sticky state
     hide                hide title window
     unhide              unhide title window
@@ -160,14 +174,8 @@ Note:   If no events/actions are specified dzen defaults to:
             button4=scrollup;button5=scrolldown'
 
         If you define any events/actions, there is no default behaviour,
-        i.e. you will need to specify _all_ events/actions you want to
+        i.e. you will have to specify _all_ events/actions you want to
         use.
-
-
-Note:   The hide/unhide actions can only be used if '-a' is supplied on
-        the command line. This is subject to change as soon as a 
-        autohide action will be introduced.
-
 
 
 4) Option '-m', Menu
@@ -193,11 +201,11 @@ Examples:
 * Display updating single line message:
     for i in $(seq 1 20); do A=${A}'='; print $A; sleep 1; done | ./dzen2
 
-* Display header and multiline message:
+* Display header and a message with multiple lines:
     (echo Header; cal; sleep 20) | dzen2 -l 8
 
     Displays "Header" in the main alert window and
-    the output of cal in the 8 lines high multiline 
+    the output of cal in the 8 lines high slave
     window.
 
 * Display updating messages:
@@ -222,3 +230,7 @@ Examples:
     {echo Procs; ps -a} | dzen2 -m -l 12 -p -e 'button1=menuprint;button3=exit;
             button4=scrollup;button5=scrolldown;entertitle=uncollapse;leaveslave=collapse' 
             | awk '{print $1}'
+
+
+
+Have fun.

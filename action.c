@@ -9,9 +9,12 @@
 #include <stdlib.h>
 #include <string.h>
 
+
 struct event_lookup ev_lookup_table[] = {
     { "exposet",        exposetitle},
     { "exposes",        exposeslave},
+    { "onstart",        onstart},
+    { "onquit",         onquit},
     { "button1",        button1},
     { "button2",        button2},
     { "button3",        button3},
@@ -273,6 +276,7 @@ a_scrolldown(char * opt[]) {
     return 0;
 }
 
+/*
 int
 a_hide(char * opt[]) {
     if(dzen.title_win.autohide && !dzen.title_win.ishidden) {
@@ -285,6 +289,24 @@ a_hide(char * opt[]) {
 int
 a_unhide(char * opt[]) {
     if(dzen.title_win.autohide && dzen.title_win.ishidden) {
+        XResizeWindow(dzen.dpy, dzen.title_win.win, dzen.title_win.width, dzen.mh);
+        dzen.title_win.ishidden = False;
+    }
+    return 0;
+}
+*/
+int
+a_hide(char * opt[]) {
+    if(!dzen.title_win.ishidden) {
+        XResizeWindow(dzen.dpy, dzen.title_win.win, dzen.title_win.width, 1);
+        dzen.title_win.ishidden = True;
+    }
+    return 0;
+}
+
+int
+a_unhide(char * opt[]) {
+    if(dzen.title_win.ishidden) {
         XResizeWindow(dzen.dpy, dzen.title_win.win, dzen.title_win.width, dzen.mh);
         dzen.title_win.ishidden = False;
     }

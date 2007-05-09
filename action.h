@@ -15,6 +15,8 @@ typedef struct EV Ev;
 enum ev_id {
     /* internal events, should not be used by the user */
     exposetitle, exposeslave,
+    /* startup, shutdown */
+    onstart, onquit,
     /* mouse buttons */
     button1, button2, button3, button4, button5,
     /* entering/leaving windows */
