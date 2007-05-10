@@ -52,6 +52,7 @@ void do_action(int);
 int get_ev_id(char *);
 void * get_action_handler(char *);
 void fill_ev_table(char *);
+void free_ev_table(void);
 
 /* action handlers */
 int a_exposetitle(char **);

@@ -86,6 +86,17 @@ get_action_handler(char *acname) {
 }
 
 void
+free_ev_table(void) {
+    int i, j;
+
+    for(i=0; i<MAXEVENTS; i++) {
+        if(ev_table[i].isset)
+            for(j=0; ev_table[i].action[j]->handler; j++)
+                free(ev_table[i].action[j]);
+    }
+}
+
+void
 fill_ev_table(char *input)
 {
     char *str1, *str2, *str3, *str4,
@@ -278,25 +289,6 @@ a_scrolldown(char * opt[]) {
     return 0;
 }
 
-/*
-int
-a_hide(char * opt[]) {
-    if(dzen.title_win.autohide && !dzen.title_win.ishidden) {
-        XResizeWindow(dzen.dpy, dzen.title_win.win, dzen.title_win.width, 1);
-        dzen.title_win.ishidden = True;
-    }
-    return 0;
-}
-
-int
-a_unhide(char * opt[]) {
-    if(dzen.title_win.autohide && dzen.title_win.ishidden) {
-        XResizeWindow(dzen.dpy, dzen.title_win.win, dzen.title_win.width, dzen.mh);
-        dzen.title_win.ishidden = False;
-    }
-    return 0;
-}
-*/
 int
 a_hide(char * opt[]) {
     if(!dzen.title_win.ishidden) {
@@ -338,8 +330,9 @@ a_print(char * opt[]) {
 
 int
 a_menuprint(char * opt[]) {
-    if(dzen.slave_win.ismenu) {
+    if(dzen.slave_win.ismenu && dzen.slave_win.sel_line != -1) {
         puts(dzen.slave_win.tbuf[dzen.slave_win.sel_line + dzen.slave_win.first_line_vis]);
+        dzen.slave_win.sel_line = -1;
         fflush(stdout);
     }
     return 0;
@@ -347,8 +340,10 @@ a_menuprint(char * opt[]) {
 
 int
 a_menuexec(char * opt[]) {
-    if(dzen.slave_win.ismenu)
+    if(dzen.slave_win.ismenu && dzen.slave_win.sel_line != -1) {
         spawn(dzen.slave_win.tbuf[dzen.slave_win.sel_line + dzen.slave_win.first_line_vis]);
+        dzen.slave_win.sel_line = -1;
+    }
     return 0;
 }
 

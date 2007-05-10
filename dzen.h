@@ -5,14 +5,15 @@
 
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
-#include <X11/keysym.h>
+//#include <X11/keysym.h>
 #include <pthread.h>
 
 #define FONT	    "-*-fixed-*-*-*-*-*-*-*-*-*-*-*-*"
 #define BGCOLOR		"#ab0b0b"
 #define FGCOLOR		"#efefef"
 
-#define BUF_SIZE    4096
+//#define BUF_SIZE    4096
+#define BUF_SIZE    1024
 
 /* gui data structures */
 enum { ColFG, ColBG, ColLast };

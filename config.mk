@@ -1,5 +1,5 @@
 # dzen version
-VERSION = 0.2.1
+VERSION = 0.2.2
 
 # Customize below to fit your system
 
@@ -15,10 +15,10 @@ INCS = -I. -I/usr/include -I${X11INC}
 LIBS = -L/usr/lib -lc -L${X11LIB} -lX11 -lpthread
 
 # flags
-#CFLAGS = -Os ${INCS} -DVERSION=\"${VERSION}\"
-#LDFLAGS = ${LIBS}
-CFLAGS = -g -Wall -O0 ${INCS} -DVERSION=\"${VERSION}\" -DPOSIX_SOURCE
-LDFLAGS = -g ${LIBS}
+CFLAGS = -Os ${INCS} -DVERSION=\"${VERSION}\"
+LDFLAGS = ${LIBS}
+#CFLAGS = -g -Wall -O0 ${INCS} -DVERSION=\"${VERSION}\" -DPOSIX_SOURCE
+#LDFLAGS = -g ${LIBS}
 
 # Solaris
 #CFLAGS = -fast ${INCS} -DVERSION=\"${VERSION}\"

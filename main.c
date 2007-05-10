@@ -30,6 +30,11 @@ catch_sigusr2() {
     do_action(sigusr2);
 }
 
+static void
+catch_sigterm() {
+    do_action(onquit);
+}
+
 sigfunc *
 setup_signal(int signr, sigfunc *shandler) {
     struct sigaction nh, oh;
@@ -331,6 +336,32 @@ x_map_window(Window win) {
     XSync(dzen.dpy, False);
 }
 
+static void 
+clean_up(void) {
+    int i;
+
+    if(!dzen.running) 
+        pthread_cancel(dzen.read_thread);
+
+    free_ev_table();
+    if(dzen.font.set)
+        XFreeFontSet(dzen.dpy, dzen.font.set);
+    else
+        XFreeFont(dzen.dpy, dzen.font.xfont);
+
+    XFreePixmap(dzen.dpy, dzen.title_win.drawable);
+    if(dzen.slave_win.max_lines) {
+        XFreePixmap(dzen.dpy, dzen.slave_win.drawable);
+        for(i=0; i < dzen.slave_win.max_lines; i++) 
+            XDestroyWindow(dzen.dpy, dzen.slave_win.line[i]);
+        free(dzen.slave_win.line);
+        XDestroyWindow(dzen.dpy, dzen.slave_win.win);
+    }
+    XFreeGC(dzen.dpy, dzen.gc);
+    XDestroyWindow(dzen.dpy, dzen.title_win.win);
+    XCloseDisplay(dzen.dpy);
+}
+
 int
 main(int argc, char *argv[]) {
     int i;
@@ -358,11 +389,9 @@ main(int argc, char *argv[]) {
         else if(!strncmp(argv[i], "-p", 3)) {
             dzen.slave_win.ispersistent = True;
         }
-        /*
         else if(!strncmp(argv[i], "-a", 3)) {
             dzen.title_win.autohide = True;
         }
-        */
         else if(!strncmp(argv[i], "-m", 3)) {
             dzen.slave_win.ismenu = True;
         }
@@ -417,13 +446,13 @@ main(int argc, char *argv[]) {
         fill_ev_table(edef);
     }
 
-    /* setup signal handlers */
+    if(ev_table[onquit].isset && (setup_signal(SIGTERM, catch_sigterm) == SIG_ERR))
+        fprintf(stderr, "dzen: error hooking SIGTERM\n");
     if(ev_table[sigusr1].isset && (setup_signal(SIGUSR1, catch_sigusr1) == SIG_ERR))
         fprintf(stderr, "dzen: error hooking SIGUSR1\n");
     if(ev_table[sigusr2].isset && (setup_signal(SIGUSR2, catch_sigusr2) == SIG_ERR))
         fprintf(stderr, "dzen: error hooking SIGUSR2\n");
 
-    /* set up windows */
     x_create_windows();
     x_map_window(dzen.title_win.win);
 
@@ -436,37 +465,11 @@ main(int argc, char *argv[]) {
     /* reader */
     pthread_create(&dzen.read_thread, NULL, read_stdin, NULL);
 
-    /* actions to be done right after startup */
     do_action(onstart);
-
-    /* catch events */
     event_loop(NULL);
-
-    /* actions to be done right before quitting*/
     do_action(onquit);
-    
-    /* clean up */
-    if(!dzen.running) 
-        pthread_cancel(dzen.read_thread);
 
-    if(dzen.font.set)
-        XFreeFontSet(dzen.dpy, dzen.font.set);
-    else
-        XFreeFont(dzen.dpy, dzen.font.xfont);
-
-    XFreePixmap(dzen.dpy, dzen.title_win.drawable);
-    if(dzen.slave_win.max_lines) {
-        XFreePixmap(dzen.dpy, dzen.slave_win.drawable);
-        for(i=0; i < dzen.slave_win.max_lines; i++) 
-            XDestroyWindow(dzen.dpy, dzen.slave_win.line[i]);
-        free(dzen.slave_win.line);
-        XDestroyWindow(dzen.dpy, dzen.slave_win.win);
-    }
-    XFreeGC(dzen.dpy, dzen.gc);
-    XDestroyWindow(dzen.dpy, dzen.title_win.win);
-    XCloseDisplay(dzen.dpy);
-
-
+    clean_up();
     if(dzen.ret_val)
         return dzen.ret_val;
 
