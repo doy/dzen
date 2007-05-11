@@ -476,7 +476,7 @@ main(int argc, char *argv[]) {
             case 'r':
                 dzen.title_win.alignement = ALIGNERIGHT;
                 break;
-            defualt:
+            default:
                 dzen.title_win.alignement = ALIGNECENTER;
         }
     }
