@@ -3,8 +3,6 @@
 ==================================
 
 A general purpose messaging, notification and launcher program. 
-Dzen can be used in a single line and/or multiple lines mode. 
-
 
 
 Features
@@ -136,7 +134,7 @@ An example:
 
 Supported events:
     onstart             Perform actions right after startup
-    onquit              Perform actions just before quitting
+    onexit              Perform actions just before exiting
     button1             Mouse button1 released 
     button2             Mouse button2 released
     button3             Mouse button3 released
@@ -155,8 +153,8 @@ Supported actions:
     exit:retval         exit dzen and return 'retval'
     print:str1:...:n    write all given options to STDOUT
     menuprint           write selected menu entry to STDOUT
-    collapse            collapse slave window
-    uncollapse          uncollapse slave window
+    collapse            collapse (roll-up) slave window
+    uncollapse          uncollapse (roll-down) slave window
     stick               stick slave window
     unstick             unstick slave window
     togglestick         toggle sticky state
@@ -164,6 +162,8 @@ Supported actions:
     unhide              unhide title window
     scrollup            scroll slave window one line up
     scrolldown          scroll slave window one line down
+    raise               raise window to view (above all others)
+    lower               lower window (behind all others)
 
 
 Note:   If no events/actions are specified dzen defaults to:
@@ -195,11 +195,14 @@ Examples:
 * Display message and timeout after 10 seconds:
     (echo "This is a message"; sleep 10) | dzen2 -bg darkred -fg grey80 -fn fixed 
 
+
 * Display message and never timeout:
     echo "This is a message"| dzen2 -p
 
+
 * Display updating single line message:
     for i in $(seq 1 20); do A=${A}'='; print $A; sleep 1; done | dzen2
+
 
 * Display header and a message with multiple lines:
     (echo Header; cal; sleep 20) | dzen2 -l 8
@@ -208,28 +211,42 @@ Examples:
     the output of cal in the 8 lines high slave
     window.
 
+
 * Display updating messages:
     (echo Header; while true; do echo test$((i++)); sleep 1; done) | dzen2 -l 12
 
     The slave window will update contents if new input has arrived.
 
+
 * Display log files:
     (su -c "echo LOGFILENAME; tail -f /var/log/messages") | dzen2 -l 20 -x 100 -y 300 -w 500
+
 
 * Monthly schedule with remind:
     (echo Monthly Schedule; remind -c1 -m) | dzen2 -l 52 -w 410 -p -fn lime -bg '#e0e8ea' -fg black -x 635
 
+
 * Simple menu:
     echo "Applications" | dzen2 -l 4 -p -m < menufile
+
 
 * Menu without any files:
     {echo Menu; echo -e "xterm\nxclock\nxeyes\nxfontsel"} | dzen2 -l 4 -m -p
 
-* Extract PIDs from the process table
 
-    {echo Procs; ps -a} | dzen2 -m -l 12 -p -e 'button1=menuprint;button3=exit;
-            button4=scrollup;button5=scrolldown;entertitle=uncollapse;leaveslave=collapse' 
+* Extract PIDs from the process table:
+
+    {echo Procs; ps -a} | dzen2 -m -l 12 -p \
+    -e 'button1=menuprint;button3=exit; button4=scrollup;button5=scrolldown;entertitle=uncollapse;leaveslave=collapse' \
             | awk '{print $1}'
+
+
+* Dzen as xmonad (see http://xmonad.org) statusbar:
+
+    status.sh | dzen2 -fn '-*-profont-*-*-*-*-11-*-*-*-*-*-iso8859' -bg '#aecf96' -fg black \
+        -p -e 'sigusr1=raise;sigusr2=lower;onquit=exec:rm /tmp/dzen2-pid;button3=exit' & echo $! > /tmp/dzen2-pid
+
+
 
 
 
