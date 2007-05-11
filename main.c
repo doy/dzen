@@ -101,14 +101,14 @@ x_resize_header(int width, int height) {
 
 static void
 x_highlight_line(int line) {
-    drawtext(dzen.slave_win.tbuf[line + dzen.slave_win.first_line_vis], 1, line+1);
+    drawtext(dzen.slave_win.tbuf[line + dzen.slave_win.first_line_vis], 1, line+1, ALIGNELEFT);
     XCopyArea(dzen.dpy, dzen.slave_win.drawable, dzen.slave_win.line[line], dzen.rgc,
             0, 0, dzen.slave_win.width, dzen.mh, 0, 0);
 }
 
 static void
 x_unhighlight_line(int line) {
-    drawtext(dzen.slave_win.tbuf[line + dzen.slave_win.first_line_vis], 0, line+1);
+    drawtext(dzen.slave_win.tbuf[line + dzen.slave_win.first_line_vis], 0, line+1, ALIGNELEFT);
     XCopyArea(dzen.dpy, dzen.slave_win.drawable, dzen.slave_win.line[line], dzen.gc,
             0, 0, dzen.slave_win.width, dzen.mh, 0, 0);
 }
@@ -135,12 +135,12 @@ x_draw_body(void) {
 
     for(i=0; i < dzen.slave_win.max_lines; i++) {
         if(i < dzen.slave_win.last_line_vis) {
-            drawtext(dzen.slave_win.tbuf[i + dzen.slave_win.first_line_vis], 0, i);
+            drawtext(dzen.slave_win.tbuf[i + dzen.slave_win.first_line_vis], 0, i, ALIGNELEFT);
             XCopyArea(dzen.dpy, dzen.slave_win.drawable, dzen.slave_win.line[i], dzen.gc, 
                     0, 0, dzen.slave_win.width, dzen.mh, 0, 0);
         }
         else if(i < dzen.slave_win.max_lines) {
-            drawtext("", 0, i);
+            drawtext("", 0, i, ALIGNELEFT);
             XCopyArea(dzen.dpy, dzen.slave_win.drawable, dzen.slave_win.line[i], dzen.gc,
                     0, 0, dzen.slave_win.width, dzen.mh, 0, 0);
         }
@@ -379,6 +379,7 @@ main(int argc, char *argv[]) {
     dzen.cur_line  = 0;
     dzen.ret_val   = 0;
     dzen.hy        = 0;
+    dzen.title_win.alignement = ALIGNECENTER;
     dzen.title_win.x = dzen.slave_win.x = 0;
     dzen.title_win.width = dzen.slave_win.width = 0;
     dzen.fnt       = FONT;
@@ -399,6 +400,9 @@ main(int argc, char *argv[]) {
         }
         else if(!strncmp(argv[i], "-a", 3)) {
             dzen.title_win.autohide = True;
+        }
+        else if(!strncmp(argv[i], "-ta", 4)) {
+            ++i; dzen.title_win.alignement = argv[i][0];
         }
         else if(!strncmp(argv[i], "-m", 3)) {
             dzen.slave_win.ismenu = True;
@@ -430,7 +434,7 @@ main(int argc, char *argv[]) {
         else if(!strncmp(argv[i], "-v", 3)) 
             eprint("dzen-"VERSION", (C)opyright 2007 Robert Manea\n");
         else
-            eprint("usage: dzen [-v] [-p] [-a] [-m] [-e <string>]                    \n"
+            eprint("usage: dzen [-v] [-p] [-a] [-m] [-ta <l|c|r>] [-e <string>]      \n"
                    "            [-x <pixel>] [-y <pixel>] [-w <pixel>]  [-tw <pixel>]\n"
                    "            [-l <lines>] [-fn <font>] [-bg <color>] [-fg <color>]\n");
 
@@ -460,6 +464,22 @@ main(int argc, char *argv[]) {
         fprintf(stderr, "dzen: error hooking SIGUSR1\n");
     if(ev_table[sigusr2].isset && (setup_signal(SIGUSR2, catch_sigusr2) == SIG_ERR))
         fprintf(stderr, "dzen: error hooking SIGUSR2\n");
+
+    if(dzen.title_win.alignement) {
+        switch(dzen.title_win.alignement) {
+            case 'l': 
+                dzen.title_win.alignement = ALIGNELEFT;
+                break;
+            case 'c':
+                dzen.title_win.alignement = ALIGNECENTER;
+                break;
+            case 'r':
+                dzen.title_win.alignement = ALIGNERIGHT;
+                break;
+            defualt:
+                dzen.title_win.alignement = ALIGNECENTER;
+        }
+    }
 
     x_create_windows();
     x_map_window(dzen.title_win.win);

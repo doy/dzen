@@ -12,8 +12,11 @@
 #define BGCOLOR		"#ab0b0b"
 #define FGCOLOR		"#efefef"
 
-//#define BUF_SIZE    4096
-#define BUF_SIZE    1024
+#define ALIGNECENTER 0
+#define ALIGNELEFT   1
+#define ALIGNERIGHT  2
+
+#define BUF_SIZE    4096
 
 /* gui data structures */
 enum { ColFG, ColBG, ColLast };
@@ -41,6 +44,7 @@ struct TW {
 
     Window win;
     Drawable drawable;
+    char alignement;
     Bool autohide;
     Bool ishidden;
 };
@@ -112,7 +116,8 @@ void x_draw_body(void);
 /* draw.c */
 extern void drawtext(const char *text,
         int reverse,
-        int line);	                        
+        int line,
+        int aligne);	                        
 extern unsigned long getcolor(const char *colstr);	/* returns color of colstr */
 extern void setfont(const char *fontstr);		    /* sets global font */
 extern unsigned int textw(const char *text);		/* returns width of text in px */

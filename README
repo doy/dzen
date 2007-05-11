@@ -46,6 +46,8 @@ dzen accepts a couple of options:
     -fg     foreground color
     -bg     background color
     -fn     font 
+    -ta     alignement of title window content 
+            l(eft), c(center), r(right)
     -a      autohide, see 1)
     -l      lines, see 2)
     -e      events and actions, see 3)
@@ -243,7 +245,7 @@ Examples:
 
 * Dzen as xmonad (see http://xmonad.org) statusbar:
 
-    status.sh | dzen2 -fn '-*-profont-*-*-*-*-11-*-*-*-*-*-iso8859' -bg '#aecf96' -fg black \
+    status.sh | dzen2 -ta r -fn '-*-profont-*-*-*-*-11-*-*-*-*-*-iso8859' -bg '#aecf96' -fg black \
         -p -e 'sigusr1=raise;sigusr2=lower;onquit=exec:rm /tmp/dzen2-pid;button3=exit' & echo $! > /tmp/dzen2-pid
 
 
