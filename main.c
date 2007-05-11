@@ -402,7 +402,7 @@ main(int argc, char *argv[]) {
             dzen.title_win.autohide = True;
         }
         else if(!strncmp(argv[i], "-ta", 4)) {
-            ++i; dzen.title_win.alignement = argv[i][0];
+            if(++i < argc) dzen.title_win.alignement = argv[i][0];
         }
         else if(!strncmp(argv[i], "-m", 3)) {
             dzen.slave_win.ismenu = True;
