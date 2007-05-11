@@ -139,3 +139,31 @@ unsigned int
 textw(const char *text) {
     return textnw(text, strlen(text)) + dzen.font.height;
 }
+
+void
+drawheader(char * text) {
+    dzen.x = 0;
+    dzen.y = 0;
+    dzen.w = dzen.title_win.width;
+    dzen.h = dzen.mh;
+    
+    if(text)
+        drawtext(text, 0, -1);
+    XCopyArea(dzen.dpy, dzen.title_win.drawable, dzen.title_win.win, 
+            dzen.gc, 0, 0, dzen.title_win.width, dzen.mh, 0, 0);
+}
+
+void
+drawbody(char * text) {
+    if(dzen.slave_win.tcnt >= BUF_SIZE) {
+        pthread_mutex_lock(&dzen.mt);
+        free_buffer();
+        pthread_mutex_unlock(&dzen.mt);
+    }
+    if(dzen.slave_win.tcnt < BUF_SIZE) {
+        pthread_mutex_lock(&dzen.mt);
+        dzen.slave_win.tbuf[dzen.slave_win.tcnt] = estrdup(text);
+        dzen.slave_win.tcnt++;
+        pthread_mutex_unlock(&dzen.mt);
+    }
+}

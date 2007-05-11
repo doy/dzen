@@ -106,6 +106,9 @@ struct DZEN {
 
 extern Dzen dzen;
 
+void free_buffer(void);
+void x_draw_body(void);
+
 /* draw.c */
 extern void drawtext(const char *text,
         int reverse,
@@ -113,6 +116,8 @@ extern void drawtext(const char *text,
 extern unsigned long getcolor(const char *colstr);	/* returns color of colstr */
 extern void setfont(const char *fontstr);		    /* sets global font */
 extern unsigned int textw(const char *text);		/* returns width of text in px */
+extern void drawheader(char *text);
+extern void drawbody(char *text);
 
 /* util.c */
 extern void *emalloc(unsigned int size);		/* allocates memory, exits on error */

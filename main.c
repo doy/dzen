@@ -55,20 +55,7 @@ chomp(char *buf, unsigned int len) {
         buf[len-1] = '\0';
 }
 
-static void
-drawheader(char * text) {
-    dzen.x = 0;
-    dzen.y = 0;
-    dzen.w = dzen.title_win.width;
-    dzen.h = dzen.mh;
-    
-    if(text)
-        drawtext(text, 0, -1);
-    XCopyArea(dzen.dpy, dzen.title_win.drawable, dzen.title_win.win, 
-            dzen.gc, 0, 0, dzen.title_win.width, dzen.mh, 0, 0);
-}
-
-static void
+void
 free_buffer(void) {
     int i;
     for(i=0; i<BUF_SIZE; i++)
@@ -77,19 +64,34 @@ free_buffer(void) {
     last_cnt = 0;
 }
 
-static void
-drawbody(char * text) {
-    if(dzen.slave_win.tcnt >= BUF_SIZE) {
-        pthread_mutex_lock(&dzen.mt);
-        free_buffer();
-        pthread_mutex_unlock(&dzen.mt);
+void *
+read_stdin(void *ptr) {
+    char buf[1024], *text = NULL;
+
+    /* draw background until data is available */
+    drawheader("");
+
+    while(dzen.running) {
+        text = fgets(buf, sizeof buf, stdin);
+        if(feof(stdin) && !dzen.slave_win.ispersistent) {
+            dzen.running = False;
+            break;
+        }
+        if(feof(stdin) && dzen.slave_win.ispersistent) 
+            break;
+
+        if(text) {
+            chomp(text, strlen(text));
+
+            if(!dzen.cur_line || !dzen.slave_win.max_lines) {
+                drawheader(text);
+            }
+            else 
+                drawbody(text);
+            dzen.cur_line++;
+        }
     }
-    if(dzen.slave_win.tcnt < BUF_SIZE) {
-        pthread_mutex_lock(&dzen.mt);
-        dzen.slave_win.tbuf[dzen.slave_win.tcnt] = estrdup(text);
-        dzen.slave_win.tcnt++;
-        pthread_mutex_unlock(&dzen.mt);
-    }
+    return NULL;
 }
 
 static void
@@ -111,6 +113,151 @@ x_unhighlight_line(int line) {
             0, 0, dzen.slave_win.width, dzen.mh, 0, 0);
 }
 
+void 
+x_draw_body(void) {
+    dzen.x = 0;
+    dzen.y = 0;
+    dzen.w = dzen.slave_win.width;
+    dzen.h = dzen.mh;
+    int i;
+
+    pthread_mutex_lock(&dzen.mt);
+    if(!dzen.slave_win.last_line_vis) {
+        if(dzen.slave_win.tcnt < dzen.slave_win.max_lines) {
+            dzen.slave_win.first_line_vis = 0;
+            dzen.slave_win.last_line_vis  = dzen.slave_win.tcnt;
+        }
+        if(dzen.slave_win.tcnt >= dzen.slave_win.max_lines) {
+            dzen.slave_win.first_line_vis = dzen.slave_win.tcnt - dzen.slave_win.max_lines;
+            dzen.slave_win.last_line_vis  = dzen.slave_win.tcnt;
+        }
+    }
+
+    for(i=0; i < dzen.slave_win.max_lines; i++) {
+        if(i < dzen.slave_win.last_line_vis) {
+            drawtext(dzen.slave_win.tbuf[i + dzen.slave_win.first_line_vis], 0, i);
+            XCopyArea(dzen.dpy, dzen.slave_win.drawable, dzen.slave_win.line[i], dzen.gc, 
+                    0, 0, dzen.slave_win.width, dzen.mh, 0, 0);
+        }
+        else if(i < dzen.slave_win.max_lines) {
+            drawtext("", 0, i);
+            XCopyArea(dzen.dpy, dzen.slave_win.drawable, dzen.slave_win.line[i], dzen.gc,
+                    0, 0, dzen.slave_win.width, dzen.mh, 0, 0);
+        }
+    }
+    pthread_mutex_unlock(&dzen.mt);
+}
+
+static void
+x_check_geometry(void) {
+    if(dzen.title_win.x > DisplayWidth(dzen.dpy, dzen.screen))
+        dzen.title_win.x = 0;
+
+    if(!dzen.title_win.width)
+        dzen.title_win.width = DisplayWidth(dzen.dpy, dzen.screen);
+
+    if((dzen.title_win.x + dzen.title_win.width) > DisplayWidth(dzen.dpy, dzen.screen))
+        dzen.title_win.width = DisplayWidth(dzen.dpy, dzen.screen) - dzen.title_win.x;
+
+    if(!dzen.slave_win.width) {
+        dzen.slave_win.x = 0;
+        dzen.slave_win.width = DisplayWidth(dzen.dpy, dzen.screen);
+    }
+    if( dzen.title_win.width == dzen.slave_win.width) {
+        dzen.slave_win.x = dzen.title_win.x;
+        dzen.slave_win.width = dzen.title_win.width;
+    }
+    if(dzen.slave_win.width != DisplayWidth(dzen.dpy, dzen.screen)) {
+        dzen.slave_win.x = dzen.title_win.x + (dzen.title_win.width- dzen.slave_win.width)/2;
+        if(dzen.slave_win.x < 0)
+            dzen.slave_win.x = 0;
+        if(dzen.slave_win.width > DisplayWidth(dzen.dpy, dzen.screen))
+            dzen.slave_win.width = DisplayWidth(dzen.dpy, dzen.screen);
+        if(dzen.slave_win.x + dzen.slave_win.width >  DisplayWidth(dzen.dpy, dzen.screen))
+            dzen.slave_win.x = DisplayWidth(dzen.dpy, dzen.screen) - dzen.slave_win.width;
+    }
+    dzen.mh = dzen.font.height + 2;
+    dzen.hy = (dzen.hy + dzen.mh) > DisplayHeight(dzen.dpy, dzen.screen) ? 0 : dzen.hy; 
+}
+
+static void
+x_create_windows(void) {
+    XSetWindowAttributes wa;
+    Window root;
+    int i;
+
+    dzen.dpy = XOpenDisplay(0);
+    if(!dzen.dpy) 
+        eprint("dzen: cannot open display\n");
+
+    dzen.screen = DefaultScreen(dzen.dpy);
+    root = RootWindow(dzen.dpy, dzen.screen);
+
+    /* style */
+    dzen.norm[ColBG] = getcolor(dzen.bg);
+    dzen.norm[ColFG] = getcolor(dzen.fg);
+    setfont(dzen.fnt);
+
+    /* window attributes */
+    wa.override_redirect = 1;
+    wa.background_pixmap = ParentRelative;
+    wa.event_mask = ExposureMask | ButtonReleaseMask | EnterWindowMask | LeaveWindowMask;
+
+    x_check_geometry();
+
+    /* title window */
+    dzen.title_win.win = XCreateWindow(dzen.dpy, root, 
+            dzen.title_win.x, dzen.hy, dzen.title_win.width, dzen.mh, 0,
+            DefaultDepth(dzen.dpy, dzen.screen), CopyFromParent,
+            DefaultVisual(dzen.dpy, dzen.screen),
+            CWOverrideRedirect | CWBackPixmap | CWEventMask, &wa);
+    dzen.title_win.drawable = XCreatePixmap(dzen.dpy, root, dzen.title_win.width, 
+            dzen.mh, DefaultDepth(dzen.dpy, dzen.screen));
+
+    /* slave window */
+    if(dzen.slave_win.max_lines) {
+        dzen.slave_win.first_line_vis = 0;
+        dzen.slave_win.last_line_vis  = 0;
+        dzen.slave_win.issticky = False;
+
+        if(dzen.hy + dzen.mh*dzen.slave_win.max_lines > DisplayHeight(dzen.dpy, dzen.screen))
+            dzen.hy = (dzen.hy - dzen.mh) - dzen.mh*(dzen.slave_win.max_lines);
+
+        dzen.slave_win.win = XCreateWindow(dzen.dpy, root, 
+                dzen.slave_win.x, dzen.hy+dzen.mh, dzen.slave_win.width, dzen.slave_win.max_lines * dzen.mh, 0,
+                DefaultDepth(dzen.dpy, dzen.screen), CopyFromParent,
+                DefaultVisual(dzen.dpy, dzen.screen),
+                CWOverrideRedirect | CWBackPixmap | CWEventMask, &wa);
+
+        dzen.slave_win.drawable = XCreatePixmap(dzen.dpy, root, dzen.slave_win.width, 
+                dzen.mh, DefaultDepth(dzen.dpy, dzen.screen));
+
+        /* windows holding the lines */
+        dzen.slave_win.line = emalloc(sizeof(Window) * dzen.slave_win.max_lines);
+        for(i=0; i < dzen.slave_win.max_lines; i++) {
+            dzen.slave_win.line[i] = XCreateWindow(dzen.dpy, dzen.slave_win.win, 
+                    0, i*dzen.mh, dzen.slave_win.width, dzen.mh, 0,
+                    DefaultDepth(dzen.dpy, dzen.screen), CopyFromParent,
+                    DefaultVisual(dzen.dpy, dzen.screen),
+                    CWOverrideRedirect | CWBackPixmap | CWEventMask, &wa);
+        }
+
+    }
+    /* normal GC */
+    dzen.gc  = XCreateGC(dzen.dpy, root, 0, 0);
+    XSetForeground(dzen.dpy, dzen.gc, dzen.norm[ColFG]);
+    XSetBackground(dzen.dpy, dzen.gc, dzen.norm[ColBG]);
+    /* reverse GC */
+    dzen.rgc = XCreateGC(dzen.dpy, root, 0, 0);
+    XSetForeground(dzen.dpy, dzen.rgc, dzen.norm[ColBG]);
+    XSetBackground(dzen.dpy, dzen.rgc, dzen.norm[ColFG]);
+}
+
+static void 
+x_map_window(Window win) {
+    XMapRaised(dzen.dpy, win);
+    XSync(dzen.dpy, False);
+}
 static void
 event_loop(void *ptr) {
     XEvent ev;
@@ -195,145 +342,6 @@ event_loop(void *ptr) {
         } else
             usleep(10000);
     }
-}
-
-void *
-read_stdin(void *ptr) {
-    char buf[1024], *text = NULL;
-
-    /* draw background until data is available */
-    drawheader("");
-
-    while(dzen.running) {
-        text = fgets(buf, sizeof buf, stdin);
-        if(feof(stdin) && !dzen.slave_win.ispersistent) {
-            dzen.running = False;
-            break;
-        }
-        if(feof(stdin) && dzen.slave_win.ispersistent) 
-            break;
-
-        if(text) {
-            chomp(text, strlen(text));
-
-            if(!dzen.cur_line || !dzen.slave_win.max_lines) {
-                drawheader(text);
-            }
-            else 
-                drawbody(text);
-            dzen.cur_line++;
-        }
-    }
-    return NULL;
-}
-
-static void
-x_create_windows(void) {
-    XSetWindowAttributes wa;
-    Window root;
-    int i;
-
-    dzen.dpy = XOpenDisplay(0);
-    if(!dzen.dpy) 
-        eprint("dzen: cannot open display\n");
-
-    dzen.screen = DefaultScreen(dzen.dpy);
-    root = RootWindow(dzen.dpy, dzen.screen);
-
-    /* style */
-    dzen.norm[ColBG] = getcolor(dzen.bg);
-    dzen.norm[ColFG] = getcolor(dzen.fg);
-    setfont(dzen.fnt);
-
-    /* window attributes */
-    wa.override_redirect = 1;
-    wa.background_pixmap = ParentRelative;
-    wa.event_mask = ExposureMask | ButtonReleaseMask | EnterWindowMask | LeaveWindowMask;
-
-
-    /* check geometry */
-    if(dzen.title_win.x > DisplayWidth(dzen.dpy, dzen.screen))
-        dzen.title_win.x = 0;
-
-    if(!dzen.title_win.width)
-        dzen.title_win.width = DisplayWidth(dzen.dpy, dzen.screen);
-
-    if((dzen.title_win.x + dzen.title_win.width) > DisplayWidth(dzen.dpy, dzen.screen))
-        dzen.title_win.width = DisplayWidth(dzen.dpy, dzen.screen) - dzen.title_win.x;
-
-    if(!dzen.slave_win.width) {
-        dzen.slave_win.x = 0;
-        dzen.slave_win.width = DisplayWidth(dzen.dpy, dzen.screen);
-    }
-    if( dzen.title_win.width == dzen.slave_win.width) {
-        dzen.slave_win.x = dzen.title_win.x;
-        dzen.slave_win.width = dzen.title_win.width;
-    }
-    if(dzen.slave_win.width != DisplayWidth(dzen.dpy, dzen.screen)) {
-        dzen.slave_win.x = dzen.title_win.x + (dzen.title_win.width- dzen.slave_win.width)/2;
-        if(dzen.slave_win.x < 0)
-            dzen.slave_win.x = 0;
-        if(dzen.slave_win.width > DisplayWidth(dzen.dpy, dzen.screen))
-            dzen.slave_win.width = DisplayWidth(dzen.dpy, dzen.screen);
-        if(dzen.slave_win.x + dzen.slave_win.width >  DisplayWidth(dzen.dpy, dzen.screen))
-            dzen.slave_win.x = DisplayWidth(dzen.dpy, dzen.screen) - dzen.slave_win.width;
-    }
-    dzen.mh = dzen.font.height + 2;
-    dzen.hy = (dzen.hy + dzen.mh) > DisplayHeight(dzen.dpy, dzen.screen) ? 0 : dzen.hy; 
-
-
-    /* title window */
-    dzen.title_win.win = XCreateWindow(dzen.dpy, root, 
-            dzen.title_win.x, dzen.hy, dzen.title_win.width, dzen.mh, 0,
-            DefaultDepth(dzen.dpy, dzen.screen), CopyFromParent,
-            DefaultVisual(dzen.dpy, dzen.screen),
-            CWOverrideRedirect | CWBackPixmap | CWEventMask, &wa);
-    dzen.title_win.drawable = XCreatePixmap(dzen.dpy, root, dzen.title_win.width, 
-            dzen.mh, DefaultDepth(dzen.dpy, dzen.screen));
-
-    /* slave window */
-    if(dzen.slave_win.max_lines) {
-        dzen.slave_win.first_line_vis = 0;
-        dzen.slave_win.last_line_vis  = 0;
-        dzen.slave_win.issticky = False;
-
-        if(dzen.hy + dzen.mh*dzen.slave_win.max_lines > DisplayHeight(dzen.dpy, dzen.screen))
-            dzen.hy = (dzen.hy - dzen.mh) - dzen.mh*(dzen.slave_win.max_lines);
-
-        dzen.slave_win.win = XCreateWindow(dzen.dpy, root, 
-                dzen.slave_win.x, dzen.hy+dzen.mh, dzen.slave_win.width, dzen.slave_win.max_lines * dzen.mh, 0,
-                DefaultDepth(dzen.dpy, dzen.screen), CopyFromParent,
-                DefaultVisual(dzen.dpy, dzen.screen),
-                CWOverrideRedirect | CWBackPixmap | CWEventMask, &wa);
-
-        dzen.slave_win.drawable = XCreatePixmap(dzen.dpy, root, dzen.slave_win.width, 
-                dzen.mh, DefaultDepth(dzen.dpy, dzen.screen));
-
-        /* windows holding the lines */
-        dzen.slave_win.line = emalloc(sizeof(Window) * dzen.slave_win.max_lines);
-        for(i=0; i < dzen.slave_win.max_lines; i++) {
-            dzen.slave_win.line[i] = XCreateWindow(dzen.dpy, dzen.slave_win.win, 
-                    0, i*dzen.mh, dzen.slave_win.width, dzen.mh, 0,
-                    DefaultDepth(dzen.dpy, dzen.screen), CopyFromParent,
-                    DefaultVisual(dzen.dpy, dzen.screen),
-                    CWOverrideRedirect | CWBackPixmap | CWEventMask, &wa);
-        }
-
-    }
-    /* normal GC */
-    dzen.gc  = XCreateGC(dzen.dpy, root, 0, 0);
-    XSetForeground(dzen.dpy, dzen.gc, dzen.norm[ColFG]);
-    XSetBackground(dzen.dpy, dzen.gc, dzen.norm[ColBG]);
-    /* reverse GC */
-    dzen.rgc = XCreateGC(dzen.dpy, root, 0, 0);
-    XSetForeground(dzen.dpy, dzen.rgc, dzen.norm[ColBG]);
-    XSetBackground(dzen.dpy, dzen.rgc, dzen.norm[ColFG]);
-}
-
-static void 
-x_map_window(Window win) {
-    XMapRaised(dzen.dpy, win);
-    XSync(dzen.dpy, False);
 }
 
 static void 
@@ -466,10 +474,14 @@ main(int argc, char *argv[]) {
     pthread_create(&dzen.read_thread, NULL, read_stdin, NULL);
 
     do_action(onstart);
+    
+    /* main event loop */
     event_loop(NULL);
+
     do_action(onquit);
 
     clean_up();
+    
     if(dzen.ret_val)
         return dzen.ret_val;
 
