@@ -32,7 +32,7 @@ catch_sigusr2() {
 
 static void
 catch_sigterm() {
-    do_action(onquit);
+    do_action(onexit);
 }
 
 sigfunc *
@@ -454,7 +454,7 @@ main(int argc, char *argv[]) {
         fill_ev_table(edef);
     }
 
-    if(ev_table[onquit].isset && (setup_signal(SIGTERM, catch_sigterm) == SIG_ERR))
+    if(ev_table[onexit].isset && (setup_signal(SIGTERM, catch_sigterm) == SIG_ERR))
         fprintf(stderr, "dzen: error hooking SIGTERM\n");
     if(ev_table[sigusr1].isset && (setup_signal(SIGUSR1, catch_sigusr1) == SIG_ERR))
         fprintf(stderr, "dzen: error hooking SIGUSR1\n");
@@ -478,7 +478,7 @@ main(int argc, char *argv[]) {
     /* main event loop */
     event_loop(NULL);
 
-    do_action(onquit);
+    do_action(onexit);
 
     clean_up();
     

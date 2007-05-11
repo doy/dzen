@@ -14,7 +14,7 @@ struct event_lookup ev_lookup_table[] = {
     { "exposet",        exposetitle},
     { "exposes",        exposeslave},
     { "onstart",        onstart},
-    { "onquit",         onquit},
+    { "onexit",         onexit},
     { "button1",        button1},
     { "button2",        button2},
     { "button3",        button3},
