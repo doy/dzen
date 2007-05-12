@@ -37,10 +37,6 @@ struct Fnt {
 /* title window */
 struct TW {
     int x, y, width, height;
-    int screen;
-    char *fnt;
-    char *bg;
-    char *fg;
 
     Window win;
     Drawable drawable;
@@ -52,10 +48,6 @@ struct TW {
 /* slave window */
 struct SW {
     int x, y, width, height;
-    int screen;
-    char *fnt;
-    char *bg;
-    char *fg;
 
     Window win;
     Window *line;
@@ -74,7 +66,6 @@ struct SW {
     Bool ismapped;
 };
 
-/* TODO: Remove unused variables */
 struct DZEN {
     int x, y, w, h;
     Bool running;
@@ -83,12 +74,10 @@ struct DZEN {
     TWIN title_win;
     SWIN slave_win;
 
-    /* to be removed */
     char *fnt;
     char *bg;
     char *fg;
-    int mw, mh;
-    /*---------------*/
+    int mh;
 
     Display *dpy;
     int screen;
@@ -99,7 +88,6 @@ struct DZEN {
     Fnt font;
 
     /* position */
-    int hy, hw;
     int cur_line;
 
     pthread_t read_thread;

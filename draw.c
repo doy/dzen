@@ -67,7 +67,7 @@ void drawtext(const char *text, int reverse, int line, int aligne) {
         else if(aligne == ALIGNELEFT)
             x = h/2;
         else
-            x = (dzen.title_win.width - h/2) - textw(buf);
+            x = dzen.title_win.width - textw(buf);
     }
     y = dzen.font.ascent + (dzen.mh - h) / 2;
 

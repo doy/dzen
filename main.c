@@ -177,7 +177,7 @@ x_check_geometry(void) {
             dzen.slave_win.x = DisplayWidth(dzen.dpy, dzen.screen) - dzen.slave_win.width;
     }
     dzen.mh = dzen.font.height + 2;
-    dzen.hy = (dzen.hy + dzen.mh) > DisplayHeight(dzen.dpy, dzen.screen) ? 0 : dzen.hy; 
+    dzen.title_win.y = (dzen.title_win.y + dzen.mh) > DisplayHeight(dzen.dpy, dzen.screen) ? 0 : dzen.title_win.y; 
 }
 
 static void
@@ -207,7 +207,7 @@ x_create_windows(void) {
 
     /* title window */
     dzen.title_win.win = XCreateWindow(dzen.dpy, root, 
-            dzen.title_win.x, dzen.hy, dzen.title_win.width, dzen.mh, 0,
+            dzen.title_win.x, dzen.title_win.y, dzen.title_win.width, dzen.mh, 0,
             DefaultDepth(dzen.dpy, dzen.screen), CopyFromParent,
             DefaultVisual(dzen.dpy, dzen.screen),
             CWOverrideRedirect | CWBackPixmap | CWEventMask, &wa);
@@ -219,12 +219,13 @@ x_create_windows(void) {
         dzen.slave_win.first_line_vis = 0;
         dzen.slave_win.last_line_vis  = 0;
         dzen.slave_win.issticky = False;
+        dzen.slave_win.y = dzen.title_win.y + dzen.mh;
 
-        if(dzen.hy + dzen.mh*dzen.slave_win.max_lines > DisplayHeight(dzen.dpy, dzen.screen))
-            dzen.hy = (dzen.hy - dzen.mh) - dzen.mh*(dzen.slave_win.max_lines);
+        if(dzen.title_win.y + dzen.mh*dzen.slave_win.max_lines > DisplayHeight(dzen.dpy, dzen.screen))
+            dzen.slave_win.y = (dzen.title_win.y - dzen.mh) - dzen.mh*(dzen.slave_win.max_lines) + dzen.mh;
 
         dzen.slave_win.win = XCreateWindow(dzen.dpy, root, 
-                dzen.slave_win.x, dzen.hy+dzen.mh, dzen.slave_win.width, dzen.slave_win.max_lines * dzen.mh, 0,
+                dzen.slave_win.x, dzen.slave_win.y, dzen.slave_win.width, dzen.slave_win.max_lines * dzen.mh, 0,
                 DefaultDepth(dzen.dpy, dzen.screen), CopyFromParent,
                 DefaultVisual(dzen.dpy, dzen.screen),
                 CWOverrideRedirect | CWBackPixmap | CWEventMask, &wa);
@@ -378,7 +379,7 @@ main(int argc, char *argv[]) {
     /* default values */
     dzen.cur_line  = 0;
     dzen.ret_val   = 0;
-    dzen.hy        = 0;
+    dzen.title_win.y = 0;
     dzen.title_win.alignement = ALIGNECENTER;
     dzen.title_win.x = dzen.slave_win.x = 0;
     dzen.title_win.width = dzen.slave_win.width = 0;
@@ -423,7 +424,7 @@ main(int argc, char *argv[]) {
             if(++i < argc) dzen.title_win.x = dzen.slave_win.x = atoi(argv[i]);
         }
         else if(!strncmp(argv[i], "-y", 3)) {
-            if(++i < argc) dzen.hy = atoi(argv[i]);
+            if(++i < argc) dzen.title_win.y = atoi(argv[i]);
         }
         else if(!strncmp(argv[i], "-w", 3)) {
             if(++i < argc) dzen.slave_win.width = atoi(argv[i]);
