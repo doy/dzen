@@ -48,15 +48,14 @@ dzen accepts a couple of options:
     -fn     font 
     -ta     alignement of title window content 
             l(eft), c(center), r(right)
-    -a      autohide, see 1)
-    -l      lines, see 2)
-    -e      events and actions, see 3)
-    -m      menu, see 4)
+    -tw     title window width
+    -l      lines, see (1)
+    -e      events and actions, see (2)
+    -m      menu, see (3)
     -p      persistent, never time out
     -x      x position
     -y      y position
     -w      width
-    -tw     title window width
     -v      version information
 
 Termination:
@@ -67,29 +66,18 @@ dzen2 uses two different approaches to terminate itself:
         - unless the '-p' flag is set
 
     * If mouse button3 is clicked -> terminate
-        - this is the default behaviour, see 3)
+        - this is the default behaviour, see (2))
 
 
 Return values:
 --------------
 0               -   dzen received EOF
 1               -   some error occured, inspect the error message
-user defined    -   set with 'exit:retval' action, see 3)
+user defined    -   set with 'exit:retval' action, see (2))
 
 
 
-1) Option "-a": Autohide
-------------------------
-
-Hides the title window as soon as the pointer leaves it (default). This
-very much resembles autohiding panels known from most desktops.
-
-Note:   This option is obsolete and will be removed in future versions as
-        the same behaviour can be achieved with the 'onstart=hide' combination,
-        see 3) for further details.
-
-
-2) Option "-l": Slave window
+(1) Option "-l": Slave window
 --------------------------------
 
 Enables support for displaying multiple lines. The parameter to "-l"
@@ -105,7 +93,7 @@ Button4 and Button5 (mouse wheel) will scroll the slave window up
 and down if the content exceeds the window height (default action).
 
 
-3) Option '-e': Events and actions
+(2) Option '-e': Events and actions
 ----------------------------------
 
 dzen allows the user to associate actions to events.
@@ -180,7 +168,7 @@ Note:   If no events/actions are specified dzen defaults to:
         use.
 
 
-4) Option '-m', Menu
+(3) Option '-m', Menu
 --------------------
 
 If menu mode is activated the line under the pointer will be

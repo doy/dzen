@@ -399,9 +399,6 @@ main(int argc, char *argv[]) {
         else if(!strncmp(argv[i], "-p", 3)) {
             dzen.slave_win.ispersistent = True;
         }
-        else if(!strncmp(argv[i], "-a", 3)) {
-            dzen.title_win.autohide = True;
-        }
         else if(!strncmp(argv[i], "-ta", 4)) {
             if(++i < argc) dzen.title_win.alignement = argv[i][0];
         }
@@ -435,7 +432,7 @@ main(int argc, char *argv[]) {
         else if(!strncmp(argv[i], "-v", 3)) 
             eprint("dzen-"VERSION", (C)opyright 2007 Robert Manea\n");
         else
-            eprint("usage: dzen [-v] [-p] [-a] [-m] [-ta <l|c|r>] [-e <string>]      \n"
+            eprint("usage: dzen [-v] [-p] [-m] [-ta <l|c|r>] [-e <string>]           \n"
                    "            [-x <pixel>] [-y <pixel>] [-w <pixel>]  [-tw <pixel>]\n"
                    "            [-l <lines>] [-fn <font>] [-bg <color>] [-fg <color>]\n");
 
