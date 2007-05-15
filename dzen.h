@@ -60,6 +60,7 @@ struct SW {
     int last_line_vis;
     int sel_line;
 
+    char alignement;
     Bool ismenu;
     Bool issticky;
     Bool ispersistent;

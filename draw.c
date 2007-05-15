@@ -59,9 +59,15 @@ void drawtext(const char *text, int reverse, int line, int aligne) {
             buf[len - 3] = '.';
     }
 
-    if(line != -1)
+    if(line != -1) {
         x = h/2;
-    else {
+        if(!aligne)
+            x = (dzen.w - textw(buf)+h)/2;
+        else if(aligne == ALIGNELEFT)
+            x = h/2;
+        else
+            x = dzen.slave_win.width - textw(buf);
+    } else {
         if(!aligne)
             x = (dzen.w - textw(buf)+h)/2;
         else if(aligne == ALIGNELEFT)

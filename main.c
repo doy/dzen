@@ -101,14 +101,14 @@ x_resize_header(int width, int height) {
 
 static void
 x_highlight_line(int line) {
-    drawtext(dzen.slave_win.tbuf[line + dzen.slave_win.first_line_vis], 1, line+1, ALIGNELEFT);
+    drawtext(dzen.slave_win.tbuf[line + dzen.slave_win.first_line_vis], 1, line+1, dzen.slave_win.alignement);
     XCopyArea(dzen.dpy, dzen.slave_win.drawable, dzen.slave_win.line[line], dzen.rgc,
             0, 0, dzen.slave_win.width, dzen.mh, 0, 0);
 }
 
 static void
 x_unhighlight_line(int line) {
-    drawtext(dzen.slave_win.tbuf[line + dzen.slave_win.first_line_vis], 0, line+1, ALIGNELEFT);
+    drawtext(dzen.slave_win.tbuf[line + dzen.slave_win.first_line_vis], 0, line+1, dzen.slave_win.alignement);
     XCopyArea(dzen.dpy, dzen.slave_win.drawable, dzen.slave_win.line[line], dzen.gc,
             0, 0, dzen.slave_win.width, dzen.mh, 0, 0);
 }
@@ -135,7 +135,7 @@ x_draw_body(void) {
 
     for(i=0; i < dzen.slave_win.max_lines; i++) {
         if(i < dzen.slave_win.last_line_vis) {
-            drawtext(dzen.slave_win.tbuf[i + dzen.slave_win.first_line_vis], 0, i, ALIGNELEFT);
+            drawtext(dzen.slave_win.tbuf[i + dzen.slave_win.first_line_vis], 0, i, dzen.slave_win.alignement);
             XCopyArea(dzen.dpy, dzen.slave_win.drawable, dzen.slave_win.line[i], dzen.gc, 
                     0, 0, dzen.slave_win.width, dzen.mh, 0, 0);
         }
@@ -402,6 +402,9 @@ main(int argc, char *argv[]) {
         else if(!strncmp(argv[i], "-ta", 4)) {
             if(++i < argc) dzen.title_win.alignement = argv[i][0];
         }
+        else if(!strncmp(argv[i], "-sa", 4)) {
+            if(++i < argc) dzen.slave_win.alignement = argv[i][0];
+        }
         else if(!strncmp(argv[i], "-m", 3)) {
             dzen.slave_win.ismenu = True;
         }
@@ -476,6 +479,21 @@ main(int argc, char *argv[]) {
                 break;
             default:
                 dzen.title_win.alignement = ALIGNECENTER;
+        }
+    }
+    if(dzen.slave_win.alignement) {
+        switch(dzen.slave_win.alignement) {
+            case 'l': 
+                dzen.slave_win.alignement = ALIGNELEFT;
+                break;
+            case 'c':
+                dzen.slave_win.alignement = ALIGNECENTER;
+                break;
+            case 'r':
+                dzen.slave_win.alignement = ALIGNERIGHT;
+                break;
+            default:
+                dzen.slave_win.alignement = ALIGNECENTER;
         }
     }
 
