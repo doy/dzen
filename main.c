@@ -395,14 +395,12 @@ set_alignment(void)
                 dzen.slave_win.alignment = ALIGNLEFT;
                 break;
             case 'c':
-                printf("slave center\n");
                 dzen.slave_win.alignment = ALIGNCENTER;
                 break;
             case 'r':
                 dzen.slave_win.alignment = ALIGNRIGHT;
                 break;
             default:
-                printf("slave default\n");
                 dzen.slave_win.alignment = ALIGNLEFT;
         }
     }
