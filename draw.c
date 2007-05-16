@@ -70,7 +70,7 @@ void drawtext(const char *text, int reverse, int line, int align) {
         else
             x = dzen.title_win.width - textw(buf);
     }
-    y = dzen.font.ascent + (dzen.mh - h) / 2;
+    y = dzen.font.ascent + (dzen.line_height - h) / 2;
 
     mgc = reverse ? dzen.rgc : dzen.gc;
     if(dzen.font.set) {
@@ -152,12 +152,12 @@ drawheader(char * text) {
     dzen.x = 0;
     dzen.y = 0;
     dzen.w = dzen.title_win.width;
-    dzen.h = dzen.mh;
+    dzen.h = dzen.line_height;
     
     if(text)
         drawtext(text, 0, -1, dzen.title_win.alignment);
     XCopyArea(dzen.dpy, dzen.title_win.drawable, dzen.title_win.win, 
-            dzen.gc, 0, 0, dzen.title_win.width, dzen.mh, 0, 0);
+            dzen.gc, 0, 0, dzen.title_win.width, dzen.line_height, 0, 0);
 }
 
 void

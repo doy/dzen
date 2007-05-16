@@ -161,7 +161,7 @@ fill_ev_table(char *input)
 int
 a_exposetitle(char * opt[]) {
     XCopyArea(dzen.dpy, dzen.title_win.drawable, dzen.title_win.win, 
-            dzen.gc, 0, 0, dzen.title_win.width, dzen.mh, 0, 0);
+            dzen.gc, 0, 0, dzen.title_win.width, dzen.line_height, 0, 0);
     return 0;
 }
 
@@ -266,7 +266,7 @@ a_hide(char * opt[]) {
 int
 a_unhide(char * opt[]) {
     if(dzen.title_win.ishidden) {
-        XResizeWindow(dzen.dpy, dzen.title_win.win, dzen.title_win.width, dzen.mh);
+        XResizeWindow(dzen.dpy, dzen.title_win.win, dzen.title_win.width, dzen.line_height);
         dzen.title_win.ishidden = False;
     }
     return 0;

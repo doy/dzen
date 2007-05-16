@@ -5,7 +5,6 @@
 
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
-//#include <X11/keysym.h>
 #include <pthread.h>
 
 #define FONT	    "-*-fixed-*-*-*-*-*-*-*-*-*-*-*-*"
@@ -77,7 +76,7 @@ struct DZEN {
     char *fnt;
     char *bg;
     char *fg;
-    int mh;
+    int line_height;
 
     Display *dpy;
     int screen;
