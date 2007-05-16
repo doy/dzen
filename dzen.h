@@ -12,9 +12,9 @@
 #define BGCOLOR		"#ab0b0b"
 #define FGCOLOR		"#efefef"
 
-#define ALIGNECENTER 0
-#define ALIGNELEFT   1
-#define ALIGNERIGHT  2
+#define ALIGNCENTER 0
+#define ALIGNLEFT   1
+#define ALIGNRIGHT  2
 
 #define BUF_SIZE    4096
 
@@ -40,8 +40,7 @@ struct TW {
 
     Window win;
     Drawable drawable;
-    char alignement;
-    Bool autohide;
+    char alignment;
     Bool ishidden;
 };
 
@@ -60,7 +59,7 @@ struct SW {
     int last_line_vis;
     int sel_line;
 
-    char alignement;
+    char alignment;
     Bool ismenu;
     Bool issticky;
     Bool ispersistent;

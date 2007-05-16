@@ -101,14 +101,14 @@ x_resize_header(int width, int height) {
 
 static void
 x_highlight_line(int line) {
-    drawtext(dzen.slave_win.tbuf[line + dzen.slave_win.first_line_vis], 1, line+1, dzen.slave_win.alignement);
+    drawtext(dzen.slave_win.tbuf[line + dzen.slave_win.first_line_vis], 1, line+1, dzen.slave_win.alignment);
     XCopyArea(dzen.dpy, dzen.slave_win.drawable, dzen.slave_win.line[line], dzen.rgc,
             0, 0, dzen.slave_win.width, dzen.mh, 0, 0);
 }
 
 static void
 x_unhighlight_line(int line) {
-    drawtext(dzen.slave_win.tbuf[line + dzen.slave_win.first_line_vis], 0, line+1, dzen.slave_win.alignement);
+    drawtext(dzen.slave_win.tbuf[line + dzen.slave_win.first_line_vis], 0, line+1, dzen.slave_win.alignment);
     XCopyArea(dzen.dpy, dzen.slave_win.drawable, dzen.slave_win.line[line], dzen.gc,
             0, 0, dzen.slave_win.width, dzen.mh, 0, 0);
 }
@@ -135,12 +135,12 @@ x_draw_body(void) {
 
     for(i=0; i < dzen.slave_win.max_lines; i++) {
         if(i < dzen.slave_win.last_line_vis) {
-            drawtext(dzen.slave_win.tbuf[i + dzen.slave_win.first_line_vis], 0, i, dzen.slave_win.alignement);
+            drawtext(dzen.slave_win.tbuf[i + dzen.slave_win.first_line_vis], 0, i, dzen.slave_win.alignment);
             XCopyArea(dzen.dpy, dzen.slave_win.drawable, dzen.slave_win.line[i], dzen.gc, 
                     0, 0, dzen.slave_win.width, dzen.mh, 0, 0);
         }
         else if(i < dzen.slave_win.max_lines) {
-            drawtext("", 0, i, ALIGNELEFT);
+            drawtext("", 0, i, dzen.slave_win.alignment);
             XCopyArea(dzen.dpy, dzen.slave_win.drawable, dzen.slave_win.line[i], dzen.gc,
                     0, 0, dzen.slave_win.width, dzen.mh, 0, 0);
         }
@@ -371,6 +371,43 @@ clean_up(void) {
     XCloseDisplay(dzen.dpy);
 }
 
+    static void
+set_alignment(void)
+{
+    if(dzen.title_win.alignment) {
+        switch(dzen.title_win.alignment) {
+            case 'l': 
+                dzen.title_win.alignment = ALIGNLEFT;
+                break;
+            case 'c':
+                dzen.title_win.alignment = ALIGNCENTER;
+                break;
+            case 'r':
+                dzen.title_win.alignment = ALIGNRIGHT;
+                break;
+            default:
+                dzen.title_win.alignment = ALIGNCENTER;
+        }
+    }
+    if(dzen.slave_win.alignment) {
+        switch(dzen.slave_win.alignment) {
+            case 'l': 
+                dzen.slave_win.alignment = ALIGNLEFT;
+                break;
+            case 'c':
+                printf("slave center\n");
+                dzen.slave_win.alignment = ALIGNCENTER;
+                break;
+            case 'r':
+                dzen.slave_win.alignment = ALIGNRIGHT;
+                break;
+            default:
+                printf("slave default\n");
+                dzen.slave_win.alignment = ALIGNLEFT;
+        }
+    }
+}
+
 int
 main(int argc, char *argv[]) {
     int i;
@@ -380,14 +417,14 @@ main(int argc, char *argv[]) {
     dzen.cur_line  = 0;
     dzen.ret_val   = 0;
     dzen.title_win.y = 0;
-    dzen.title_win.alignement = ALIGNECENTER;
+    dzen.title_win.alignment = ALIGNCENTER;
+    dzen.slave_win.alignment = ALIGNLEFT;
     dzen.title_win.x = dzen.slave_win.x = 0;
     dzen.title_win.width = dzen.slave_win.width = 0;
     dzen.fnt       = FONT;
     dzen.bg        = BGCOLOR;
     dzen.fg        = FGCOLOR;
     dzen.slave_win.max_lines  = 0;
-    dzen.title_win.autohide   = False;
     dzen.running = True;
 
 
@@ -400,10 +437,10 @@ main(int argc, char *argv[]) {
             dzen.slave_win.ispersistent = True;
         }
         else if(!strncmp(argv[i], "-ta", 4)) {
-            if(++i < argc) dzen.title_win.alignement = argv[i][0];
+            if(++i < argc) dzen.title_win.alignment = argv[i][0];
         }
         else if(!strncmp(argv[i], "-sa", 4)) {
-            if(++i < argc) dzen.slave_win.alignement = argv[i][0];
+            if(++i < argc) dzen.slave_win.alignment = argv[i][0];
         }
         else if(!strncmp(argv[i], "-m", 3)) {
             dzen.slave_win.ismenu = True;
@@ -435,9 +472,9 @@ main(int argc, char *argv[]) {
         else if(!strncmp(argv[i], "-v", 3)) 
             eprint("dzen-"VERSION", (C)opyright 2007 Robert Manea\n");
         else
-            eprint("usage: dzen [-v] [-p] [-m] [-ta <l|c|r>] [-e <string>]           \n"
-                   "            [-x <pixel>] [-y <pixel>] [-w <pixel>]  [-tw <pixel>]\n"
-                   "            [-l <lines>] [-fn <font>] [-bg <color>] [-fg <color>]\n");
+            eprint("usage: dzen2 [-v] [-p] [-m] [-ta <l|c|r>] [-sa <l|c|r>] [-tw <pixel>]\n"
+                   "             [-e <string>] [-x <pixel>] [-y <pixel>]  [-w <pixel>]    \n"
+                   "             [-l <lines>]  [-fn <font>] [-bg <color>] [-fg <color>]   \n");
 
     if(dzen.title_win.width == 0)
         dzen.title_win.width = dzen.slave_win.width;
@@ -466,45 +503,9 @@ main(int argc, char *argv[]) {
     if(ev_table[sigusr2].isset && (setup_signal(SIGUSR2, catch_sigusr2) == SIG_ERR))
         fprintf(stderr, "dzen: error hooking SIGUSR2\n");
 
-    if(dzen.title_win.alignement) {
-        switch(dzen.title_win.alignement) {
-            case 'l': 
-                dzen.title_win.alignement = ALIGNELEFT;
-                break;
-            case 'c':
-                dzen.title_win.alignement = ALIGNECENTER;
-                break;
-            case 'r':
-                dzen.title_win.alignement = ALIGNERIGHT;
-                break;
-            default:
-                dzen.title_win.alignement = ALIGNECENTER;
-        }
-    }
-    if(dzen.slave_win.alignement) {
-        switch(dzen.slave_win.alignement) {
-            case 'l': 
-                dzen.slave_win.alignement = ALIGNELEFT;
-                break;
-            case 'c':
-                dzen.slave_win.alignement = ALIGNECENTER;
-                break;
-            case 'r':
-                dzen.slave_win.alignement = ALIGNERIGHT;
-                break;
-            default:
-                dzen.slave_win.alignement = ALIGNECENTER;
-        }
-    }
-
+    set_alignment();
     x_create_windows();
     x_map_window(dzen.title_win.win);
-
-    /* autohiding */
-    if(dzen.title_win.autohide) {
-        x_resize_header(dzen.title_win.width, 1);
-        dzen.title_win.ishidden = True;
-    }
 
     /* reader */
     pthread_create(&dzen.read_thread, NULL, read_stdin, NULL);
@@ -515,7 +516,6 @@ main(int argc, char *argv[]) {
     event_loop(NULL);
 
     do_action(onexit);
-
     clean_up();
     
     if(dzen.ret_val)

@@ -18,7 +18,7 @@ textnw(const char *text, unsigned int len) {
     return XTextWidth(dzen.font.xfont, text, len);
 }
 
-void drawtext(const char *text, int reverse, int line, int aligne) {
+void drawtext(const char *text, int reverse, int line, int align) {
     int x, y, w, h;
     static char buf[1024];
     unsigned int len, olen;
@@ -28,14 +28,10 @@ void drawtext(const char *text, int reverse, int line, int aligne) {
 
 
     mgc = reverse ? dzen.gc : dzen.rgc;
-    /* title win */
-    if(line == -1) {
+    if(line == -1) 
         XFillRectangles(dzen.dpy, dzen.title_win.drawable, mgc, &r, 1);
-    }
-    /* slave win */
-    else {
+    else 
         XFillRectangles(dzen.dpy, dzen.slave_win.drawable, mgc, &r, 1);
-    }
 
     if(!text)
         return;
@@ -60,17 +56,16 @@ void drawtext(const char *text, int reverse, int line, int aligne) {
     }
 
     if(line != -1) {
-        x = h/2;
-        if(!aligne)
-            x = (dzen.w - textw(buf)+h)/2;
-        else if(aligne == ALIGNELEFT)
+        if(align == ALIGNLEFT)
             x = h/2;
+        else if(align == ALIGNCENTER)
+            x = (dzen.slave_win.width - textw(buf)+h)/2;
         else
             x = dzen.slave_win.width - textw(buf);
     } else {
-        if(!aligne)
+        if(!align)
             x = (dzen.w - textw(buf)+h)/2;
-        else if(aligne == ALIGNELEFT)
+        else if(align == ALIGNLEFT)
             x = h/2;
         else
             x = dzen.title_win.width - textw(buf);
@@ -160,7 +155,7 @@ drawheader(char * text) {
     dzen.h = dzen.mh;
     
     if(text)
-        drawtext(text, 0, -1, dzen.title_win.alignement);
+        drawtext(text, 0, -1, dzen.title_win.alignment);
     XCopyArea(dzen.dpy, dzen.title_win.drawable, dzen.title_win.win, 
             dzen.gc, 0, 0, dzen.title_win.width, dzen.mh, 0, 0);
 }
