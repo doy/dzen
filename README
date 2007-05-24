@@ -15,6 +15,7 @@ Features
     * flexible event/action 
       mechanism
     * hideable, collapsable
+    * Xinerama support
 
 
 Requirements
@@ -33,6 +34,10 @@ necessary as root):
     make clean install
 
 
+Note:       By default dzen will not be compiled with Xinerama support.
+            Uncomment the respective lines in config.mk to change this.
+
+
 Contact:
 --------
 Feature requests, patches or anything else related to dzen can be send
@@ -49,6 +54,7 @@ dzen accepts a couple of options:
     -ta     alignement of title window content 
             l(eft), c(center), r(right)
     -tw     title window width
+    -sa     alignment of slave window, see "-ta"
     -l      lines, see (1)
     -e      events and actions, see (2)
     -m      menu, see (3)
@@ -56,6 +62,7 @@ dzen accepts a couple of options:
     -x      x position
     -y      y position
     -w      width
+    -xs     number of Xinerama screen
     -v      version information
 
 Termination:

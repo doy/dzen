@@ -5,6 +5,9 @@
 
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
+#ifdef DZEN_XINERAMA
+#include <X11/extensions/Xinerama.h>
+#endif
 #include <pthread.h>
 
 #define FONT	    "-*-fixed-*-*-*-*-*-*-*-*-*-*-*-*"
@@ -93,6 +96,9 @@ struct DZEN {
     pthread_mutex_t mt;
 
     int ret_val;
+
+    /* should always be 0 if DZEN_XINERAMA not defined */
+    int xinescreen;
 };
 
 extern Dzen dzen;

@@ -18,7 +18,9 @@ textnw(const char *text, unsigned int len) {
     return XTextWidth(dzen.font.xfont, text, len);
 }
 
-void drawtext(const char *text, int reverse, int line, int align) {
+
+void 
+drawtext(const char *text, int reverse, int line, int align) {
     int x, y, w, h;
     static char buf[1024];
     unsigned int len, olen;
@@ -28,9 +30,9 @@ void drawtext(const char *text, int reverse, int line, int align) {
 
 
     mgc = reverse ? dzen.gc : dzen.rgc;
-    if(line == -1) 
+    if(line == -1)  /* title window */
         XFillRectangles(dzen.dpy, dzen.title_win.drawable, mgc, &r, 1);
-    else 
+    else            /* slave window */
         XFillRectangles(dzen.dpy, dzen.slave_win.drawable, mgc, &r, 1);
 
     if(!text)

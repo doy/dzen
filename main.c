@@ -149,42 +149,73 @@ x_draw_body(void) {
 }
 
 static void
-x_check_geometry(void) {
-    if(dzen.title_win.x > DisplayWidth(dzen.dpy, dzen.screen))
-        dzen.title_win.x = 0;
+x_check_geometry(XRectangle si) {
+    if(dzen.title_win.x > si.width)
+        dzen.title_win.x = si.x;
+    if (dzen.title_win.x < si.x)
+        dzen.title_win.x = si.x;
 
     if(!dzen.title_win.width)
-        dzen.title_win.width = DisplayWidth(dzen.dpy, dzen.screen);
+        dzen.title_win.width = si.width;
 
-    if((dzen.title_win.x + dzen.title_win.width) > DisplayWidth(dzen.dpy, dzen.screen))
-        dzen.title_win.width = DisplayWidth(dzen.dpy, dzen.screen) - dzen.title_win.x;
+    if((dzen.title_win.x + dzen.title_win.width) > (si.x + si.width))
+        dzen.title_win.width = si.width - (dzen.title_win.x - si.x);
 
     if(!dzen.slave_win.width) {
-        dzen.slave_win.x = 0;
-        dzen.slave_win.width = DisplayWidth(dzen.dpy, dzen.screen);
+        dzen.slave_win.x = si.x;
+        dzen.slave_win.width = si.width;
     }
     if( dzen.title_win.width == dzen.slave_win.width) {
         dzen.slave_win.x = dzen.title_win.x;
         dzen.slave_win.width = dzen.title_win.width;
     }
-    if(dzen.slave_win.width != DisplayWidth(dzen.dpy, dzen.screen)) {
+    if(dzen.slave_win.width != si.width) {
         dzen.slave_win.x = dzen.title_win.x + (dzen.title_win.width - dzen.slave_win.width)/2;
-        if(dzen.slave_win.x < 0)
-            dzen.slave_win.x = 0;
-        if(dzen.slave_win.width > DisplayWidth(dzen.dpy, dzen.screen))
-            dzen.slave_win.width = DisplayWidth(dzen.dpy, dzen.screen);
-        if(dzen.slave_win.x + dzen.slave_win.width >  DisplayWidth(dzen.dpy, dzen.screen))
-            dzen.slave_win.x = DisplayWidth(dzen.dpy, dzen.screen) - dzen.slave_win.width;
+        if(dzen.slave_win.x < si.x)
+            dzen.slave_win.x = si.x;
+        if(dzen.slave_win.width > si.width)
+            dzen.slave_win.width = si.width;
+        if(dzen.slave_win.x + dzen.slave_win.width >  si.width)
+            dzen.slave_win.x = si.x + (si.width - dzen.slave_win.width);
     }
     dzen.line_height = dzen.font.height + 2;
-    dzen.title_win.y = (dzen.title_win.y + dzen.line_height) > DisplayHeight(dzen.dpy, dzen.screen) ? 0 : dzen.title_win.y; 
+    dzen.title_win.y = si.y + ((dzen.title_win.y + dzen.line_height) > si.height ? 0 : dzen.title_win.y); 
 }
+
+static void
+qsi_no_xinerama(Display *dpy, XRectangle *rect) {
+    rect->x = 0;
+    rect->y = 0;
+    rect->width  = DisplayWidth( dpy, DefaultScreen(dpy));
+    rect->height = DisplayHeight(dpy, DefaultScreen(dpy));
+}
+
+#ifdef DZEN_XINERAMA
+static void
+queryscreeninfo(Display *dpy, XRectangle *rect, int screen) {
+    XineramaScreenInfo *xsi = NULL;
+    int nscreens = 1;
+
+    if(XineramaIsActive(dpy))
+        xsi = XineramaQueryScreens(dpy, &nscreens);
+    
+    if(xsi == NULL || screen > nscreens || screen <= 0) {
+        qsi_no_xinerama(dpy, rect);
+    } else {
+        rect->x      = xsi[screen-1].x_org;
+        rect->y      = xsi[screen-1].y_org;
+        rect->width  = xsi[screen-1].width;
+        rect->height = xsi[screen-1].height;
+    }
+}
+#endif
 
 static void
 x_create_windows(void) {
     XSetWindowAttributes wa;
     Window root;
     int i;
+    XRectangle si;
 
     dzen.dpy = XOpenDisplay(0);
     if(!dzen.dpy) 
@@ -203,7 +234,13 @@ x_create_windows(void) {
     wa.background_pixmap = ParentRelative;
     wa.event_mask = ExposureMask | ButtonReleaseMask | EnterWindowMask | LeaveWindowMask;
 
-    x_check_geometry();
+#ifdef DZEN_XINERAMA
+    queryscreeninfo(dzen.dpy, &si, dzen.xinescreen);
+#else
+    qsi_no_xinerama(dzen.dpy, &si);
+#endif
+
+    x_check_geometry(si);
 
     /* title window */
     dzen.title_win.win = XCreateWindow(dzen.dpy, root, 
@@ -221,7 +258,7 @@ x_create_windows(void) {
         dzen.slave_win.issticky = False;
         dzen.slave_win.y = dzen.title_win.y + dzen.line_height;
 
-        if(dzen.title_win.y + dzen.line_height*dzen.slave_win.max_lines > DisplayHeight(dzen.dpy, dzen.screen))
+        if(dzen.title_win.y + dzen.line_height*dzen.slave_win.max_lines > si.height)
             dzen.slave_win.y = (dzen.title_win.y - dzen.line_height) - dzen.line_height*(dzen.slave_win.max_lines) + dzen.line_height;
 
         dzen.slave_win.win = XCreateWindow(dzen.dpy, root, 
@@ -425,6 +462,7 @@ main(int argc, char *argv[]) {
     dzen.fg  = FGCOLOR;
     dzen.slave_win.max_lines  = 0;
     dzen.running = True;
+    dzen.xinescreen = 0;
 
 
     /* cmdline args */
@@ -468,12 +506,21 @@ main(int argc, char *argv[]) {
         else if(!strncmp(argv[i], "-tw", 3)) {
             if(++i < argc) dzen.title_win.width = atoi(argv[i]);
         }
+#ifdef DZEN_XINERAMA
+        else if(!strncmp(argv[i], "-xs", 4)) {
+            if(++i < argc) dzen.xinescreen = atoi(argv[i]);
+        }
+#endif
         else if(!strncmp(argv[i], "-v", 3)) 
             eprint("dzen-"VERSION", (C)opyright 2007 Robert Manea\n");
         else
             eprint("usage: dzen2 [-v] [-p] [-m] [-ta <l|c|r>] [-sa <l|c|r>] [-tw <pixel>]\n"
                    "             [-e <string>] [-x <pixel>] [-y <pixel>]  [-w <pixel>]    \n"
-                   "             [-l <lines>]  [-fn <font>] [-bg <color>] [-fg <color>]   \n");
+                   "             [-l <lines>]  [-fn <font>] [-bg <color>] [-fg <color>]   \n"
+#ifdef DZEN_XINERAMA
+                   "             [-xs <screen>]\n"
+#endif
+                   );
 
     if(!dzen.title_win.width)
         dzen.title_win.width = dzen.slave_win.width;
