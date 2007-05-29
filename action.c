@@ -306,7 +306,8 @@ a_menuprint(char * opt[]) {
 
 int
 a_menuexec(char * opt[]) {
-    if(dzen.slave_win.ismenu && dzen.slave_win.sel_line != -1) {
+    if(dzen.slave_win.ismenu && dzen.slave_win.sel_line != -1
+            && (dzen.slave_win.sel_line + dzen.slave_win.first_line_vis) < dzen.slave_win.tcnt) {
         spawn(dzen.slave_win.tbuf[dzen.slave_win.sel_line + dzen.slave_win.first_line_vis]);
         dzen.slave_win.sel_line = -1;
     }
