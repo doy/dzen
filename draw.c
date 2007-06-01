@@ -102,7 +102,7 @@ getcolor(const char *colstr) {
     XColor color;
 
     if(!XAllocNamedColor(dzen.dpy, cmap, colstr, &color, &color))
-        eprint("error, cannot allocate color '%s'\n", colstr);
+        eprint("dzen: error, cannot allocate color '%s'\n", colstr);
     return color.pixel;
 }
 
@@ -137,7 +137,7 @@ setfont(const char *fontstr) {
             XFreeFont(dzen.dpy, dzen.font.xfont);
         dzen.font.xfont = NULL;
         if(!(dzen.font.xfont = XLoadQueryFont(dzen.dpy, fontstr)))
-            eprint("error, cannot load font: '%s'\n", fontstr);
+            eprint("dzen: error, cannot load font: '%s'\n", fontstr);
         dzen.font.ascent = dzen.font.xfont->ascent;
         dzen.font.descent = dzen.font.xfont->descent;
     }
@@ -164,15 +164,10 @@ drawheader(char * text) {
 
 void
 drawbody(char * text) {
-    if(dzen.slave_win.tcnt >= BUF_SIZE) {
-        pthread_mutex_lock(&dzen.mt);
+    if(dzen.slave_win.tcnt >= BUF_SIZE) 
         free_buffer();
-        pthread_mutex_unlock(&dzen.mt);
-    }
     if(dzen.slave_win.tcnt < BUF_SIZE) {
-        pthread_mutex_lock(&dzen.mt);
         dzen.slave_win.tbuf[dzen.slave_win.tcnt] = estrdup(text);
         dzen.slave_win.tcnt++;
-        pthread_mutex_unlock(&dzen.mt);
     }
 }

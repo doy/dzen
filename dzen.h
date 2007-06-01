@@ -8,7 +8,6 @@
 #ifdef DZEN_XINERAMA
 #include <X11/extensions/Xinerama.h>
 #endif
-#include <pthread.h>
 
 #define FONT	    "-*-fixed-*-*-*-*-*-*-*-*-*-*-*-*"
 #define BGCOLOR		"#ab0b0b"
@@ -64,7 +63,6 @@ struct SW {
     char alignment;
     Bool ismenu;
     Bool issticky;
-    Bool ispersistent;
     Bool ismapped;
 };
 
@@ -89,12 +87,8 @@ struct DZEN {
     GC gc, rgc;
     Fnt font;
 
-    /* position */
+    Bool ispersistent;
     int cur_line;
-
-    pthread_t read_thread;
-    pthread_mutex_t mt;
-
     int ret_val;
 
     /* should always be 0 if DZEN_XINERAMA not defined */

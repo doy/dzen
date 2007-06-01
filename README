@@ -20,7 +20,7 @@ Features
 
 Requirements
 ------------
-In order to build dzen you need the Xlib and phtread header files.
+In order to build dzen you need the Xlib header files.
 
 
 Installation

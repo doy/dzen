@@ -133,9 +133,10 @@ fill_ev_table(char *input)
                     }
                     if(str4 == kommatoken && str4 != token && eid != -1) {
                             ev_table[eid].isset = 1;
-                            ev_table[eid].action[i] = malloc(sizeof(As));
-                            if((ah = (void *)get_action_handler(dptoken)))
+                            if((ah = (void *)get_action_handler(dptoken))) {
+                                ev_table[eid].action[i] = emalloc(sizeof(As));
                                 ev_table[eid].action[i]->handler= get_action_handler(dptoken);
+                            }
                             i++;
                     }
                     else if(str4 != token && eid != -1 && ah) {
@@ -147,7 +148,7 @@ fill_ev_table(char *input)
                 }
                 k=0;
             }
-            ev_table[eid].action[i] = malloc(sizeof(As));
+            ev_table[eid].action[i] = emalloc(sizeof(As));
             ev_table[eid].action[i]->handler = NULL;
             i=0; 
         }

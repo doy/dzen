@@ -1,5 +1,5 @@
 # dzen version
-VERSION = 0.2.4
+VERSION = 0.3.0
 
 # Customize below to fit your system
 
@@ -9,17 +9,18 @@ MANPREFIX = ${PREFIX}/share/man
 
 X11INC = /usr/X11R6/include
 X11LIB = /usr/X11R6/lib
-
 INCS = -I. -I/usr/include -I${X11INC}
+
 # No Xinerama:
-LIBS = -L/usr/lib -lc -L${X11LIB} -lX11 -lpthread
+LIBS = -L/usr/lib -lc -L${X11LIB} -lX11
 # With Xinerama:
-#LIBS = -L/usr/lib -lc -L${X11LIB} -lX11 -lpthread -lXinerama
+#LIBS = -L/usr/lib -lc -L${X11LIB} -lX11 -lXinerama
 
 # No Xinerama:
 CFLAGS = -Os ${INCS} -DVERSION=\"${VERSION}\"
 # With Xinerama:
 #CFLAGS = -Os ${INCS} -DVERSION=\"${VERSION}\" -DDZEN_XINERAMA
+
 LDFLAGS = ${LIBS}
 
 # Debugging
