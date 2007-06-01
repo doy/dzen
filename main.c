@@ -84,15 +84,13 @@ read_stdin(void *ptr) {
     char buf[1024], retbuf[1024];
     ssize_t n, n_off=0;
 
-    n = read(STDIN_FILENO, buf, sizeof buf);
-
-    if(!n && !dzen.ispersistent) {
-        dzen.running = False;
-        return -1;
-    } else if (!n && dzen.ispersistent)
-        return -2;
-
-    if(n) {
+    if(!(n = read(STDIN_FILENO, buf, sizeof buf))) {
+        if(!dzen.ispersistent) {
+            dzen.running = False;
+            return -1;
+        } else 
+            return -2;
+    } else {
         while((n_off = chomp(buf, retbuf, n_off, n))) {
             if(!dzen.cur_line || !dzen.slave_win.max_lines) {
                 drawheader(retbuf);
@@ -394,9 +392,10 @@ event_loop(void *ptr) {
     int xfd, ret, dr=0;
     fd_set rmask;
 
+    /* fill window until data is available */
     drawheader("");
-    xfd = ConnectionNumber(dzen.dpy);
 
+    xfd = ConnectionNumber(dzen.dpy);
     while(dzen.running) {
         FD_ZERO(&rmask);
         FD_SET(xfd, &rmask);
@@ -405,13 +404,14 @@ event_loop(void *ptr) {
 
         while(XPending(dzen.dpy))
             handle_xev();
+
         ret = select(xfd+1, &rmask, NULL, NULL, NULL);
         if(ret) {
             if(dr != -2){
                 if(FD_ISSET(STDIN_FILENO, &rmask)) {
                     dr = read_stdin(NULL);
                     if(dr == -1)
-                        return 0;
+                        return;
                     handle_newl();
                 }
             }
@@ -419,7 +419,7 @@ event_loop(void *ptr) {
                 handle_xev();
         }
     }
-    return 1;
+    return; 
 }
 
 static void 
