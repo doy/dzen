@@ -160,7 +160,7 @@ x_draw_body(void) {
 }
 
 static void
-    x_check_geometry(XRectangle si) {
+x_check_geometry(XRectangle si) {
         if(dzen.title_win.x > si.width)
             dzen.title_win.x = si.x;
         if (dzen.title_win.x < si.x)
@@ -401,7 +401,7 @@ event_loop(void *ptr) {
     int xfd, ret, dr=0;
     fd_set rmask;
 
-    /* fill window until data is available */
+    /* fill background until data is available */
     drawheader("");
 
     xfd = ConnectionNumber(dzen.dpy);
@@ -416,17 +416,14 @@ event_loop(void *ptr) {
 
         ret = select(xfd+1, &rmask, NULL, NULL, NULL);
         if(ret) {
-            if(dr != -2){
-                if(FD_ISSET(STDIN_FILENO, &rmask)) {
-                    dr = read_stdin(NULL);
-                    if(dr == -1)
-                        return;
-                    handle_newl();
-                }
+            if(dr != -2 && FD_ISSET(STDIN_FILENO, &rmask)) {
+                if((dr = read_stdin(NULL)) == -1)
+                    return;
+                handle_newl();
             }
-            if(FD_ISSET(xfd, &rmask))
-                handle_xev();
         }
+        if(FD_ISSET(xfd, &rmask))
+            handle_xev();
     }
     return; 
 }
