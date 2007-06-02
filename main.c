@@ -53,11 +53,18 @@ setup_signal(int signr, sigfunc *shandler) {
     return NULL;
 }
 
+char *rem=NULL;
 static int
 chomp(char *inbuf, char *outbuf, int start, int len) {
     int i=0;
     int off=start;
 
+    if(rem) {
+        strncpy(outbuf, rem, strlen(rem));
+        i += strlen(rem);
+        free(rem);
+        rem = NULL;
+    }
     while(off < len) {
         if(inbuf[off] != '\n') {
             outbuf[i++] = inbuf[off++];
@@ -66,7 +73,9 @@ chomp(char *inbuf, char *outbuf, int start, int len) {
             return ++off;
         }
     }
+
     outbuf[i] = '\0';
+    rem = estrdup(outbuf);
     return 0;
 }
 
@@ -81,7 +90,7 @@ free_buffer(void) {
 
 static int 
 read_stdin(void *ptr) {
-    char buf[1024], retbuf[1024];
+    char buf[1024], retbuf[2048];
     ssize_t n, n_off=0;
 
     if(!(n = read(STDIN_FILENO, buf, sizeof buf))) {
