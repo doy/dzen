@@ -11,15 +11,18 @@ X11INC = /usr/X11R6/include
 X11LIB = /usr/X11R6/lib
 INCS = -I. -I/usr/include -I${X11INC}
 
-# No Xinerama:
-LIBS = -L/usr/lib -lc -L${X11LIB} -lX11
-# With Xinerama:
-#LIBS = -L/usr/lib -lc -L${X11LIB} -lX11 -lXinerama
+# Uncomment this line to use Xinerama.
+# USE_XINERAMA=y
 
-# No Xinerama:
+# (ifdef/else/endif might not be portable; if it doesn't work for you,
+# contact the author and we'll work on a better solution.)
+ifdef USE_XINERAMA
+LIBS = -L/usr/lib -lc -L${X11LIB} -lX11 -lXinerama
+CFLAGS = -Os ${INCS} -DVERSION=\"${VERSION}\" -DDZEN_XINERAMA
+else
+LIBS = -L/usr/lib -lc -L${X11LIB} -lX11
 CFLAGS = -Os ${INCS} -DVERSION=\"${VERSION}\"
-# With Xinerama:
-#CFLAGS = -Os ${INCS} -DVERSION=\"${VERSION}\" -DDZEN_XINERAMA
+endif
 
 LDFLAGS = ${LIBS}
 
