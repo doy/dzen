@@ -394,9 +394,12 @@ handle_newl(void) {
 
     if(dzen.slave_win.max_lines && (dzen.slave_win.tcnt > last_cnt)) {
         if (XGetWindowAttributes(dzen.dpy, dzen.slave_win.win, &wa),
-                wa.map_state != IsUnmapped &&
+                wa.map_state != IsUnmapped
                 /* scroll only if we're viewing the last line of input */
-                (dzen.slave_win.last_line_vis == last_cnt)) {
+                && (dzen.slave_win.last_line_vis == last_cnt)) {
+            dzen.slave_win.first_line_vis = 0;
+            dzen.slave_win.last_line_vis = 0;
+        } else if(wa.map_state == IsUnmapped || !dzen.slave_win.last_line_vis) {
             dzen.slave_win.first_line_vis = 0;
             dzen.slave_win.last_line_vis = 0;
         }
@@ -425,12 +428,12 @@ event_loop(void *ptr) {
 
         ret = select(xfd+1, &rmask, NULL, NULL, NULL);
         if(ret) {
-            if(dr != -2 
-                    && FD_ISSET(STDIN_FILENO, &rmask)
-                    && dzen.timeout > 0) {
+            if(dr != -2 && FD_ISSET(STDIN_FILENO, &rmask)) {
                 if((dr = read_stdin(NULL)) == -1)
                     return;
                 handle_newl();
+            }
+            else if(dr == -2 && dzen.timeout > 0) {
                 // Set an alarm to kill us after the timeout
                 struct itimerval value;
                 memset(&value, 0, sizeof(value));
@@ -438,9 +441,9 @@ event_loop(void *ptr) {
                 value.it_value.tv_usec = 1000 * (dzen.timeout % 1000);
                 setitimer(ITIMER_REAL, &value, NULL);
             }
+            if(FD_ISSET(xfd, &rmask))
+                handle_xev();
         }
-        if(FD_ISSET(xfd, &rmask))
-            handle_xev();
     }
     return; 
 }
