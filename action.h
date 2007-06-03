@@ -73,6 +73,6 @@ int a_menuprint(char **);
 int a_menuexec(char **);
 int a_raise(char **);
 int a_lower(char **);
-int a_showhead(char **);
+int a_scrollhome(char **);
 
 

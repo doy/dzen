@@ -387,11 +387,13 @@ handle_newl(void) {
 
     if(dzen.slave_win.max_lines && (dzen.slave_win.tcnt > last_cnt)) {
         if (XGetWindowAttributes(dzen.dpy, dzen.slave_win.win, &wa),
-                wa.map_state != IsUnmapped) {
+                wa.map_state != IsUnmapped &&
+                /* scroll only if we're viewing the last line of input */
+                (dzen.slave_win.last_line_vis == last_cnt)) {
             dzen.slave_win.first_line_vis = 0;
             dzen.slave_win.last_line_vis = 0;
-            do_action(exposeslave);
         }
+        do_action(exposeslave);
         last_cnt = dzen.slave_win.tcnt;
     }
 }

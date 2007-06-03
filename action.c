@@ -48,7 +48,7 @@ struct action_lookup  ac_lookup_table[] = {
     { "menuexec",       a_menuexec},
     { "raise",          a_raise},
     { "lower",          a_lower},
-    { "showhead",       a_showhead},
+    { "scrollhome",     a_scrollhome},
     { 0, 0 }
 };
 
@@ -201,7 +201,7 @@ a_uncollapse(char * opt[]){
         XMapRaised(dzen.dpy, dzen.slave_win.win);
         for(i=0; i < dzen.slave_win.max_lines; i++)
             XMapRaised(dzen.dpy, dzen.slave_win.line[i]);
-        x_draw_body();
+        //x_draw_body();
     }
     return 0;
 }
@@ -335,10 +335,10 @@ a_lower(char * opt[]) {
 }
 
 int 
-a_showhead(char * opt[]) {
+a_scrollhome(char * opt[]) {
     if(dzen.slave_win.max_lines) {
         dzen.slave_win.first_line_vis = 0; 
-        dzen.slave_win.last_line_vis = dzen.slave_win.max_lines;
+        dzen.slave_win.last_line_vis  = dzen.slave_win.max_lines;
         x_draw_body();
     }
     return 0;
