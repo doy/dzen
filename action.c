@@ -234,11 +234,22 @@ a_togglestick(char * opt[]) {
 
 int
 a_scrollup(char * opt[]) {
+    int n;
+    if(opt[0]) 
+        n = atoi(opt[0]);
+    if(!n)
+        n = 1;
+
     if(dzen.slave_win.max_lines 
             && dzen.slave_win.first_line_vis 
             && dzen.slave_win.last_line_vis > dzen.slave_win.max_lines) {
-        dzen.slave_win.first_line_vis--;
-        dzen.slave_win.last_line_vis--;
+        if(dzen.slave_win.first_line_vis - n < 0) {
+            dzen.slave_win.first_line_vis = 0;
+            dzen.slave_win.last_line_vis = dzen.slave_win.max_lines;
+        } else {
+            dzen.slave_win.first_line_vis -= n;
+            dzen.slave_win.last_line_vis -=n;
+        }
         x_draw_body();
     }
     return 0;
@@ -246,11 +257,22 @@ a_scrollup(char * opt[]) {
 
 int
 a_scrolldown(char * opt[]) {
+    int n;
+    if(opt[0]) 
+        n = atoi(opt[0]);
+    if(!n)
+        n = 1;
+
     if(dzen.slave_win.max_lines
             && dzen.slave_win.last_line_vis >= dzen.slave_win.max_lines 
             && dzen.slave_win.last_line_vis < dzen.slave_win.tcnt) {
-        dzen.slave_win.first_line_vis++;
-        dzen.slave_win.last_line_vis++;
+        if(dzen.slave_win.last_line_vis + n > dzen.slave_win.tcnt) {
+            dzen.slave_win.first_line_vis = dzen.slave_win.tcnt - dzen.slave_win.max_lines;
+            dzen.slave_win.last_line_vis = dzen.slave_win.tcnt;
+        } else {
+            dzen.slave_win.first_line_vis += n;
+            dzen.slave_win.last_line_vis +=n;
+        }
         x_draw_body();
     }
     return 0;
