@@ -433,7 +433,7 @@ event_loop(void *ptr) {
                     return;
                 handle_newl();
             }
-            else if(dr == -2 && dzen.timeout > 0) {
+            if(dr == -2 && dzen.timeout > 0) {
                 // Set an alarm to kill us after the timeout
                 struct itimerval value;
                 memset(&value, 0, sizeof(value));
