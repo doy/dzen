@@ -41,8 +41,7 @@ catch_sigterm() {
 
 static void
 catch_alrm() {
-    // this is called to kill us after the -p timeout from the time that stdin
-    // gives us EOF
+    do_action(onexit);
     exit(0);
 }
 
@@ -434,12 +433,12 @@ event_loop(void *ptr) {
                 handle_newl();
             }
             if(dr == -2 && dzen.timeout > 0) {
-                // Set an alarm to kill us after the timeout
-                struct itimerval value;
-                memset(&value, 0, sizeof(value));
-                value.it_value.tv_sec = dzen.timeout / 1000;
-                value.it_value.tv_usec = 1000 * (dzen.timeout % 1000);
-                setitimer(ITIMER_REAL, &value, NULL);
+                /* Set an alarm to kill us after the timeout */
+                struct itimerval t;
+                memset(&t, 0, sizeof t);
+                t.it_value.tv_sec = dzen.timeout;
+                t.it_value.tv_usec = 0;
+                setitimer(ITIMER_REAL, &t, NULL);
             }
             if(FD_ISSET(xfd, &rmask))
                 handle_xev();
@@ -534,7 +533,7 @@ main(int argc, char *argv[]) {
         }
         else if(!strncmp(argv[i], "-p", 3)) {
             dzen.ispersistent = True;
-            // see if the next argument looks like a valid number
+            /* see if the next argument looks like a valid number */
             if (i + 1 < argc) {
                 dzen.timeout = strtol(argv[i + 1], &endptr, 10);
                 if (*endptr) {
