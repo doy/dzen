@@ -42,6 +42,8 @@ catch_sigterm() {
 static void
 catch_alrm() {
     do_action(onexit);
+    /* TODO: that's quite rude, we need 
+       a better way to do this  */
     exit(0);
 }
 
@@ -197,7 +199,7 @@ x_check_geometry(XRectangle si) {
         }
         dzen.line_height = dzen.font.height + 2;
         dzen.title_win.y = si.y + ((dzen.title_win.y + dzen.line_height) > si.height ? 0 : dzen.title_win.y); 
-    }
+}
 
 static void
 qsi_no_xinerama(Display *dpy, XRectangle *rect) {
@@ -256,7 +258,6 @@ x_create_windows(void) {
 #else
     qsi_no_xinerama(dzen.dpy, &si);
 #endif
-
     x_check_geometry(si);
 
     /* title window */
@@ -394,7 +395,7 @@ handle_newl(void) {
     if(dzen.slave_win.max_lines && (dzen.slave_win.tcnt > last_cnt)) {
         if (XGetWindowAttributes(dzen.dpy, dzen.slave_win.win, &wa),
                 wa.map_state != IsUnmapped
-                /* scroll only if we're viewing the last line of input */
+                /* scroll only if we're currently viewing the last line of input */
                 && (dzen.slave_win.last_line_vis == last_cnt)) {
             dzen.slave_win.first_line_vis = 0;
             dzen.slave_win.last_line_vis = 0;
@@ -433,7 +434,7 @@ event_loop(void *ptr) {
                 handle_newl();
             }
             if(dr == -2 && dzen.timeout > 0) {
-                /* Set an alarm to kill us after the timeout */
+                /* set an alarm to kill us after the timeout */
                 struct itimerval t;
                 memset(&t, 0, sizeof t);
                 t.it_value.tv_sec = dzen.timeout;
@@ -533,14 +534,9 @@ main(int argc, char *argv[]) {
         }
         else if(!strncmp(argv[i], "-p", 3)) {
             dzen.ispersistent = True;
-            /* see if the next argument looks like a valid number */
             if (i + 1 < argc) {
                 dzen.timeout = strtol(argv[i + 1], &endptr, 10);
-                if (*endptr) {
-                    dzen.timeout = 0;
-                } else {
-                    i++;
-                }
+                *endptr ? dzen.timeout = 0 : i++;
             }
         }
         else if(!strncmp(argv[i], "-ta", 4)) {
