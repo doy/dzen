@@ -169,7 +169,10 @@ x_draw_body(void) {
 
 static void
 x_check_geometry(XRectangle si) {
-    if(dzen.title_win.x > si.width)
+    dzen.title_win.x += si.x;
+    dzen.title_win.y += si.y;
+
+    if(dzen.title_win.x > si.x + si.width)
         dzen.title_win.x = si.x;
     if (dzen.title_win.x < si.x)
         dzen.title_win.x = si.x;
@@ -179,26 +182,24 @@ x_check_geometry(XRectangle si) {
     
     if((dzen.title_win.x + dzen.title_win.width) > (si.x + si.width))
         dzen.title_win.width = si.width - (dzen.title_win.x - si.x);
-    
     if(!dzen.slave_win.width) {
         dzen.slave_win.x = si.x;
         dzen.slave_win.width = si.width;
     }
     if( dzen.title_win.width == dzen.slave_win.width) {
         dzen.slave_win.x = dzen.title_win.x;
-        dzen.slave_win.width = dzen.title_win.width;
     }
     if(dzen.slave_win.width != si.width) {
         dzen.slave_win.x = dzen.title_win.x + (dzen.title_win.width - dzen.slave_win.width)/2;
         if(dzen.slave_win.x < si.x)
             dzen.slave_win.x = si.x;
-        if(dzen.slave_win.width > si.width)
-            dzen.slave_win.width = si.width;
-        if(dzen.slave_win.x + dzen.slave_win.width >  si.width)
+        if(dzen.slave_win.x + dzen.slave_win.width > si.x + si.width)
             dzen.slave_win.x = si.x + (si.width - dzen.slave_win.width);
     }
     dzen.line_height = dzen.font.height + 2;
-    dzen.title_win.y = si.y + ((dzen.title_win.y + dzen.line_height) > si.height ? 0 : dzen.title_win.y); 
+
+    if (dzen.title_win.y + dzen.line_height > si.y + si.height)
+        dzen.title_win.y = 0;
 }
 
 static void
@@ -276,7 +277,7 @@ x_create_windows(void) {
         dzen.slave_win.issticky = False;
         dzen.slave_win.y = dzen.title_win.y + dzen.line_height;
 
-        if(dzen.title_win.y + dzen.line_height*dzen.slave_win.max_lines > si.height)
+        if(dzen.title_win.y + dzen.line_height*dzen.slave_win.max_lines > si.y + si.height)
             dzen.slave_win.y = (dzen.title_win.y - dzen.line_height) - dzen.line_height*(dzen.slave_win.max_lines) + dzen.line_height;
 
         dzen.slave_win.win = XCreateWindow(dzen.dpy, root, 
