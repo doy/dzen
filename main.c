@@ -169,36 +169,36 @@ x_draw_body(void) {
 
 static void
 x_check_geometry(XRectangle si) {
-        if(dzen.title_win.x > si.width)
-            dzen.title_win.x = si.x;
-        if (dzen.title_win.x < si.x)
-            dzen.title_win.x = si.x;
-
-        if(!dzen.title_win.width)
-            dzen.title_win.width = si.width;
-
-        if((dzen.title_win.x + dzen.title_win.width) > (si.x + si.width))
-            dzen.title_win.width = si.width - (dzen.title_win.x - si.x);
-
-        if(!dzen.slave_win.width) {
+    if(dzen.title_win.x > si.width)
+        dzen.title_win.x = si.x;
+    if (dzen.title_win.x < si.x)
+        dzen.title_win.x = si.x;
+    
+    if(!dzen.title_win.width)
+        dzen.title_win.width = si.width;
+    
+    if((dzen.title_win.x + dzen.title_win.width) > (si.x + si.width))
+        dzen.title_win.width = si.width - (dzen.title_win.x - si.x);
+    
+    if(!dzen.slave_win.width) {
+        dzen.slave_win.x = si.x;
+        dzen.slave_win.width = si.width;
+    }
+    if( dzen.title_win.width == dzen.slave_win.width) {
+        dzen.slave_win.x = dzen.title_win.x;
+        dzen.slave_win.width = dzen.title_win.width;
+    }
+    if(dzen.slave_win.width != si.width) {
+        dzen.slave_win.x = dzen.title_win.x + (dzen.title_win.width - dzen.slave_win.width)/2;
+        if(dzen.slave_win.x < si.x)
             dzen.slave_win.x = si.x;
+        if(dzen.slave_win.width > si.width)
             dzen.slave_win.width = si.width;
-        }
-        if( dzen.title_win.width == dzen.slave_win.width) {
-            dzen.slave_win.x = dzen.title_win.x;
-            dzen.slave_win.width = dzen.title_win.width;
-        }
-        if(dzen.slave_win.width != si.width) {
-            dzen.slave_win.x = dzen.title_win.x + (dzen.title_win.width - dzen.slave_win.width)/2;
-            if(dzen.slave_win.x < si.x)
-                dzen.slave_win.x = si.x;
-            if(dzen.slave_win.width > si.width)
-                dzen.slave_win.width = si.width;
-            if(dzen.slave_win.x + dzen.slave_win.width >  si.width)
-                dzen.slave_win.x = si.x + (si.width - dzen.slave_win.width);
-        }
-        dzen.line_height = dzen.font.height + 2;
-        dzen.title_win.y = si.y + ((dzen.title_win.y + dzen.line_height) > si.height ? 0 : dzen.title_win.y); 
+        if(dzen.slave_win.x + dzen.slave_win.width >  si.width)
+            dzen.slave_win.x = si.x + (si.width - dzen.slave_win.width);
+    }
+    dzen.line_height = dzen.font.height + 2;
+    dzen.title_win.y = si.y + ((dzen.title_win.y + dzen.line_height) > si.height ? 0 : dzen.title_win.y); 
 }
 
 static void
