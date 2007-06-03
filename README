@@ -9,12 +9,15 @@ Features
 --------
 
     * scriptable in any language
-    * single line and/or windows 
-      holding multiple lines
+
+    * single line and/or windows holding multiple lines
+    
     * menu functionality
-    * flexible event/action 
-      mechanism
+    
+    * flexible event/action mechanism
+    
     * hideable, collapsable
+    
     * Xinerama support
 
 
@@ -58,22 +61,26 @@ dzen accepts a couple of options:
     -l      lines, see (1)
     -e      events and actions, see (2)
     -m      menu, see (3)
-    -p      persist EOF (optional timeout)
+    -p      persist EOF (optional timeout in seconds)
     -x      x position
     -y      y position
     -w      width
     -xs     number of Xinerama screen
     -v      version information
 
+
 Termination:
 ------------
-dzen2 uses two different approaches to terminate itself:
+dzen uses two different approaches to terminate itself:
 
-    * If EOF is received -> terminate
-        - unless the '-p' flag is set
+    * Timed termination: if EOF is received -> terminate
+        - unless the '-p' option is set
+            · '-p' without argument persist forever
+            · '-p' with argument n  persist n seconds
 
-    * If mouse button3 is clicked -> terminate
+    * Interactive termination: if mouse button3 is clicked -> terminate
         - this is the default behaviour, see (2))
+
 
 
 Return values:
@@ -235,7 +242,7 @@ Examples:
 * Extract PIDs from the process table:
 
     {echo Procs; ps -a} | dzen2 -m -l 12 -p \
-    -e 'button1=menuprint;button3=exit; button4=scrollup;button5=scrolldown;entertitle=uncollapse;leaveslave=collapse' \
+    -e 'button1=menuprint;button3=exit; button4=scrollup:3;button5=scrolldown:3;entertitle=uncollapse;leaveslave=collapse' \
             | awk '{print $1}'
 
 
