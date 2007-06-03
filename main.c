@@ -39,6 +39,13 @@ catch_sigterm() {
     do_action(onexit);
 }
 
+static void
+catch_alrm() {
+    // this is called to kill us after the -p timeout from the time that stdin
+    // gives us EOF
+    exit(0);
+}
+
 static sigfunc *
 setup_signal(int signr, sigfunc *shandler) {
     struct sigaction nh, oh;
@@ -418,10 +425,18 @@ event_loop(void *ptr) {
 
         ret = select(xfd+1, &rmask, NULL, NULL, NULL);
         if(ret) {
-            if(dr != -2 && FD_ISSET(STDIN_FILENO, &rmask)) {
+            if(dr != -2 
+                    && FD_ISSET(STDIN_FILENO, &rmask)
+                    && dzen.timeout > 0) {
                 if((dr = read_stdin(NULL)) == -1)
                     return;
                 handle_newl();
+                // Set an alarm to kill us after the timeout
+                struct itimerval value;
+                memset(&value, 0, sizeof(value));
+                value.it_value.tv_sec = dzen.timeout / 1000;
+                value.it_value.tv_usec = 1000 * (dzen.timeout % 1000);
+                setitimer(ITIMER_REAL, &value, NULL);
             }
         }
         if(FD_ISSET(xfd, &rmask))
@@ -492,6 +507,7 @@ int
 main(int argc, char *argv[]) {
     int i;
     char *action_string = NULL;
+    char *endptr;
 
     /* default values */
     dzen.cur_line  = 0;
@@ -515,6 +531,15 @@ main(int argc, char *argv[]) {
         }
         else if(!strncmp(argv[i], "-p", 3)) {
             dzen.ispersistent = True;
+            // see if the next argument looks like a valid number
+            if (i + 1 < argc) {
+                dzen.timeout = strtol(argv[i + 1], &endptr, 10);
+                if (*endptr) {
+                    dzen.timeout = 0;
+                } else {
+                    i++;
+                }
+            }
         }
         else if(!strncmp(argv[i], "-ta", 4)) {
             if(++i < argc) dzen.title_win.alignment = argv[i][0];
@@ -557,7 +582,7 @@ main(int argc, char *argv[]) {
         else if(!strncmp(argv[i], "-v", 3)) 
             eprint("dzen-"VERSION", (C)opyright 2007 Robert Manea\n");
         else
-            eprint("usage: dzen2 [-v] [-p] [-m] [-ta <l|c|r>] [-sa <l|c|r>] [-tw <pixel>]\n"
+            eprint("usage: dzen2 [-v] [-p [timeout]] [-m] [-ta <l|c|r>] [-sa <l|c|r>] [-tw <pixel>]\n"
                     "             [-e <string>] [-x <pixel>] [-y <pixel>]  [-w <pixel>]    \n"
                     "             [-l <lines>]  [-fn <font>] [-bg <color>] [-fg <color>]   \n"
 #ifdef DZEN_XINERAMA
@@ -589,6 +614,8 @@ main(int argc, char *argv[]) {
         fprintf(stderr, "dzen: error hooking SIGUSR1\n");
     if(ev_table[sigusr2].isset && (setup_signal(SIGUSR2, catch_sigusr2) == SIG_ERR))
         fprintf(stderr, "dzen: error hooking SIGUSR2\n");
+    if(setup_signal(SIGALRM, catch_alrm) == SIG_ERR)
+        fprintf(stderr, "dzen: error hooking SIGALARM\n");
 
     set_alignment();
     x_create_windows();
