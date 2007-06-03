@@ -58,7 +58,7 @@ dzen accepts a couple of options:
     -l      lines, see (1)
     -e      events and actions, see (2)
     -m      menu, see (3)
-    -p      persistent, never time out
+    -p      persist EOF (optional timeout)
     -x      x position
     -y      y position
     -w      width
@@ -157,10 +157,11 @@ Supported actions:
     togglestick         toggle sticky state
     hide                hide title window
     unhide              unhide title window
-    scrollup            scroll slave window one line up
-    scrolldown          scroll slave window one line down
     raise               raise window to view (above all others)
     lower               lower window (behind all others)
+    scrollhome          show head of input
+    scrollup:n          scroll slave window n lines up   (default n=1)
+    scrolldown:n        scroll slave window n lines down (default n=1)
 
 
 Note:   If no events/actions are specified dzen defaults to:

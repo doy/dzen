@@ -201,7 +201,6 @@ a_uncollapse(char * opt[]){
         XMapRaised(dzen.dpy, dzen.slave_win.win);
         for(i=0; i < dzen.slave_win.max_lines; i++)
             XMapRaised(dzen.dpy, dzen.slave_win.line[i]);
-        //x_draw_body();
     }
     return 0;
 }
@@ -234,11 +233,10 @@ a_togglestick(char * opt[]) {
 
 int
 a_scrollup(char * opt[]) {
-    int n;
+    int n=1;
+
     if(opt[0]) 
         n = atoi(opt[0]);
-    if(!n)
-        n = 1;
 
     if(dzen.slave_win.max_lines 
             && dzen.slave_win.first_line_vis 
@@ -257,11 +255,10 @@ a_scrollup(char * opt[]) {
 
 int
 a_scrolldown(char * opt[]) {
-    int n;
+    int n=1;
+    
     if(opt[0]) 
         n = atoi(opt[0]);
-    if(!n)
-        n = 1;
 
     if(dzen.slave_win.max_lines
             && dzen.slave_win.last_line_vis >= dzen.slave_win.max_lines 
