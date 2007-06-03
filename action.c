@@ -231,8 +231,10 @@ a_togglestick(char * opt[]) {
     return 0;
 }
 
-void
+int
 scroll(int n) {
+    if(dzen.slave_win.last_line_vis < dzen.slave_win.max_lines)
+        return;
     if(dzen.slave_win.first_line_vis + n < 0) {
         dzen.slave_win.first_line_vis = 0;
         dzen.slave_win.last_line_vis = dzen.slave_win.max_lines;
