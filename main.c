@@ -536,7 +536,7 @@ main(int argc, char *argv[]) {
 		else if(!strncmp(argv[i], "-p", 3)) {
 			dzen.ispersistent = True;
 			if (i + 1 < argc) {
-				dzen.timeout = strtol(argv[i + 1], &endptr, 10);
+				dzen.timeout = strtoul(argv[i + 1], &endptr, 10);
 				*endptr ? dzen.timeout = 0 : i++;
 			}
 		}
