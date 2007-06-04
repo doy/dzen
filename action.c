@@ -1,5 +1,5 @@
 /* 
- * (C)opyright MMVII Robert Manea <rob dot manea  at gmail dot com>
+ * (C)opyright MMVII Robert Manea <rob dot manea at gmail dot com>
  * See LICENSE file for license details.
  */
 
@@ -231,7 +231,7 @@ a_togglestick(char * opt[]) {
     return 0;
 }
 
-int
+static int
 scroll(int n) {
     if(dzen.slave_win.last_line_vis < dzen.slave_win.max_lines)
         return;
@@ -334,7 +334,7 @@ a_menuexec(char * opt[]) {
     return 0;
 }
 
-int 
+int
 a_raise(char * opt[]) {
     XRaiseWindow(dzen.dpy, dzen.title_win.win);
 
@@ -343,7 +343,7 @@ a_raise(char * opt[]) {
     return 0;
 }
 
-int 
+int
 a_lower(char * opt[]) {
     XLowerWindow(dzen.dpy, dzen.title_win.win);
 
@@ -352,7 +352,7 @@ a_lower(char * opt[]) {
     return 0;
 }
 
-int 
+int
 a_scrollhome(char * opt[]) {
     if(dzen.slave_win.max_lines) {
         dzen.slave_win.first_line_vis = 0; 

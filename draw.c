@@ -155,7 +155,7 @@ drawheader(char * text) {
     dzen.y = 0;
     dzen.w = dzen.title_win.width;
     dzen.h = dzen.line_height;
-    
+
     if(text)
         drawtext(text, 0, -1, dzen.title_win.alignment);
     XCopyArea(dzen.dpy, dzen.title_win.drawable, dzen.title_win.win, 

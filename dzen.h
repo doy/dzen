@@ -1,7 +1,7 @@
 /* 
- * (C)opyright MMVII Robert Manea <rob dot manea  at gmail dot com>
- * See LICENSE file for license details.
- */
+* (C)opyright MMVII Robert Manea <rob dot manea  at gmail dot com>
+* See LICENSE file for license details.
+*/
 
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>

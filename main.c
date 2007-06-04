@@ -176,10 +176,10 @@ x_check_geometry(XRectangle si) {
         dzen.title_win.x = si.x;
     if (dzen.title_win.x < si.x)
         dzen.title_win.x = si.x;
-    
+
     if(!dzen.title_win.width)
         dzen.title_win.width = si.width;
-    
+
     if((dzen.title_win.x + dzen.title_win.width) > (si.x + si.width))
         dzen.title_win.width = si.width - (dzen.title_win.x - si.x);
     if(!dzen.slave_win.width) {
