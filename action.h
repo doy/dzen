@@ -1,8 +1,8 @@
 /*  
- *  (C)opyright MMVII Robert Manea <rob dot manea at gmail dot com>
- *  See LICENSE file for license details.
- *
- */
+*  (C)opyright MMVII Robert Manea <rob dot manea at gmail dot com>
+*  See LICENSE file for license details.
+*
+*/
 
 #define MAXEVENTS 32
 #define MAXACTIONS 256
@@ -13,36 +13,36 @@ typedef struct AS As;
 typedef struct EV Ev;
 
 enum ev_id {
-    /* internal events, should not be used by the user */
-    exposetitle, exposeslave,
-    /* startup, exit */
-    onstart, onexit,
-    /* mouse buttons */
-    button1, button2, button3, button4, button5,
-    /* entering/leaving windows */
-    entertitle, leavetitle, enterslave, leaveslave, 
-    /* external signals */
-    sigusr1, sigusr2
+	/* internal events, should not be used by the user */
+	exposetitle, exposeslave,
+	/* startup, exit */
+	onstart, onexit,
+	/* mouse buttons */
+	button1, button2, button3, button4, button5,
+	/* entering/leaving windows */
+	entertitle, leavetitle, enterslave, leaveslave, 
+	/* external signals */
+	sigusr1, sigusr2
 };
 
 struct event_lookup {
-    char *name;
-    int id;
+	char *name;
+	int id;
 };
 
 struct action_lookup {
-    char *name;
-    int (*handler)(char **);
+	char *name;
+	int (*handler)(char **);
 };
 
 struct AS {
-    char *options[MAXOPTIONS];
-    int (*handler)(char **);
+	char *options[MAXOPTIONS];
+	int (*handler)(char **);
 };
 
 struct EV {
-    int isset;
-    As *action[MAXACTIONS];
+	int isset;
+	As *action[MAXACTIONS];
 };
 
 extern Ev ev_table[MAXEVENTS];
@@ -74,5 +74,4 @@ int a_menuexec(char **);
 int a_raise(char **);
 int a_lower(char **);
 int a_scrollhome(char **);
-
 

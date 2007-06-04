@@ -28,74 +28,74 @@ typedef struct TW TWIN;
 typedef struct SW SWIN;
 
 struct Fnt {
-    XFontStruct *xfont;
-    XFontSet set;
-    int ascent;
-    int descent;
-    int height;
+	XFontStruct *xfont;
+	XFontSet set;
+	int ascent;
+	int descent;
+	int height;
 };
 
 /* title window */
 struct TW {
-    int x, y, width, height;
+	int x, y, width, height;
 
-    Window win;
-    Drawable drawable;
-    char alignment;
-    Bool ishidden;
+	Window win;
+	Drawable drawable;
+	char alignment;
+	Bool ishidden;
 };
 
 /* slave window */
 struct SW {
-    int x, y, width, height;
+	int x, y, width, height;
 
-    Window win;
-    Window *line;
-    Drawable drawable;
+	Window win;
+	Window *line;
+	Drawable drawable;
 
-    char *tbuf[BUF_SIZE];
-    int tcnt;
-    int max_lines;
-    int first_line_vis;
-    int last_line_vis;
-    int sel_line;
+	char *tbuf[BUF_SIZE];
+	int tcnt;
+	int max_lines;
+	int first_line_vis;
+	int last_line_vis;
+	int sel_line;
 
-    char alignment;
-    Bool ismenu;
-    Bool issticky;
-    Bool ismapped;
+	char alignment;
+	Bool ismenu;
+	Bool issticky;
+	Bool ismapped;
 };
 
 struct DZEN {
-    int x, y, w, h;
-    Bool running;
-    unsigned long norm[ColLast];
+	int x, y, w, h;
+	Bool running;
+	unsigned long norm[ColLast];
 
-    TWIN title_win;
-    SWIN slave_win;
+	TWIN title_win;
+	SWIN slave_win;
 
-    char *fnt;
-    char *bg;
-    char *fg;
-    int line_height;
+	char *fnt;
+	char *bg;
+	char *fg;
+	int line_height;
 
-    Display *dpy;
-    int screen;
-    unsigned int depth;
+	Display *dpy;
+	int screen;
+	unsigned int depth;
 
-    Visual *visual;
-    GC gc, rgc;
-    Fnt font;
+	Visual *visual;
+	GC gc, rgc;
+	Fnt font;
 
-    Bool ispersistent;
-    // The number of milliseconds to wait after an EOF from stdin before
-    // exiting. A value of 0 == forever
-    unsigned long timeout;
-    int cur_line;
-    int ret_val;
+	Bool ispersistent;
+	// The number of milliseconds to wait after an EOF from stdin before
+	// exiting. A value of 0 == forever
+	unsigned long timeout;
+	int cur_line;
+	int ret_val;
 
-    /* should always be 0 if DZEN_XINERAMA not defined */
-    int xinescreen;
+	/* should always be 0 if DZEN_XINERAMA not defined */
+	int xinescreen;
 };
 
 extern Dzen dzen;
@@ -105,9 +105,9 @@ void x_draw_body(void);
 
 /* draw.c */
 extern void drawtext(const char *text,
-        int reverse,
-        int line,
-        int aligne);	                        
+		int reverse,
+		int line,
+		int aligne);	                        
 extern unsigned long getcolor(const char *colstr);	/* returns color of colstr */
 extern void setfont(const char *fontstr);		    /* sets global font */
 extern unsigned int textw(const char *text);		/* returns width of text in px */
