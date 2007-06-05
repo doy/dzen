@@ -62,6 +62,7 @@ struct SW {
 
 	char alignment;
 	Bool ismenu;
+	Bool ishmenu;
 	Bool issticky;
 	Bool ismapped;
 };
@@ -88,8 +89,6 @@ struct DZEN {
 	Fnt font;
 
 	Bool ispersistent;
-	// The number of milliseconds to wait after an EOF from stdin before
-	// exiting. A value of 0 == forever
 	unsigned long timeout;
 	int cur_line;
 	int ret_val;

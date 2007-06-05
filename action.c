@@ -186,7 +186,9 @@ int
 int
 a_collapse(char * opt[]){
 	int i;
-	if(dzen.slave_win.max_lines && !dzen.slave_win.issticky) {
+	if(!dzen.slave_win.ishmenu 
+			&& dzen.slave_win.max_lines 
+			&& !dzen.slave_win.issticky) {
 		for(i=0; i < dzen.slave_win.max_lines; i++)
 			XUnmapWindow(dzen.dpy, dzen.slave_win.line[i]);
 		XUnmapWindow(dzen.dpy, dzen.slave_win.win);
@@ -197,10 +199,12 @@ a_collapse(char * opt[]){
 int
 a_uncollapse(char * opt[]){
 	int i;
-	if(dzen.slave_win.max_lines && !dzen.slave_win.issticky) {
+	if(!dzen.slave_win.ishmenu 
+			&& dzen.slave_win.max_lines 
+			&& !dzen.slave_win.issticky) {
 		XMapRaised(dzen.dpy, dzen.slave_win.win);
 		for(i=0; i < dzen.slave_win.max_lines; i++)
-			XMapRaised(dzen.dpy, dzen.slave_win.line[i]);
+			XMapWindow(dzen.dpy, dzen.slave_win.line[i]);
 	}
 	return 0;
 }
@@ -211,44 +215,47 @@ a_togglecollapse(char * opt[]){
 }
 
 int
-	a_stick(char * opt[]) {
-		if(dzen.slave_win.max_lines)
-			dzen.slave_win.issticky = True;
-		return 0;
-	}
+a_stick(char * opt[]) {
+	if(!dzen.slave_win.ishmenu 
+			&& dzen.slave_win.max_lines)
+		dzen.slave_win.issticky = True;
+	return 0;
+}
 
 int
-	a_unstick(char * opt[]) {
-		if(dzen.slave_win.max_lines)
-			dzen.slave_win.issticky = False;
-		return 0;
-	}
+a_unstick(char * opt[]) {
+	if(!dzen.slave_win.ishmenu 
+			&& dzen.slave_win.max_lines)
+		dzen.slave_win.issticky = False;
+	return 0;
+}
 
 int
-	a_togglestick(char * opt[]) {
-		if(dzen.slave_win.max_lines)
-			dzen.slave_win.issticky = dzen.slave_win.issticky ? False : True;
-		return 0;
+a_togglestick(char * opt[]) {
+	if(!dzen.slave_win.ishmenu
+			&& dzen.slave_win.max_lines)
+		dzen.slave_win.issticky = dzen.slave_win.issticky ? False : True;
+	return 0;
 	}
 
 static int
-	scroll(int n) {
-		if(dzen.slave_win.tcnt <= dzen.slave_win.max_lines)
-			return;
-		if(dzen.slave_win.first_line_vis + n < 0) {
-			dzen.slave_win.first_line_vis = 0;
-			dzen.slave_win.last_line_vis = dzen.slave_win.max_lines;
-		}
-		else if(dzen.slave_win.last_line_vis + n > dzen.slave_win.tcnt) {
-			dzen.slave_win.first_line_vis = dzen.slave_win.tcnt - dzen.slave_win.max_lines;
-			dzen.slave_win.last_line_vis = dzen.slave_win.tcnt;
-		} else {
-			dzen.slave_win.first_line_vis += n;
-			dzen.slave_win.last_line_vis  += n;
-		}
-
-		x_draw_body();
+scroll(int n) {
+	if(dzen.slave_win.tcnt <= dzen.slave_win.max_lines)
+		return;
+	if(dzen.slave_win.first_line_vis + n < 0) {
+		dzen.slave_win.first_line_vis = 0;
+		dzen.slave_win.last_line_vis = dzen.slave_win.max_lines;
 	}
+	else if(dzen.slave_win.last_line_vis + n > dzen.slave_win.tcnt) {
+		dzen.slave_win.first_line_vis = dzen.slave_win.tcnt - dzen.slave_win.max_lines;
+		dzen.slave_win.last_line_vis = dzen.slave_win.tcnt;
+	} else {
+		dzen.slave_win.first_line_vis += n;
+		dzen.slave_win.last_line_vis  += n;
+	}
+
+	x_draw_body();
+}
 
 int
 a_scrollup(char * opt[]) {

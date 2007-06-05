@@ -109,7 +109,7 @@ read_stdin(void *ptr) {
 			return -2;
 	} else {
 		while((n_off = chomp(buf, retbuf, n_off, n))) {
-			if(!dzen.cur_line || !dzen.slave_win.max_lines) {
+			if(!dzen.slave_win.ishmenu && !dzen.cur_line || !dzen.slave_win.max_lines) {
 				drawheader(retbuf);
 			}
 			else 
@@ -270,8 +270,42 @@ x_create_windows(void) {
 	dzen.title_win.drawable = XCreatePixmap(dzen.dpy, root, dzen.title_win.width, 
 			dzen.line_height, DefaultDepth(dzen.dpy, dzen.screen));
 
+	/* TODO: Smarter approach to window creation so we can reduce the
+	         size of this function
+	*/
+	/* vertical menu mode */
+	if(dzen.slave_win.ishmenu && dzen.slave_win.max_lines) {
+		dzen.slave_win.first_line_vis = 0;
+		dzen.slave_win.last_line_vis  = 0;
+		dzen.slave_win.issticky = False;
+		dzen.slave_win.y = dzen.title_win.y;
+
+		int entrywidth = dzen.slave_win.width / dzen.slave_win.max_lines;
+		
+
+		dzen.slave_win.win = XCreateWindow(dzen.dpy, root, 
+				dzen.slave_win.x, dzen.slave_win.y, dzen.slave_win.width, dzen.line_height, 0,
+				DefaultDepth(dzen.dpy, dzen.screen), CopyFromParent,
+				DefaultVisual(dzen.dpy, dzen.screen),
+				CWOverrideRedirect | CWBackPixmap | CWEventMask, &wa);
+
+		dzen.slave_win.drawable = XCreatePixmap(dzen.dpy, root, entrywidth, 
+				dzen.line_height, DefaultDepth(dzen.dpy, dzen.screen));
+
+		/* windows holding the lines */
+		dzen.slave_win.line = emalloc(sizeof(Window) * dzen.slave_win.max_lines);
+		for(i=0; i < dzen.slave_win.max_lines; i++) {
+			dzen.slave_win.line[i] = XCreateWindow(dzen.dpy, dzen.slave_win.win, 
+					i*entrywidth, 0, entrywidth, dzen.line_height, 0,
+					DefaultDepth(dzen.dpy, dzen.screen), CopyFromParent,
+					DefaultVisual(dzen.dpy, dzen.screen),
+					CWOverrideRedirect | CWBackPixmap | CWEventMask, &wa);
+		}
+		dzen.slave_win.width = entrywidth;
+	}
+
 	/* slave window */
-	if(dzen.slave_win.max_lines) {
+	if(!dzen.slave_win.ishmenu && dzen.slave_win.max_lines) {
 		dzen.slave_win.first_line_vis = 0;
 		dzen.slave_win.last_line_vis  = 0;
 		dzen.slave_win.issticky = False;
@@ -325,7 +359,7 @@ handle_xev(void) {
 	switch(ev.type) {
 		case Expose:
 			if(ev.xexpose.count == 0) {
-				if(ev.xexpose.window == dzen.title_win.win) 
+				if(!dzen.slave_win.ishmenu && ev.xexpose.window == dzen.title_win.win) 
 					drawheader(NULL);
 				if(ev.xexpose.window == dzen.slave_win.win)
 					do_action(exposeslave);
@@ -341,7 +375,7 @@ handle_xev(void) {
 					if(ev.xcrossing.window == dzen.slave_win.line[i])
 						x_highlight_line(i);
 			}
-			if(ev.xcrossing.window == dzen.title_win.win)
+			if(!dzen.slave_win.ishmenu && ev.xcrossing.window == dzen.title_win.win)
 				do_action(entertitle);
 			if(ev.xcrossing.window == dzen.slave_win.win)
 				do_action(enterslave);
@@ -353,7 +387,7 @@ handle_xev(void) {
 					if(ev.xcrossing.window == dzen.slave_win.line[i])
 						x_unhighlight_line(i);
 			}
-			if(ev.xcrossing.window == dzen.title_win.win)
+			if(!dzen.slave_win.ishmenu && ev.xcrossing.window == dzen.title_win.win)
 				do_action(leavetitle);
 			if(ev.xcrossing.window == dzen.slave_win.win) {
 				do_action(leaveslave);
@@ -535,8 +569,8 @@ main(int argc, char *argv[]) {
 		}
 		else if(!strncmp(argv[i], "-p", 3)) {
 			dzen.ispersistent = True;
-			if (i + 1 < argc) {
-				dzen.timeout = strtoul(argv[i + 1], &endptr, 10);
+			if (i+1 < argc) {
+				dzen.timeout = strtoul(argv[i+1], &endptr, 10);
 				*endptr ? dzen.timeout = 0 : i++;
 			}
 		}
@@ -548,6 +582,8 @@ main(int argc, char *argv[]) {
 		}
 		else if(!strncmp(argv[i], "-m", 3)) {
 			dzen.slave_win.ismenu = True;
+			if(i+1 < argc) 
+				dzen.slave_win.ishmenu = (argv[i+1][0] == 'h') ? ++i, True : False;
 		}
 		else if(!strncmp(argv[i], "-fn", 4)) {
 			if(++i < argc) dzen.fnt = argv[i];
@@ -581,11 +617,11 @@ main(int argc, char *argv[]) {
 		else if(!strncmp(argv[i], "-v", 3)) 
 			eprint("dzen-"VERSION", (C)opyright 2007 Robert Manea\n");
 		else
-			eprint("usage: dzen2 [-v] [-p [timeout]] [-m] [-ta <l|c|r>] [-sa <l|c|r>] [-tw <pixel>]\n"
-					"             [-e <string>] [-x <pixel>] [-y <pixel>]  [-w <pixel>]    \n"
-					"             [-l <lines>]  [-fn <font>] [-bg <color>] [-fg <color>]   \n"
+			eprint("usage: dzen2 [-v] [-p [seconds]] [-m [v|h]] [-ta <l|c|r>] [-sa <l|c|r>]\n"
+                   "             [-x <pixel>] [-y <pixel>] [-w <pixel>] [-tw <pixel>]      \n"
+				   "             [-e <string>] [-l <lines>]  [-fn <font>] [-bg <color>] [-fg <color>]\n"
 #ifdef DZEN_XINERAMA
-					"             [-xs <screen>]\n"
+				   "             [-xs <screen>]\n"
 #endif
 				  );
 
@@ -617,8 +653,20 @@ main(int argc, char *argv[]) {
 		fprintf(stderr, "dzen: error hooking SIGALARM\n");
 
 	set_alignment();
+	
+	if(dzen.slave_win.ishmenu &&
+			!dzen.slave_win.max_lines)
+		dzen.slave_win.max_lines = 1;
+
 	x_create_windows();
-	x_map_window(dzen.title_win.win);
+	
+	if(!dzen.slave_win.ishmenu)
+		x_map_window(dzen.title_win.win);
+	else {
+		XMapRaised(dzen.dpy, dzen.slave_win.win);
+		for(i=0; i < dzen.slave_win.max_lines; i++)
+			XMapWindow(dzen.dpy, dzen.slave_win.line[i]);
+	}
 
 	do_action(onstart);
 
