@@ -270,9 +270,11 @@ x_create_windows(void) {
 	dzen.title_win.drawable = XCreatePixmap(dzen.dpy, root, dzen.title_win.width, 
 			dzen.line_height, DefaultDepth(dzen.dpy, dzen.screen));
 
-	/* TODO: Smarter approach to window creation so we can reduce the
-	         size of this function
+	/* TODO: For next release
+	         Smarter approach to window creation so we can reduce the
+	         size of this function. 
 	*/
+
 	/* vertical menu mode */
 	if(dzen.slave_win.ishmenu && dzen.slave_win.max_lines) {
 		dzen.slave_win.first_line_vis = 0;
@@ -280,28 +282,28 @@ x_create_windows(void) {
 		dzen.slave_win.issticky = False;
 		dzen.slave_win.y = dzen.title_win.y;
 
-		int entrywidth = dzen.slave_win.width / dzen.slave_win.max_lines;
 		
-
 		dzen.slave_win.win = XCreateWindow(dzen.dpy, root, 
 				dzen.slave_win.x, dzen.slave_win.y, dzen.slave_win.width, dzen.line_height, 0,
 				DefaultDepth(dzen.dpy, dzen.screen), CopyFromParent,
 				DefaultVisual(dzen.dpy, dzen.screen),
 				CWOverrideRedirect | CWBackPixmap | CWEventMask, &wa);
+		
+		int ew = dzen.slave_win.width / dzen.slave_win.max_lines;
+		int r = dzen.slave_win.width - ew * dzen.slave_win.max_lines;
 
-		dzen.slave_win.drawable = XCreatePixmap(dzen.dpy, root, entrywidth, 
+		dzen.slave_win.drawable = XCreatePixmap(dzen.dpy, root, ew+r, 
 				dzen.line_height, DefaultDepth(dzen.dpy, dzen.screen));
 
 		/* windows holding the lines */
 		dzen.slave_win.line = emalloc(sizeof(Window) * dzen.slave_win.max_lines);
-		for(i=0; i < dzen.slave_win.max_lines; i++) {
+		for(i=0; i < dzen.slave_win.max_lines; i++)
 			dzen.slave_win.line[i] = XCreateWindow(dzen.dpy, dzen.slave_win.win, 
-					i*entrywidth, 0, entrywidth, dzen.line_height, 0,
+					i*ew, 0, (i == dzen.slave_win.max_lines-1) ? ew+r : ew, dzen.line_height, 0,
 					DefaultDepth(dzen.dpy, dzen.screen), CopyFromParent,
 					DefaultVisual(dzen.dpy, dzen.screen),
 					CWOverrideRedirect | CWBackPixmap | CWEventMask, &wa);
-		}
-		dzen.slave_win.width = entrywidth;
+		dzen.slave_win.width = ew+r;
 	}
 
 	/* slave window */
