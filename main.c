@@ -270,12 +270,11 @@ x_create_windows(void) {
 	dzen.title_win.drawable = XCreatePixmap(dzen.dpy, root, dzen.title_win.width, 
 			dzen.line_height, DefaultDepth(dzen.dpy, dzen.screen));
 
-	/* TODO: For next release
-	         Smarter approach to window creation so we can reduce the
+	/* TODO: Smarter approach to window creation so we can reduce the
 	         size of this function. 
 	*/
 
-	/* vertical menu mode */
+	/* horizontal menu mode */
 	if(dzen.slave_win.ishmenu && dzen.slave_win.max_lines) {
 		dzen.slave_win.first_line_vis = 0;
 		dzen.slave_win.last_line_vis  = 0;
@@ -306,7 +305,7 @@ x_create_windows(void) {
 		dzen.slave_win.width = ew+r;
 	}
 
-	/* slave window */
+	/* vertical slave window */
 	if(!dzen.slave_win.ishmenu && dzen.slave_win.max_lines) {
 		dzen.slave_win.first_line_vis = 0;
 		dzen.slave_win.last_line_vis  = 0;
@@ -432,7 +431,7 @@ handle_newl(void) {
 	if(dzen.slave_win.max_lines && (dzen.slave_win.tcnt > last_cnt)) {
 		if (XGetWindowAttributes(dzen.dpy, dzen.slave_win.win, &wa),
 				wa.map_state != IsUnmapped
-				/* scroll only if we're currently viewing the last line of input */
+				/* autoscroll only if we're currently viewing the last line of input */
 				&& (dzen.slave_win.last_line_vis == last_cnt)) {
 			dzen.slave_win.first_line_vis = 0;
 			dzen.slave_win.last_line_vis = 0;
