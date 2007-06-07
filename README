@@ -60,7 +60,7 @@ dzen accepts a couple of options:
     -sa     alignment of slave window, see "-ta"
     -l      lines, see (1)
     -e      events and actions, see (2)
-    -m      menu, see (3)
+    -m      menu mode, see (3)
     -p      persist EOF (optional timeout in seconds)
     -x      x position
     -y      y position
@@ -184,13 +184,28 @@ Note:   If no events/actions are specified dzen defaults to:
 
 
 (3) Option '-m', Menu
---------------------
+---------------------
 
-If menu mode is activated the line under the pointer will be
-highlighted. 
+Dzen provides two menu modes, vertical and horizontal menus. You can
+access these modes by adding 'v'(ertical) or 'h'(horizontal) to the 
+'-m' option. If nothing is specified dzen defaults to vertical menus.
+
+Vertical menu, both invocations beeing equivalent:      
+    dzen2 -p -l 4 -m < file
+    dzen2 -p -l 4 -m v < file
+
+Horizontal menu:    
+    dzen2 -p -l 4 -m h < file
+
+
 All actions beginning with "menu" work on the selected menu entry.
 
 Note:   Menu mode only makes sense if '-l <n>' is specified!
+
+        Horizontal menus have no title window, so all actions
+        affecting the title window will be silently discarded
+		in this mode.
+
 
 
 
