@@ -1,5 +1,5 @@
 # dzen version
-VERSION = 0.3.5
+VERSION = 0.4.0
 
 # Customize below to fit your system
 
