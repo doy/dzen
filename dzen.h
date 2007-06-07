@@ -9,7 +9,7 @@
 #include <X11/extensions/Xinerama.h>
 #endif
 
-#define FONT	    "-*-fixed-*-*-*-*-*-*-*-*-*-*-*-*"
+#define FONT		"-*-fixed-*-*-*-*-*-*-*-*-*-*-*-*"
 #define BGCOLOR		"#ab0b0b"
 #define FGCOLOR		"#efefef"
 

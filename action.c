@@ -97,7 +97,7 @@ free_ev_table(void) {
 	}
 }
 
-	void
+void
 fill_ev_table(char *input)
 {
 	char *str1, *str2, *str3, *str4,
@@ -284,7 +284,11 @@ a_scrolldown(char * opt[]) {
 int
 a_hide(char * opt[]) {
 	if(!dzen.title_win.ishidden) {
-		XResizeWindow(dzen.dpy, dzen.title_win.win, dzen.title_win.width, 1);
+		if(!dzen.slave_win.ishmenu)
+			XResizeWindow(dzen.dpy, dzen.title_win.win, dzen.title_win.width, 1);
+		else
+			XResizeWindow(dzen.dpy, dzen.slave_win.win, dzen.title_win.width, 1);
+
 		dzen.title_win.ishidden = True;
 	}
 	return 0;
@@ -293,7 +297,11 @@ a_hide(char * opt[]) {
 int
 a_unhide(char * opt[]) {
 	if(dzen.title_win.ishidden) {
-		XResizeWindow(dzen.dpy, dzen.title_win.win, dzen.title_win.width, dzen.line_height);
+		if(!dzen.slave_win.ishmenu)
+			XResizeWindow(dzen.dpy, dzen.title_win.win, dzen.title_win.width, dzen.line_height);
+		else
+			XResizeWindow(dzen.dpy, dzen.slave_win.win, dzen.title_win.width, dzen.line_height);
+
 		dzen.title_win.ishidden = False;
 	}
 	return 0;

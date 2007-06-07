@@ -24,6 +24,29 @@ static int last_cnt = 0;
 typedef void sigfunc(int);
 
 
+static void 
+clean_up(void) {
+	int i;
+
+	free_ev_table();
+	if(dzen.font.set)
+		XFreeFontSet(dzen.dpy, dzen.font.set);
+	else
+		XFreeFont(dzen.dpy, dzen.font.xfont);
+
+	XFreePixmap(dzen.dpy, dzen.title_win.drawable);
+	if(dzen.slave_win.max_lines) {
+		XFreePixmap(dzen.dpy, dzen.slave_win.drawable);
+		for(i=0; i < dzen.slave_win.max_lines; i++) 
+			XDestroyWindow(dzen.dpy, dzen.slave_win.line[i]);
+		free(dzen.slave_win.line);
+		XDestroyWindow(dzen.dpy, dzen.slave_win.win);
+	}
+	XFreeGC(dzen.dpy, dzen.gc);
+	XDestroyWindow(dzen.dpy, dzen.title_win.win);
+	XCloseDisplay(dzen.dpy);
+}
+
 static void
 catch_sigusr1() {
 	do_action(sigusr1);
@@ -42,8 +65,7 @@ catch_sigterm() {
 static void
 catch_alrm() {
 	do_action(onexit);
-	/* TODO: that's quite rude, we need 
-	   a better way to do this  */
+	clean_up();
 	exit(0);
 }
 
@@ -271,69 +293,76 @@ x_create_windows(void) {
 			dzen.line_height, DefaultDepth(dzen.dpy, dzen.screen));
 
 	/* TODO: Smarter approach to window creation so we can reduce the
-	         size of this function. 
-	*/
+	 *       size of this function. 
+	 */
 
 	/* horizontal menu mode */
-	if(dzen.slave_win.ishmenu && dzen.slave_win.max_lines) {
+	if(dzen.slave_win.max_lines) {
 		dzen.slave_win.first_line_vis = 0;
 		dzen.slave_win.last_line_vis  = 0;
-		dzen.slave_win.issticky = False;
-		dzen.slave_win.y = dzen.title_win.y;
 
-		
-		dzen.slave_win.win = XCreateWindow(dzen.dpy, root, 
-				dzen.slave_win.x, dzen.slave_win.y, dzen.slave_win.width, dzen.line_height, 0,
-				DefaultDepth(dzen.dpy, dzen.screen), CopyFromParent,
-				DefaultVisual(dzen.dpy, dzen.screen),
-				CWOverrideRedirect | CWBackPixmap | CWEventMask, &wa);
-		
-		int ew = dzen.slave_win.width / dzen.slave_win.max_lines;
-		int r = dzen.slave_win.width - ew * dzen.slave_win.max_lines;
+		if(dzen.slave_win.ishmenu) {
+			/* calculate width of menuentrieѕ, this is a very simple
+			 * approach but works well for general cases.
+			 */
+			int ew = dzen.slave_win.width / dzen.slave_win.max_lines;
+			int r = dzen.slave_win.width - ew * dzen.slave_win.max_lines;
+			dzen.slave_win.issticky = True;
+			dzen.slave_win.y = dzen.title_win.y;
 
-		dzen.slave_win.drawable = XCreatePixmap(dzen.dpy, root, ew+r, 
-				dzen.line_height, DefaultDepth(dzen.dpy, dzen.screen));
-
-		/* windows holding the lines */
-		dzen.slave_win.line = emalloc(sizeof(Window) * dzen.slave_win.max_lines);
-		for(i=0; i < dzen.slave_win.max_lines; i++)
-			dzen.slave_win.line[i] = XCreateWindow(dzen.dpy, dzen.slave_win.win, 
-					i*ew, 0, (i == dzen.slave_win.max_lines-1) ? ew+r : ew, dzen.line_height, 0,
+			dzen.slave_win.win = XCreateWindow(dzen.dpy, root, 
+					dzen.slave_win.x, dzen.slave_win.y, dzen.slave_win.width, dzen.line_height, 0,
 					DefaultDepth(dzen.dpy, dzen.screen), CopyFromParent,
 					DefaultVisual(dzen.dpy, dzen.screen),
 					CWOverrideRedirect | CWBackPixmap | CWEventMask, &wa);
-		dzen.slave_win.width = ew+r;
-	}
 
-	/* vertical slave window */
-	if(!dzen.slave_win.ishmenu && dzen.slave_win.max_lines) {
-		dzen.slave_win.first_line_vis = 0;
-		dzen.slave_win.last_line_vis  = 0;
-		dzen.slave_win.issticky = False;
-		dzen.slave_win.y = dzen.title_win.y + dzen.line_height;
+			dzen.slave_win.drawable = XCreatePixmap(dzen.dpy, root, ew+r, 
+					dzen.line_height, DefaultDepth(dzen.dpy, dzen.screen));
 
-		if(dzen.title_win.y + dzen.line_height*dzen.slave_win.max_lines > si.y + si.height)
-			dzen.slave_win.y = (dzen.title_win.y - dzen.line_height) - dzen.line_height*(dzen.slave_win.max_lines) + dzen.line_height;
+			/* windows holding the lines */
+			dzen.slave_win.line = emalloc(sizeof(Window) * dzen.slave_win.max_lines);
+			for(i=0; i < dzen.slave_win.max_lines; i++)
+				dzen.slave_win.line[i] = XCreateWindow(dzen.dpy, dzen.slave_win.win, 
+						i*ew, 0, (i == dzen.slave_win.max_lines-1) ? ew+r : ew, dzen.line_height, 0,
+						DefaultDepth(dzen.dpy, dzen.screen), CopyFromParent,
+						DefaultVisual(dzen.dpy, dzen.screen),
+						CWOverrideRedirect | CWBackPixmap | CWEventMask, &wa);
 
-		dzen.slave_win.win = XCreateWindow(dzen.dpy, root, 
-				dzen.slave_win.x, dzen.slave_win.y, dzen.slave_win.width, dzen.slave_win.max_lines * dzen.line_height, 0,
-				DefaultDepth(dzen.dpy, dzen.screen), CopyFromParent,
-				DefaultVisual(dzen.dpy, dzen.screen),
-				CWOverrideRedirect | CWBackPixmap | CWEventMask, &wa);
-
-		dzen.slave_win.drawable = XCreatePixmap(dzen.dpy, root, dzen.slave_win.width, 
-				dzen.line_height, DefaultDepth(dzen.dpy, dzen.screen));
-
-		/* windows holding the lines */
-		dzen.slave_win.line = emalloc(sizeof(Window) * dzen.slave_win.max_lines);
-		for(i=0; i < dzen.slave_win.max_lines; i++) {
-			dzen.slave_win.line[i] = XCreateWindow(dzen.dpy, dzen.slave_win.win, 
-					0, i*dzen.line_height, dzen.slave_win.width, dzen.line_height, 0,
-					DefaultDepth(dzen.dpy, dzen.screen), CopyFromParent,
-					DefaultVisual(dzen.dpy, dzen.screen),
-					CWOverrideRedirect | CWBackPixmap | CWEventMask, &wa);
+			/* As we don't use the title window in this mode,
+			 * we reuse it's width value 
+			 */
+			dzen.title_win.width = dzen.slave_win.width;
+			dzen.slave_win.width = ew+r;
 		}
 
+		/* vertical slave window */
+		else {
+			dzen.slave_win.issticky = False;
+			dzen.slave_win.y = dzen.title_win.y + dzen.line_height;
+
+			if(dzen.title_win.y + dzen.line_height*dzen.slave_win.max_lines > si.y + si.height)
+				dzen.slave_win.y = (dzen.title_win.y - dzen.line_height) - dzen.line_height*(dzen.slave_win.max_lines) + dzen.line_height;
+
+			dzen.slave_win.win = XCreateWindow(dzen.dpy, root, 
+					dzen.slave_win.x, dzen.slave_win.y, dzen.slave_win.width, dzen.slave_win.max_lines * dzen.line_height, 0,
+					DefaultDepth(dzen.dpy, dzen.screen), CopyFromParent,
+					DefaultVisual(dzen.dpy, dzen.screen),
+					CWOverrideRedirect | CWBackPixmap | CWEventMask, &wa);
+
+			dzen.slave_win.drawable = XCreatePixmap(dzen.dpy, root, dzen.slave_win.width, 
+					dzen.line_height, DefaultDepth(dzen.dpy, dzen.screen));
+
+			/* windows holding the lines */
+			dzen.slave_win.line = emalloc(sizeof(Window) * dzen.slave_win.max_lines);
+			for(i=0; i < dzen.slave_win.max_lines; i++) {
+				dzen.slave_win.line[i] = XCreateWindow(dzen.dpy, dzen.slave_win.win, 
+						0, i*dzen.line_height, dzen.slave_win.width, dzen.line_height, 0,
+						DefaultDepth(dzen.dpy, dzen.screen), CopyFromParent,
+						DefaultVisual(dzen.dpy, dzen.screen),
+						CWOverrideRedirect | CWBackPixmap | CWEventMask, &wa);
+			}
+
+		}
 	}
 	/* normal GC */
 	dzen.gc  = XCreateGC(dzen.dpy, root, 0, 0);
@@ -360,7 +389,8 @@ handle_xev(void) {
 	switch(ev.type) {
 		case Expose:
 			if(ev.xexpose.count == 0) {
-				if(!dzen.slave_win.ishmenu && ev.xexpose.window == dzen.title_win.win) 
+				if(!dzen.slave_win.ishmenu
+						&& ev.xexpose.window == dzen.title_win.win) 
 					drawheader(NULL);
 				if(ev.xexpose.window == dzen.slave_win.win)
 					do_action(exposeslave);
@@ -376,7 +406,8 @@ handle_xev(void) {
 					if(ev.xcrossing.window == dzen.slave_win.line[i])
 						x_highlight_line(i);
 			}
-			if(!dzen.slave_win.ishmenu && ev.xcrossing.window == dzen.title_win.win)
+			if(!dzen.slave_win.ishmenu 
+					&& ev.xcrossing.window == dzen.title_win.win)
 				do_action(entertitle);
 			if(ev.xcrossing.window == dzen.slave_win.win)
 				do_action(enterslave);
@@ -388,7 +419,8 @@ handle_xev(void) {
 					if(ev.xcrossing.window == dzen.slave_win.line[i])
 						x_unhighlight_line(i);
 			}
-			if(!dzen.slave_win.ishmenu && ev.xcrossing.window == dzen.title_win.win)
+			if(!dzen.slave_win.ishmenu 
+					&& ev.xcrossing.window == dzen.title_win.win)
 				do_action(leavetitle);
 			if(ev.xcrossing.window == dzen.slave_win.win) {
 				do_action(leaveslave);
@@ -484,33 +516,10 @@ event_loop(void *ptr) {
 	return; 
 }
 
-static void 
-clean_up(void) {
-	int i;
 
-	free_ev_table();
-	if(dzen.font.set)
-		XFreeFontSet(dzen.dpy, dzen.font.set);
-	else
-		XFreeFont(dzen.dpy, dzen.font.xfont);
-
-	XFreePixmap(dzen.dpy, dzen.title_win.drawable);
-	if(dzen.slave_win.max_lines) {
-		XFreePixmap(dzen.dpy, dzen.slave_win.drawable);
-		for(i=0; i < dzen.slave_win.max_lines; i++) 
-			XDestroyWindow(dzen.dpy, dzen.slave_win.line[i]);
-		free(dzen.slave_win.line);
-		XDestroyWindow(dzen.dpy, dzen.slave_win.win);
-	}
-	XFreeGC(dzen.dpy, dzen.gc);
-	XDestroyWindow(dzen.dpy, dzen.title_win.win);
-	XCloseDisplay(dzen.dpy);
-}
-
-	static void
-set_alignment(void)
-{
-	if(dzen.title_win.alignment) {
+static void
+set_alignment(void) {
+	if(dzen.title_win.alignment) 
 		switch(dzen.title_win.alignment) {
 			case 'l': 
 				dzen.title_win.alignment = ALIGNLEFT;
@@ -524,8 +533,7 @@ set_alignment(void)
 			default:
 				dzen.title_win.alignment = ALIGNCENTER;
 		}
-	}
-	if(dzen.slave_win.alignment) {
+	if(dzen.slave_win.alignment)
 		switch(dzen.slave_win.alignment) {
 			case 'l': 
 				dzen.slave_win.alignment = ALIGNLEFT;
@@ -539,7 +547,6 @@ set_alignment(void)
 			default:
 				dzen.slave_win.alignment = ALIGNLEFT;
 		}
-	}
 }
 
 int
