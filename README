@@ -204,7 +204,7 @@ Note:   Menu mode only makes sense if '-l <n>' is specified!
 
         Horizontal menus have no title window, so all actions
         affecting the title window will be silently discarded
-		in this mode.
+        in this mode.
 
 
 
@@ -250,14 +250,14 @@ Examples:
     echo "Applications" | dzen2 -l 4 -p -m < menufile
 
 
-* Menu without any files:
-    {echo Menu; echo -e "xterm\nxclock\nxeyes\nxfontsel"} | dzen2 -l 4 -m -p
+* Horizontal menu without any files:
+    {echo Menu; echo -e "xterm\nxclock\nxeyes\nxfontsel"} | dzen2 -l 4 -m h -p
 
 
 * Extract PIDs from the process table:
 
     {echo Procs; ps -a} | dzen2 -m -l 12 -p \
-    -e 'button1=menuprint;button3=exit; button4=scrollup:3;button5=scrolldown:3;entertitle=uncollapse;leaveslave=collapse' \
+    -e 'button1=menuprint;button3=exit;button4=scrollup:3;button5=scrolldown:3;entertitle=uncollapse;leaveslave=collapse' \
             | awk '{print $1}'
 
 
