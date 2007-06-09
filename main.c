@@ -131,10 +131,10 @@ read_stdin(void *ptr) {
 			return -2;
 	} else {
 		while((n_off = chomp(buf, retbuf, n_off, n))) {
-			if( !dzen.slave_win.ishmenu 
+			if(!dzen.slave_win.ishmenu 
 					&& dzen.tsupdate 
 					&& dzen.slave_win.max_lines 
-					&& ( (dzen.cur_line == 0) || !(dzen.cur_line % (dzen.slave_win.max_lines+1))))
+					&& ((dzen.cur_line == 0) || !(dzen.cur_line % (dzen.slave_win.max_lines+1))))
 				drawheader(retbuf);
 			else if(!dzen.slave_win.ishmenu 
 					&& !dzen.tsupdate 
@@ -302,11 +302,11 @@ x_create_windows(void) {
 	 *       size of this function. 
 	 */
 
-	/* horizontal menu mode */
 	if(dzen.slave_win.max_lines) {
 		dzen.slave_win.first_line_vis = 0;
 		dzen.slave_win.last_line_vis  = 0;
 
+		/* horizontal menu mode */
 		if(dzen.slave_win.ishmenu) {
 			/* calculate width of menuentrieѕ, this is a very simple
 			 * approach but works well for general cases.
@@ -636,7 +636,7 @@ main(int argc, char *argv[]) {
 			eprint("dzen-"VERSION", (C)opyright 2007 Robert Manea\n");
 		else
 			eprint("usage: dzen2 [-v] [-p [seconds]] [-m [v|h]] [-ta <l|c|r>] [-sa <l|c|r>]\n"
-                   "             [-x <pixel>] [-y <pixel>] [-w <pixel>] [-tw <pixel>]      \n"
+                   "             [-x <pixel>] [-y <pixel>] [-w <pixel>] [-tw <pixel>] [-u] \n"
 				   "             [-e <string>] [-l <lines>]  [-fn <font>] [-bg <color>] [-fg <color>]\n"
 #ifdef DZEN_XINERAMA
 				   "             [-xs <screen>]\n"
