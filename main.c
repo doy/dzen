@@ -131,9 +131,15 @@ read_stdin(void *ptr) {
 			return -2;
 	} else {
 		while((n_off = chomp(buf, retbuf, n_off, n))) {
-			if(!dzen.slave_win.ishmenu && !dzen.cur_line || !dzen.slave_win.max_lines) {
+			if( !dzen.slave_win.ishmenu 
+					&& dzen.tsupdate 
+					&& dzen.slave_win.max_lines 
+					&& ( (dzen.cur_line == 0) || !(dzen.cur_line % (dzen.slave_win.max_lines+1))))
 				drawheader(retbuf);
-			}
+			else if(!dzen.slave_win.ishmenu 
+					&& !dzen.tsupdate 
+					&& !dzen.cur_line || !dzen.slave_win.max_lines)
+				drawheader(retbuf);
 			else 
 				drawbody(retbuf);
 			dzen.cur_line++;
@@ -569,11 +575,15 @@ main(int argc, char *argv[]) {
 	dzen.slave_win.max_lines  = 0;
 	dzen.running = True;
 	dzen.xinescreen = 0;
+	dzen.tsupdate = 0;
 
 	/* cmdline args */
 	for(i = 1; i < argc; i++)
 		if(!strncmp(argv[i], "-l", 3)){
 			if(++i < argc) dzen.slave_win.max_lines = atoi(argv[i]);
+		}
+		else if(!strncmp(argv[i], "-u", 3)){
+			dzen.tsupdate = True;
 		}
 		else if(!strncmp(argv[i], "-p", 3)) {
 			dzen.ispersistent = True;

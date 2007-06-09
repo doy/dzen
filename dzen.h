@@ -89,6 +89,7 @@ struct DZEN {
 	Fnt font;
 
 	Bool ispersistent;
+	Bool tsupdate;
 	unsigned long timeout;
 	int cur_line;
 	int ret_val;
