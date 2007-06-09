@@ -19,7 +19,7 @@ textnw(const char *text, unsigned int len) {
 }
 
 
-void 
+void
 drawtext(const char *text, int reverse, int line, int align) {
 	int x, y, w, h;
 	static char buf[1024];
@@ -30,10 +30,12 @@ drawtext(const char *text, int reverse, int line, int align) {
 
 
 	mgc = reverse ? dzen.gc : dzen.rgc;
+	
 	if(line == -1)  /* title window */
 		XFillRectangles(dzen.dpy, dzen.title_win.drawable, mgc, &r, 1);
 	else            /* slave window */
-		XFillRectangles(dzen.dpy, dzen.slave_win.drawable, mgc, &r, 1);
+		XFillRectangles(dzen.dpy, dzen.slave_win.drawable[line], mgc, &r, 1);
+	
 
 	if(!text)
 		return;
@@ -77,10 +79,10 @@ drawtext(const char *text, int reverse, int line, int align) {
 	mgc = reverse ? dzen.rgc : dzen.gc;
 	if(dzen.font.set) {
 		if(line == -1) 
-			XmbDrawString(dzen.dpy, dzen.title_win.drawable, dzen.font.set,
+	 		XmbDrawString(dzen.dpy, dzen.title_win.drawable, dzen.font.set,
 					mgc, x, y, buf, len);
 		else
-			XmbDrawString(dzen.dpy, dzen.slave_win.drawable, dzen.font.set,
+			XmbDrawString(dzen.dpy, dzen.slave_win.drawable[line], dzen.font.set,
 					mgc, x, y, buf, len);
 	}
 	else {
@@ -88,7 +90,7 @@ drawtext(const char *text, int reverse, int line, int align) {
 		XChangeGC(dzen.dpy, mgc, GCForeground | GCFont, &gcv);
 
 		if(line != -1)
-			XDrawString(dzen.dpy, dzen.slave_win.drawable,
+			XDrawString(dzen.dpy, dzen.slave_win.drawable[line],
 					mgc, x, y, buf, len);
 		else
 			XDrawString(dzen.dpy, dzen.title_win.drawable, 

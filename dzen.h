@@ -51,7 +51,7 @@ struct SW {
 
 	Window win;
 	Window *line;
-	Drawable drawable;
+	Drawable *drawable;
 
 	char *tbuf[BUF_SIZE];
 	int tcnt;
