@@ -17,7 +17,8 @@
 #define ALIGNLEFT   1
 #define ALIGNRIGHT  2
 
-#define BUF_SIZE    4096
+#define MIN_BUF_SIZE   512
+#define MAX_LINE_LEN   512
 
 /* gui data structures */
 enum { ColFG, ColBG, ColLast };
@@ -53,8 +54,12 @@ struct SW {
 	Window *line;
 	Drawable *drawable;
 
-	char *tbuf[BUF_SIZE];
+	//char *tbuf[BUF_SIZE];
+	/* input buffer */
+	char **tbuf;
+	int tsize;
 	int tcnt;
+
 	int max_lines;
 	int first_line_vis;
 	int last_line_vis;

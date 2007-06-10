@@ -113,15 +113,19 @@ chomp(char *inbuf, char *outbuf, int start, int len) {
 void
 free_buffer(void) {
 	int i;
-	for(i=0; i<BUF_SIZE; i++)
+	for(i=0; i<dzen.slave_win.tsize; i++) {
 		free(dzen.slave_win.tbuf[i]);
-	dzen.slave_win.tcnt = 0;
-	last_cnt = 0;
+		dzen.slave_win.tbuf[i] = NULL;
+	}
+	dzen.slave_win.tcnt = 
+		dzen.slave_win.last_line_vis = 
+		last_cnt = 0;
 }
 
 static int 
 read_stdin(void *ptr) {
-	char buf[1024], retbuf[2048];
+	char buf[MAX_LINE_LEN], 
+		 retbuf[MAX_LINE_LEN];
 	ssize_t n, n_off=0;
 
 	if(!(n = read(STDIN_FILENO, buf, sizeof buf))) {
@@ -139,7 +143,7 @@ read_stdin(void *ptr) {
 				drawheader(retbuf);
 			else if(!dzen.slave_win.ishmenu 
 					&& !dzen.tsupdate 
-					&& !dzen.cur_line || !dzen.slave_win.max_lines)
+					&& ((dzen.cur_line == 0) || !dzen.slave_win.max_lines))
 				drawheader(retbuf);
 			else 
 				drawbody(retbuf);
@@ -553,6 +557,19 @@ set_alignment(void) {
 		}
 }
 
+static void
+init_input_buffer() {
+	
+	if(MIN_BUF_SIZE % dzen.slave_win.max_lines)
+		dzen.slave_win.tsize = MIN_BUF_SIZE + (dzen.slave_win.max_lines - (MIN_BUF_SIZE % dzen.slave_win.max_lines));
+	else
+		dzen.slave_win.tsize = MIN_BUF_SIZE;
+
+	printf("Buffer: %d\n", dzen.slave_win.tsize);
+	fflush(stdout);
+	dzen.slave_win.tbuf = emalloc(dzen.slave_win.tsize);
+}
+
 int
 main(int argc, char *argv[]) {
 	int i;
@@ -578,7 +595,10 @@ main(int argc, char *argv[]) {
 	/* cmdline args */
 	for(i = 1; i < argc; i++)
 		if(!strncmp(argv[i], "-l", 3)){
-			if(++i < argc) dzen.slave_win.max_lines = atoi(argv[i]);
+			if(++i < argc) {
+				dzen.slave_win.max_lines = atoi(argv[i]);
+				init_input_buffer();
+			}
 		}
 		else if(!strncmp(argv[i], "-u", 3)){
 			dzen.tsupdate = True;

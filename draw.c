@@ -165,11 +165,11 @@ drawheader(char * text) {
 }
 
 void
-	drawbody(char * text) {
-		if(dzen.slave_win.tcnt >= BUF_SIZE) 
-			free_buffer();
-		if(dzen.slave_win.tcnt < BUF_SIZE) {
-			dzen.slave_win.tbuf[dzen.slave_win.tcnt] = estrdup(text);
-			dzen.slave_win.tcnt++;
-		}
+drawbody(char * text) {
+	if(dzen.slave_win.tcnt == dzen.slave_win.tsize) 
+		free_buffer();
+	if(dzen.slave_win.tcnt < dzen.slave_win.tsize) {
+		dzen.slave_win.tbuf[dzen.slave_win.tcnt] = estrdup(text);
+		dzen.slave_win.tcnt++;
 	}
+}
