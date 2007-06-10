@@ -598,7 +598,8 @@ main(int argc, char *argv[]) {
 			}
 		}
 		else if(!strncmp(argv[i], "-u", 3)){
-			dzen.tsupdate = True;
+			if(dzen.slave_win.max_lines)
+				dzen.tsupdate = True;
 		}
 		else if(!strncmp(argv[i], "-p", 3)) {
 			dzen.ispersistent = True;
