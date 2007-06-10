@@ -5,8 +5,8 @@
 */
 
 #define MAXEVENTS 32
-#define MAXACTIONS 256
-#define MAXOPTIONS 256
+#define MAXACTIONS 64
+#define MAXOPTIONS 64
 
 /* Event, Action data structures */
 typedef struct AS As;

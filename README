@@ -2,7 +2,10 @@
   dzen, (c) 2007 by Robert Manea
 ==================================
 
-A general purpose messaging, notification and launcher program. 
+A general purpose messaging, notification and menu program
+
+Script archive with a collection of interesting ideas:
+  http://gotmor.googlepages.com/dzenscriptarchive
 
 
 Features
@@ -11,13 +14,13 @@ Features
     * scriptable in any language
 
     * single line and/or windows holding multiple lines
-    
+
     * menu functionality
-    
+
     * flexible event/action mechanism
-    
+
     * hideable, collapsable
-    
+
     * Xinerama support
 
 
@@ -38,7 +41,7 @@ necessary as root):
 
 
 Note:       By default dzen will not be compiled with Xinerama support.
-            Uncomment the respective lines in config.mk to change this.
+            Uncomment the respective line in config.mk to change this.
 
 
 Contact:
@@ -61,6 +64,8 @@ dzen accepts a couple of options:
     -l      lines, see (1)
     -e      events and actions, see (2)
     -m      menu mode, see (3)
+    -u      update contents of title and 
+            slave window simultaneously, see (4)
     -p      persist EOF (optional timeout in seconds)
     -x      x position
     -y      y position
@@ -79,7 +84,7 @@ dzen uses two different approaches to terminate itself:
             · '-p' with argument n  persist n seconds
 
     * Interactive termination: if mouse button3 is clicked -> terminate
-        - this is the default behaviour, see (2))
+        - this is the default behaviour, see (2)
 
 
 
@@ -107,6 +112,7 @@ Button4 and Button5 (mouse wheel) will scroll the slave window up
 and down if the content exceeds the window height (default action).
 
 
+
 (2) Option '-e': Events and actions
 ----------------------------------
 
@@ -116,7 +122,7 @@ The command line syntax is as follows:
 -e 'event1=action1:option1:...option<n>,...,action<m>;...;event<l>'
 
 Every event can take any number of actions and every action can take any number
-of options. (Currently limited to 256 each)
+of options. (Currently limited to 64 each, easily changable in action.h)
 
 An example:
     -e 'button1=exec:xterm:firefox;entertitle=uncollapse,unhide;button3=exit'
@@ -183,6 +189,7 @@ Note:   If no events/actions are specified dzen defaults to:
         use.
 
 
+
 (3) Option '-m', Menu
 ---------------------
 
@@ -205,6 +212,32 @@ Note:   Menu mode only makes sense if '-l <n>' is specified!
         Horizontal menus have no title window, so all actions
         affecting the title window will be silently discarded
         in this mode.
+
+
+
+(4) Option '-u', Simultaneous updates
+-------------------------------------
+
+This option provides facilities to update the title and slave window at
+the same time.
+
+The way it works is best described by an example:
+
+  Motivation:
+
+  We want to display an updating clock in the title and some log
+  output in the slave window.
+
+  Solution:
+
+  while true; do
+        date                # output goes to the title window
+        dmesg | tail -n 10  # output goes to the slave window
+        sleep 1
+  done | dzen2 -l 10 -u
+
+For this to work correctly it is essential to provide exactly the number
+of lines to the slave window as defined by the parameter to '-l'.
 
 
 
