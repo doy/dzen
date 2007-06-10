@@ -559,14 +559,11 @@ set_alignment(void) {
 
 static void
 init_input_buffer() {
-	
 	if(MIN_BUF_SIZE % dzen.slave_win.max_lines)
 		dzen.slave_win.tsize = MIN_BUF_SIZE + (dzen.slave_win.max_lines - (MIN_BUF_SIZE % dzen.slave_win.max_lines));
 	else
 		dzen.slave_win.tsize = MIN_BUF_SIZE;
 
-	printf("Buffer: %d\n", dzen.slave_win.tsize);
-	fflush(stdout);
 	dzen.slave_win.tbuf = emalloc(dzen.slave_win.tsize);
 }
 

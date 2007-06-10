@@ -54,7 +54,6 @@ struct SW {
 	Window *line;
 	Drawable *drawable;
 
-	//char *tbuf[BUF_SIZE];
 	/* input buffer */
 	char **tbuf;
 	int tsize;
