@@ -218,7 +218,7 @@ a_togglestick(char * opt[]) {
 	return 0;
 	}
 
-static int
+static void
 scroll(int n) {
 	if(dzen.slave_win.tcnt <= dzen.slave_win.max_lines)
 		return;

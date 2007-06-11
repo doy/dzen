@@ -484,7 +484,7 @@ handle_newl(void) {
 	}
 }
 
-static int
+static void
 event_loop(void *ptr) {
 	int xfd, ret, dr=0;
 	fd_set rmask;
@@ -558,7 +558,7 @@ set_alignment(void) {
 }
 
 static void
-init_input_buffer() {
+init_input_buffer(void) {
 	if(MIN_BUF_SIZE % dzen.slave_win.max_lines)
 		dzen.slave_win.tsize = MIN_BUF_SIZE + (dzen.slave_win.max_lines - (MIN_BUF_SIZE % dzen.slave_win.max_lines));
 	else
