@@ -1,7 +1,8 @@
 /* 
-* (C)opyright MMVII Robert Manea <rob dot manea at gmail dot com>
-* See LICENSE file for license details.
-*/
+ * (C)opyright MMVII Robert Manea <rob dot manea at gmail dot com>
+ * See LICENSE file for license details.
+ *
+ */
 
 #include "dzen.h"
 #include "action.h"
@@ -11,8 +12,6 @@
 
 
 struct event_lookup ev_lookup_table[] = {
-	{ "exposet",        exposetitle},
-	{ "exposes",        exposeslave},
 	{ "onstart",        onstart},
 	{ "onexit",         onexit},
 	{ "button1",        button1},
@@ -30,8 +29,6 @@ struct event_lookup ev_lookup_table[] = {
 };
 
 struct action_lookup  ac_lookup_table[] = {
-	{ "exposetitle",    a_exposetitle},
-	{ "exposeslave",    a_exposeslave},
 	{ "print",          a_print },
 	{ "exec",           a_exec},
 	{ "exit",           a_exit},
@@ -158,30 +155,13 @@ fill_ev_table(char *input)
 
 
 /* actions */
-
-/* used internally */
 int
-a_exposetitle(char * opt[]) {
-	XCopyArea(dzen.dpy, dzen.title_win.drawable, dzen.title_win.win, 
-			dzen.gc, 0, 0, dzen.title_win.width, dzen.line_height, 0, 0);
+a_exit(char * opt[]) {
+	if(opt[0]) 
+		dzen.ret_val = atoi(opt[0]);
+	dzen.running = False;
 	return 0;
 }
-
-/* used internally */
-int
-a_exposeslave(char * opt[]) {
-	x_draw_body();
-	return 0;
-}
-
-/* user selectable actions */
-int
-	a_exit(char * opt[]) {
-		if(opt[0]) 
-			dzen.ret_val = atoi(opt[0]);
-		dzen.running = False;
-		return 0;
-	}
 
 int
 a_collapse(char * opt[]){

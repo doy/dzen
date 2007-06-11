@@ -1,8 +1,9 @@
 /*
-*  (C)opyright MMVII Robert Manea <rob dot manea at gmail dot com>
-*  See LICENSE file for license details.
-*
-*/
+ * (C)opyright MMVII Robert Manea <rob dot manea at gmail dot com>
+ * See LICENSE file for license details.
+ *
+ */
+
 #include "dzen.h"
 #include "action.h"
 
@@ -401,12 +402,11 @@ handle_xev(void) {
 						&& ev.xexpose.window == dzen.title_win.win) 
 					drawheader(NULL);
 				if(ev.xexpose.window == dzen.slave_win.win)
-					do_action(exposeslave);
+					x_draw_body();;
 				for(i=0; i < dzen.slave_win.max_lines; i++) 
 					if(ev.xcrossing.window == dzen.slave_win.line[i])
-						do_action(exposeslave);
+						x_draw_body();
 			}
-			XSync(dzen.dpy, False);
 			break;
 		case EnterNotify:
 			if(dzen.slave_win.ismenu) { 
@@ -419,7 +419,6 @@ handle_xev(void) {
 				do_action(entertitle);
 			if(ev.xcrossing.window == dzen.slave_win.win)
 				do_action(enterslave);
-			XSync(dzen.dpy, False);
 			break;
 		case LeaveNotify:
 			if(dzen.slave_win.ismenu) {
@@ -433,7 +432,6 @@ handle_xev(void) {
 			if(ev.xcrossing.window == dzen.slave_win.win) {
 				do_action(leaveslave);
 			}
-			XSync(dzen.dpy, False);
 			break;
 		case ButtonRelease:
 			if(dzen.slave_win.ismenu) {
@@ -458,10 +456,8 @@ handle_xev(void) {
 					do_action(button5);
 					break;
 			}
-			XSync(dzen.dpy, False);
 			break;
 	}
-	XFlush(dzen.dpy);
 }
 
 static void
@@ -480,7 +476,7 @@ handle_newl(void) {
 			x_draw_body();
 		}  
 		/* forget state if window was unmapped */
-		else if(wa.map_state == IsUnmapped || !dzen.slave_win.last_line_vis) {
+		if(wa.map_state == IsUnmapped || !dzen.slave_win.last_line_vis) {
 			dzen.slave_win.first_line_vis = 0;
 			dzen.slave_win.last_line_vis = 0;
 		}
@@ -669,13 +665,10 @@ main(int argc, char *argv[]) {
 	if(!setlocale(LC_ALL, "") || !XSupportsLocale())
 		puts("dzen: locale not available, expect problems with fonts.\n");
 
-	if(action_string) {
-		char edef[] = "exposet=exposetitle;exposes=exposeslave";
-		fill_ev_table(edef);
+	if(action_string) 
 		fill_ev_table(action_string);
-	} else {
-		char edef[] = "exposet=exposetitle;exposes=exposeslave;"
-			"entertitle=uncollapse;leaveslave=collapse;"
+	else {
+		char edef[] = "entertitle=uncollapse;leaveslave=collapse;"
 			"button1=menuexec;button2=togglestick;button3=exit:13;"
 			"button4=scrollup;button5=scrolldown";
 		fill_ev_table(edef);

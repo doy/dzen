@@ -1,8 +1,8 @@
 /*  
-*  (C)opyright MMVII Robert Manea <rob dot manea at gmail dot com>
-*  See LICENSE file for license details.
-*
-*/
+ * (C)opyright MMVII Robert Manea <rob dot manea at gmail dot com>
+ * See LICENSE file for license details.
+ *
+ */
 
 #define MAXEVENTS 32
 #define MAXACTIONS 64
@@ -13,8 +13,6 @@ typedef struct AS As;
 typedef struct EV Ev;
 
 enum ev_id {
-	/* internal events, should not be used by the user */
-	exposetitle, exposeslave,
 	/* startup, exit */
 	onstart, onexit,
 	/* mouse buttons */
@@ -55,8 +53,6 @@ void fill_ev_table(char *);
 void free_ev_table(void);
 
 /* action handlers */
-int a_exposetitle(char **);
-int a_exposeslave(char **);
 int a_print(char **);
 int a_exit(char **);
 int a_exec(char **);

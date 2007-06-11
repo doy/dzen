@@ -1,7 +1,9 @@
-/* (C)opyright MMVI-MMVII Anselm R. Garbe <garbeam at gmail dot com>
-* (C)opyright MMVII Robert Manea <rob dot manea  at gmail dot com>
-* See LICENSE file for license details.
-*/
+/* 
+ * (C)opyright MMVI-MMVII Anselm R. Garbe <garbeam at gmail dot com>
+ * (C)opyright MMVII Robert Manea <rob dot manea  at gmail dot com>
+ * See LICENSE file for license details.
+ *
+ */
 
 #include "dzen.h"
 #include <stdarg.h>
