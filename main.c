@@ -51,22 +51,22 @@ clean_up(void) {
 }
 
 static void
-catch_sigusr1() {
+catch_sigusr1(int s) {
 	do_action(sigusr1);
 }
 
 static void
-catch_sigusr2() {
+catch_sigusr2(int s) {
 	do_action(sigusr2);
 }
 
 static void
-catch_sigterm() {
+catch_sigterm(int s) {
 	do_action(onexit);
 }
 
 static void
-catch_alrm() {
+catch_alrm(int s) {
 	do_action(onexit);
 	clean_up();
 	exit(0);

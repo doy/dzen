@@ -56,7 +56,7 @@ struct action_lookup  ac_lookup_table[] = {
 ev_list *head = NULL;
 
 int 
-new_event(evid) {
+new_event(long evid) {
 	ev_list *item, *newitem;
 
 	if(!head) {
@@ -224,9 +224,9 @@ fill_ev_table(char *input) {
 						break;
 					}
 					if(str4 == kommatoken && str4 != token && eid != -1) {
-						if((ah = (void *)get_action_handler(dptoken))) {
+						if((ah = (void *)get_action_handler(dptoken)) == NULL) {
 							new_event(eid);
-							add_handler(eid, i, ah);
+							add_handler(eid, i, get_action_handler(dptoken));
 							i++;
 						}
 					}

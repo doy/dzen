@@ -53,7 +53,8 @@ void do_action(long);
 int get_ev_id(char *);
 void * get_action_handler(char *);
 void fill_ev_table(char *);
-void free_ev_table(void);
+void free_event_list(void);
+int find_event(long);
 
 /* action handlers */
 int a_print(char **);
