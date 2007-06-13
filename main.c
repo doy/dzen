@@ -675,13 +675,25 @@ main(int argc, char *argv[]) {
 	if(action_string) 
 		fill_ev_table(action_string);
 	else {
-		char edef[] = "entertitle=uncollapse,grabkeys;"
-			"enterslave=grabkeys;leaveslave=collapse,ungrabkeys;"
-			"button1=menuexec;button2=togglestick;button3=exit:13;"
-			"button4=scrollup;button5=scrolldown;"
-			"key_Up=scrollup;key_Left=scrollup;key_Down=scrolldown;key_Right=scrolldown;"
-			"key_q=ungrabkeys,exit";
-		fill_ev_table(edef);
+		if(!dzen.slave_win.max_lines) {
+			char edef[] = "button3=exit:13";
+			fill_ev_table(edef);
+		}
+		else if(dzen.slave_win.ishmenu) {
+			char edef[] = "enterslave=grabkeys;leaveslave=ungrabkeys;"
+				"key_Left=scrollup;key_Right=scrolldown;"
+				"button1=menuexec;button3=exit:13";
+			fill_ev_table(edef);
+		}
+		else {
+			char edef[]  = "entertitle=uncollapse,grabkeys;"
+				"enterslave=grabkeys;leaveslave=collapse,ungrabkeys;"
+				"button1=menuexec;button2=togglestick;button3=exit:13;"
+				"button4=scrollup;button5=scrolldown;"
+				"key_Up=scrollup;key_Down=scrolldown;"
+				"key_q=ungrabkeys,exit";
+			fill_ev_table(edef);
+		}
 	}
 
 	if((find_event(onexit) != -1) 

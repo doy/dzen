@@ -56,18 +56,18 @@ struct action_lookup  ac_lookup_table[] = {
 ev_list *head = NULL;
 
 int 
-new_event(keid) {
+new_event(evid) {
 	ev_list *item, *newitem;
 
 	if(!head) {
 		head = emalloc(sizeof (ev_list));
-		head->id = keid;
+		head->id = evid;
 		head->next = NULL;
 	} else {
 		item = head;
 		/* check if we already handle this event */
 		while(item) {
-			if(item->id == keid)
+			if(item->id == evid)
 				return 0;
 			item = item->next;
 		}
@@ -76,7 +76,7 @@ new_event(keid) {
 			item = item->next;
 
 		newitem = emalloc(sizeof (ev_list));
-		newitem->id = keid;
+		newitem->id = evid;
 		item->next = newitem;
 		newitem->next= NULL;
 	}
@@ -84,12 +84,12 @@ new_event(keid) {
 }
 
 void
-add_handler(long keid, int hpos, void * hcb) {
+add_handler(long evid, int hpos, void * hcb) {
 	ev_list *item;
 
 	item = head;
 	while(item) {
-		if(item->id == keid) {
+		if(item->id == evid) {
 			item->action[hpos] = emalloc(sizeof(As));
 			item->action[hpos]->handler = hcb;
 			break;
@@ -99,12 +99,12 @@ add_handler(long keid, int hpos, void * hcb) {
 }
 
 void
-add_option(long keid, int hpos, int opos, char* opt) {
+add_option(long evid, int hpos, int opos, char* opt) {
 	ev_list *item;
 
 	item = head;
 	while(item) {
-		if(item->id == keid) {
+		if(item->id == evid) {
 			item->action[hpos]->options[opos] = estrdup(opt);
 			break;
 		}
@@ -113,12 +113,12 @@ add_option(long keid, int hpos, int opos, char* opt) {
 }
 
 int
-find_event(long event) {
+find_event(long evid) {
 	ev_list *item;
 
 	item = head;
 	while(item) {
-		if(item->id == event) 
+		if(item->id == evid) 
 			return item->id;
 		item = item->next;
 	}
@@ -126,15 +126,14 @@ find_event(long event) {
 	return -1;
 }
 
-
 void
-do_action(long event) {
+do_action(long evid) {
 	int i;
 	ev_list *item;
 
 	item = head;
 	while(item) {
-		if(item->id == event)
+		if(item->id == evid)
 			break;
 		item = item->next;
 	}
