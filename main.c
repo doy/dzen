@@ -483,7 +483,9 @@ handle_newl(void) {
 			dzen.slave_win.first_line_vis = 0;
 			dzen.slave_win.last_line_vis = 0;
 			x_draw_body();
-		}  
+		} 
+		else if(wa.map_state != IsUnmapped)
+			x_draw_body();
 		/* forget state if window was unmapped */
 		else if(wa.map_state == IsUnmapped || !dzen.slave_win.last_line_vis) {
 			dzen.slave_win.first_line_vis = 0;
