@@ -91,7 +91,7 @@ add_handler(long evid, int hpos, void * hcb) {
 	while(item) {
 		if(item->id == evid) {
 			item->action[hpos] = emalloc(sizeof(As));
-			item->action[hpos]->handler = hcb;
+			item->action[hpos]->handler = (handlerf) hcb;
 			break;
 		}
 		item = item->next;
@@ -164,15 +164,15 @@ get_ev_id(char *evname) {
 	return -1;
 }
 
-void *
+handlerf 
 get_action_handler(char *acname) {
 	int i;
 
 	for(i=0; ac_lookup_table[i].name; i++) {
 		if(strcmp(ac_lookup_table[i].name, acname) == 0)
-			return ac_lookup_table[i].handler;
+			return (handlerf) ac_lookup_table[i].handler;
 	}
-	return (void *)NULL;
+	return (handlerf)NULL;
 }
 
 

@@ -10,6 +10,7 @@
 /* Event, Action data structures */
 typedef struct AS As;
 typedef struct _ev_list ev_list;
+typedef int (* handlerf)(char **);
 
 enum ev_id {
 	/* startup, exit */
@@ -51,7 +52,7 @@ struct AS {
 /* utility functions */
 void do_action(long);
 int get_ev_id(char *);
-void * get_action_handler(char *);
+handlerf get_action_handler(char *);
 void fill_ev_table(char *);
 void free_event_list(void);
 int find_event(long);
