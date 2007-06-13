@@ -23,6 +23,7 @@
 Dzen dzen = {0};
 static int last_cnt = 0;
 typedef void sigfunc(int);
+int isfocused = 0;
 
 
 static void 
@@ -99,7 +100,7 @@ chomp(char *inbuf, char *outbuf, int start, int len) {
 	}
 	while(off < len) {
 		if(inbuf[off] != '\n') {
-			outbuf[i++] = inbuf[off++];
+			 outbuf[i++] = inbuf[off++];
 		} else if(inbuf[off] == '\n') {
 			outbuf[i] = '\0';
 			return ++off;
@@ -283,7 +284,7 @@ x_create_windows(void) {
 	/* window attributes */
 	wa.override_redirect = 1;
 	wa.background_pixmap = ParentRelative;
-	wa.event_mask = ExposureMask | ButtonReleaseMask | EnterWindowMask | LeaveWindowMask;
+	wa.event_mask = ExposureMask | ButtonReleaseMask | EnterWindowMask | LeaveWindowMask | KeyPressMask;
 
 #ifdef DZEN_XINERAMA
 	queryscreeninfo(dzen.dpy, &si, dzen.xinescreen);
@@ -393,6 +394,8 @@ static void
 handle_xev(void) {
 	XEvent ev;
 	int i;
+	char buf[32];
+	KeySym ksym;
 
 	XNextEvent(dzen.dpy, &ev);
 	switch(ev.type) {
@@ -456,6 +459,10 @@ handle_xev(void) {
 					do_action(button5);
 					break;
 			}
+			break;
+		case KeyPress:
+			XLookupString(&ev.xkey, buf, sizeof buf, &ksym, 0);
+			do_action(ksym+keymarker);
 			break;
 	}
 }
@@ -668,9 +675,12 @@ main(int argc, char *argv[]) {
 	if(action_string) 
 		fill_ev_table(action_string);
 	else {
-		char edef[] = "entertitle=uncollapse;leaveslave=collapse;"
+		char edef[] = "entertitle=uncollapse,grabkeys;"
+			"enterslave=grabkeys;leaveslave=collapse,ungrabkeys;"
 			"button1=menuexec;button2=togglestick;button3=exit:13;"
-			"button4=scrollup;button5=scrolldown";
+			"button4=scrollup;button5=scrolldown;"
+			"key_Up=scrollup;key_Left=scrollup;key_Down=scrolldown;key_Right=scrolldown;"
+			"key_q=ungrabkeys,exit";
 		fill_ev_table(edef);
 	}
 

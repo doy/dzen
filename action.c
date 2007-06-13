@@ -25,6 +25,7 @@ struct event_lookup ev_lookup_table[] = {
 	{ "leaveslave",     leaveslave},
 	{ "sigusr1",        sigusr1},
 	{ "sigusr2",        sigusr2},
+	{ "keymarker",		keymarker},
 	{ 0, 0 }
 };
 
@@ -46,25 +47,109 @@ struct action_lookup  ac_lookup_table[] = {
 	{ "raise",          a_raise},
 	{ "lower",          a_lower},
 	{ "scrollhome",     a_scrollhome},
+	{ "scrollend",		a_scrollend},
+	{ "grabkeys",		a_grabkeys},
+	{ "ungrabkeys",		a_ungrabkeys},
 	{ 0, 0 }
 };
 
 Ev ev_table[MAXEVENTS] = {{0}, {0}};
+key_ev_list *head = NULL;
 
-/* utilities */
+int 
+key_new_event(keid) {
+	key_ev_list *item, *newitem;
+
+	if(!head) {
+		head = emalloc(sizeof (key_ev_list));
+		head->id = keid;
+		head->next = NULL;
+	} else {
+		item = head;
+		/* check if we already handle this event */
+		while(item) {
+			if(item->id == keid)
+				return 0;
+			item = item->next;
+		}
+		item = head;
+		while(item->next)
+			item = item->next;
+
+		newitem = emalloc(sizeof (key_ev_list));
+		newitem->id = keid;
+		item->next = newitem;
+		newitem->next= NULL;
+		}
+	return 0;
+}
+
 void
-do_action(int event) {
-	int i;
+key_add_handler(long keid, int hpos, void * hcb){
+	key_ev_list *item;
 
-	if(ev_table[event].isset)
-		for(i=0; ev_table[event].action[i]->handler; i++)
-			ev_table[event].action[i]->handler(ev_table[event].action[i]->options);
+	item = head;
+	while(item) {
+		if(item->id == keid) {
+			item->action[hpos] = emalloc(sizeof(As));
+			item->action[hpos]->handler = hcb;
+			break;
+		}
+		item = item->next;
+	}
+
+}
+
+void
+key_add_option(long keid, int hpos, int opos, char* opt) {
+	key_ev_list *item;
+
+	item = head;
+	while(item) {
+		if(item->id == keid) {
+			item->action[hpos]->options[opos] = estrdup(opt);
+			break;
+		}
+		item = item->next;
+	}
+}
+
+void
+do_action(long event) {
+	int i;
+	key_ev_list *item;
+
+	if(event > keymarker) {
+		item = head;
+		while(item) {
+			if(item->id == event)
+				break;
+			item = item->next;
+		}
+
+		if(item) {
+			for(i=0; item->action[i]->handler; i++) {
+				item->action[i]->handler(item->action[i]->options);
+			}
+		}
+	} else
+		if(ev_table[event].isset)
+			for(i=0; ev_table[event].action[i]->handler; i++)
+				ev_table[event].action[i]->handler(ev_table[event].action[i]->options);
 }
 
 int
 get_ev_id(char *evname) {
 	int i;
+	KeySym ks;
 
+	/* check for keyboard event */
+	if((!strncmp(evname, "key_", 4))
+			&& ((ks = XStringToKeysym(evname+4)) != NoSymbol)) {
+		return ks+keymarker;
+	}
+	
+	/* own events */
 	for(i=0; ev_lookup_table[i].name; i++) {
 		if(strcmp(ev_lookup_table[i].name, evname) == 0)
 			return ev_lookup_table[i].id;
@@ -101,7 +186,7 @@ fill_ev_table(char *input)
 		 *token, *subtoken, *kommatoken, *dptoken;
 	char *saveptr1, *saveptr2, *saveptr3, *saveptr4;
 	int j, i=0, k=0;
-	int eid=0;
+	long eid=0;
 	void *ah=0;
 
 
@@ -130,15 +215,29 @@ fill_ev_table(char *input)
 						break;
 					}
 					if(str4 == kommatoken && str4 != token && eid != -1) {
-						ev_table[eid].isset = 1;
-						if((ah = (void *)get_action_handler(dptoken))) {
-							ev_table[eid].action[i] = emalloc(sizeof(As));
-							ev_table[eid].action[i]->handler= get_action_handler(dptoken);
+						/* keyboard event */
+						if(eid > keymarker) {
+							/* populate linked list of key events */
+							if((ah = (void *)get_action_handler(dptoken))) {
+								key_new_event(eid);
+								key_add_handler(eid, i, ah);
+							}
+						} else {
+							ev_table[eid].isset = 1;
+							if((ah = (void *)get_action_handler(dptoken))) {
+								ev_table[eid].action[i] = emalloc(sizeof(As));
+								ev_table[eid].action[i]->handler= get_action_handler(dptoken);
+							}
 						}
 						i++;
 					}
 					else if(str4 != token && eid != -1 && ah) {
-						ev_table[eid].action[i-1]->options[k] = strdup(dptoken);
+						if(eid > keymarker) {
+							/* add option to key events */
+							key_add_option(eid, i-1, k, dptoken);
+						} else
+							ev_table[eid].action[i-1]->options[k] = strdup(dptoken);
+
 						k++;
 					}
 					else if(!ah)
@@ -146,8 +245,13 @@ fill_ev_table(char *input)
 				}
 				k=0;
 			}
-			ev_table[eid].action[i] = emalloc(sizeof(As));
-			ev_table[eid].action[i]->handler = NULL;
+			if(eid > keymarker) {
+				key_new_event(eid);
+				key_add_handler(eid, i, NULL);
+			} else {
+				ev_table[eid].action[i] = emalloc(sizeof(As));
+				ev_table[eid].action[i]->handler = NULL;
+			}
 			i=0; 
 		}
 	}
@@ -357,3 +461,28 @@ a_scrollhome(char * opt[]) {
 	return 0;
 }
 
+int
+a_scrollend(char * opt[]) {
+	if(dzen.slave_win.max_lines) {
+		dzen.slave_win.first_line_vis = dzen.slave_win.tcnt - dzen.slave_win.max_lines ; 
+		dzen.slave_win.last_line_vis  = dzen.slave_win.tcnt;
+		x_draw_body();
+	}
+	return 0;
+}
+
+int
+a_grabkeys(char * opt[]) {
+	XGrabKeyboard(dzen.dpy, RootWindow(dzen.dpy, dzen.screen),
+			True, GrabModeAsync, GrabModeAsync, CurrentTime);
+	return 0;
+}
+
+int
+a_ungrabkeys(char * opt[]) {
+	XUngrabKeyboard(dzen.dpy, CurrentTime);
+	return 0;
+}
+
+	
+	

@@ -11,6 +11,7 @@
 /* Event, Action data structures */
 typedef struct AS As;
 typedef struct EV Ev;
+typedef struct _key_ev_list key_ev_list;
 
 enum ev_id {
 	/* startup, exit */
@@ -20,12 +21,22 @@ enum ev_id {
 	/* entering/leaving windows */
 	entertitle, leavetitle, enterslave, leaveslave, 
 	/* external signals */
-	sigusr1, sigusr2
+	sigusr1, sigusr2,
+	/* key event marker 
+	 * must always be the last entry
+	 */
+	keymarker
+};
+
+struct _key_ev_list {
+	long id;
+	As *action[MAXACTIONS];
+	key_ev_list *next;
 };
 
 struct event_lookup {
 	char *name;
-	int id;
+	long id;
 };
 
 struct action_lookup {
@@ -46,7 +57,7 @@ struct EV {
 extern Ev ev_table[MAXEVENTS];
 
 /* utility functions */
-void do_action(int);
+void do_action(long);
 int get_ev_id(char *);
 void * get_action_handler(char *);
 void fill_ev_table(char *);
@@ -70,4 +81,7 @@ int a_menuexec(char **);
 int a_raise(char **);
 int a_lower(char **);
 int a_scrollhome(char **);
+int a_scrollend(char **);
+int a_grabkeys(char **);
+int a_ungrabkeys(char **);
 
