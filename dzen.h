@@ -96,7 +96,7 @@ struct DZEN {
 	Bool ispersistent;
 	Bool tsupdate;
 	unsigned long timeout;
-	int cur_line;
+	long cur_line;
 	int ret_val;
 
 	/* should always be 0 if DZEN_XINERAMA not defined */
