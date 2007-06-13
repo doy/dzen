@@ -4,14 +4,12 @@
  *
  */
 
-#define MAXEVENTS 32
 #define MAXACTIONS 64
 #define MAXOPTIONS 64
 
 /* Event, Action data structures */
 typedef struct AS As;
-typedef struct EV Ev;
-typedef struct _key_ev_list key_ev_list;
+typedef struct _ev_list ev_list;
 
 enum ev_id {
 	/* startup, exit */
@@ -28,10 +26,10 @@ enum ev_id {
 	keymarker
 };
 
-struct _key_ev_list {
+struct _ev_list {
 	long id;
 	As *action[MAXACTIONS];
-	key_ev_list *next;
+	ev_list *next;
 };
 
 struct event_lookup {
@@ -49,12 +47,6 @@ struct AS {
 	int (*handler)(char **);
 };
 
-struct EV {
-	int isset;
-	As *action[MAXACTIONS];
-};
-
-extern Ev ev_table[MAXEVENTS];
 
 /* utility functions */
 void do_action(long);

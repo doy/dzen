@@ -30,7 +30,7 @@ static void
 clean_up(void) {
 	int i;
 
-	free_ev_table();
+	free_event_list();
 	if(dzen.font.set)
 		XFreeFontSet(dzen.dpy, dzen.font.set);
 	else
@@ -155,14 +155,14 @@ read_stdin(void *ptr) {
 	return 0;
 }
 
-static void
+void
 x_highlight_line(int line) {
 	drawtext(dzen.slave_win.tbuf[line + dzen.slave_win.first_line_vis], 1, line, dzen.slave_win.alignment);
 	XCopyArea(dzen.dpy, dzen.slave_win.drawable[line], dzen.slave_win.line[line], dzen.rgc,
 			0, 0, dzen.slave_win.width, dzen.line_height, 0, 0);
 }
 
-static void
+void
 x_unhighlight_line(int line) {
 	drawtext(dzen.slave_win.tbuf[line + dzen.slave_win.first_line_vis], 0, line, dzen.slave_win.alignment);
 	XCopyArea(dzen.dpy, dzen.slave_win.drawable[line], dzen.slave_win.line[line], dzen.gc,
@@ -684,12 +684,18 @@ main(int argc, char *argv[]) {
 		fill_ev_table(edef);
 	}
 
-	if(ev_table[onexit].isset && (setup_signal(SIGTERM, catch_sigterm) == SIG_ERR))
+	if((find_event(onexit) != -1) 
+			&& (setup_signal(SIGTERM, catch_sigterm) == SIG_ERR))
 		fprintf(stderr, "dzen: error hooking SIGTERM\n");
-	if(ev_table[sigusr1].isset && (setup_signal(SIGUSR1, catch_sigusr1) == SIG_ERR))
+
+	if((find_event(sigusr1) != -1) 
+			&& (setup_signal(SIGUSR1, catch_sigusr1) == SIG_ERR))
 		fprintf(stderr, "dzen: error hooking SIGUSR1\n");
-	if(ev_table[sigusr2].isset && (setup_signal(SIGUSR2, catch_sigusr2) == SIG_ERR))
+	
+	if((find_event(sigusr2) != -1) 
+		&& (setup_signal(SIGUSR2, catch_sigusr2) == SIG_ERR))
 		fprintf(stderr, "dzen: error hooking SIGUSR2\n");
+	
 	if(setup_signal(SIGALRM, catch_alrm) == SIG_ERR)
 		fprintf(stderr, "dzen: error hooking SIGALARM\n");
 

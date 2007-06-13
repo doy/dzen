@@ -1,8 +1,8 @@
 /* 
- * (C)opyright MMVII Robert Manea <rob dot manea at gmail dot com>
- * See LICENSE file for license details.
- *
- */
+* (C)opyright MMVII Robert Manea <rob dot manea at gmail dot com>
+* See LICENSE file for license details.
+*
+*/
 
 #include "dzen.h"
 #include "action.h"
@@ -53,15 +53,14 @@ struct action_lookup  ac_lookup_table[] = {
 	{ 0, 0 }
 };
 
-Ev ev_table[MAXEVENTS] = {{0}, {0}};
-key_ev_list *head = NULL;
+ev_list *head = NULL;
 
 int 
-key_new_event(keid) {
-	key_ev_list *item, *newitem;
+new_event(keid) {
+	ev_list *item, *newitem;
 
 	if(!head) {
-		head = emalloc(sizeof (key_ev_list));
+		head = emalloc(sizeof (ev_list));
 		head->id = keid;
 		head->next = NULL;
 	} else {
@@ -76,17 +75,17 @@ key_new_event(keid) {
 		while(item->next)
 			item = item->next;
 
-		newitem = emalloc(sizeof (key_ev_list));
+		newitem = emalloc(sizeof (ev_list));
 		newitem->id = keid;
 		item->next = newitem;
 		newitem->next= NULL;
-		}
+	}
 	return 0;
 }
 
 void
-key_add_handler(long keid, int hpos, void * hcb){
-	key_ev_list *item;
+add_handler(long keid, int hpos, void * hcb) {
+	ev_list *item;
 
 	item = head;
 	while(item) {
@@ -97,12 +96,11 @@ key_add_handler(long keid, int hpos, void * hcb){
 		}
 		item = item->next;
 	}
-
 }
 
 void
-key_add_option(long keid, int hpos, int opos, char* opt) {
-	key_ev_list *item;
+add_option(long keid, int hpos, int opos, char* opt) {
+	ev_list *item;
 
 	item = head;
 	while(item) {
@@ -114,28 +112,38 @@ key_add_option(long keid, int hpos, int opos, char* opt) {
 	}
 }
 
+int
+find_event(long event) {
+	ev_list *item;
+
+	item = head;
+	while(item) {
+		if(item->id == event) 
+			return item->id;
+		item = item->next;
+	}
+
+	return -1;
+}
+
+
 void
 do_action(long event) {
 	int i;
-	key_ev_list *item;
+	ev_list *item;
 
-	if(event > keymarker) {
-		item = head;
-		while(item) {
-			if(item->id == event)
-				break;
-			item = item->next;
-		}
+	item = head;
+	while(item) {
+		if(item->id == event)
+			break;
+		item = item->next;
+	}
 
-		if(item) {
-			for(i=0; item->action[i]->handler; i++) {
-				item->action[i]->handler(item->action[i]->options);
-			}
+	if(item) {
+		for(i=0; item->action[i]->handler; i++) {
+			item->action[i]->handler(item->action[i]->options);
 		}
-	} else
-		if(ev_table[event].isset)
-			for(i=0; ev_table[event].action[i]->handler; i++)
-				ev_table[event].action[i]->handler(ev_table[event].action[i]->options);
+	}
 }
 
 int
@@ -148,10 +156,10 @@ get_ev_id(char *evname) {
 			&& ((ks = XStringToKeysym(evname+4)) != NoSymbol)) {
 		return ks+keymarker;
 	}
-	
+
 	/* own events */
 	for(i=0; ev_lookup_table[i].name; i++) {
-		if(strcmp(ev_lookup_table[i].name, evname) == 0)
+		if(strncmp(ev_lookup_table[i].name, evname, strlen(ev_lookup_table[i].name)) == 0)
 			return ev_lookup_table[i].id;
 	}
 	return -1;
@@ -168,20 +176,22 @@ get_action_handler(char *acname) {
 	return (void *)NULL;
 }
 
-void
-free_ev_table(void) {
-	int i, j;
 
-	for(i=0; i<MAXEVENTS; i++) {
-		if(ev_table[i].isset)
-			for(j=0; ev_table[i].action[j]->handler; j++)
-				free(ev_table[i].action[j]);
+void
+free_event_list(void) {
+	int i;
+	ev_list *item;
+
+	item = head;
+	while(item) {
+		for(i=0; item->action[i]->handler; i++)
+			free(item->action[i]);
+		item = item->next;
 	}
 }
 
 void
-fill_ev_table(char *input)
-{
+fill_ev_table(char *input) {
 	char *str1, *str2, *str3, *str4,
 		 *token, *subtoken, *kommatoken, *dptoken;
 	char *saveptr1, *saveptr2, *saveptr3, *saveptr4;
@@ -215,29 +225,14 @@ fill_ev_table(char *input)
 						break;
 					}
 					if(str4 == kommatoken && str4 != token && eid != -1) {
-						/* keyboard event */
-						if(eid > keymarker) {
-							/* populate linked list of key events */
-							if((ah = (void *)get_action_handler(dptoken))) {
-								key_new_event(eid);
-								key_add_handler(eid, i, ah);
-							}
-						} else {
-							ev_table[eid].isset = 1;
-							if((ah = (void *)get_action_handler(dptoken))) {
-								ev_table[eid].action[i] = emalloc(sizeof(As));
-								ev_table[eid].action[i]->handler= get_action_handler(dptoken);
-							}
+						if((ah = (void *)get_action_handler(dptoken))) {
+							new_event(eid);
+							add_handler(eid, i, ah);
+							i++;
 						}
-						i++;
 					}
 					else if(str4 != token && eid != -1 && ah) {
-						if(eid > keymarker) {
-							/* add option to key events */
-							key_add_option(eid, i-1, k, dptoken);
-						} else
-							ev_table[eid].action[i-1]->options[k] = strdup(dptoken);
-
+						add_option(eid, i-1, k, dptoken);
 						k++;
 					}
 					else if(!ah)
@@ -245,13 +240,8 @@ fill_ev_table(char *input)
 				}
 				k=0;
 			}
-			if(eid > keymarker) {
-				key_new_event(eid);
-				key_add_handler(eid, i, NULL);
-			} else {
-				ev_table[eid].action[i] = emalloc(sizeof(As));
-				ev_table[eid].action[i]->handler = NULL;
-			}
+			new_event(eid);
+			add_handler(eid, i, NULL);
 			i=0; 
 		}
 	}
@@ -320,7 +310,7 @@ a_togglestick(char * opt[]) {
 			&& dzen.slave_win.max_lines)
 		dzen.slave_win.issticky = dzen.slave_win.issticky ? False : True;
 	return 0;
-	}
+}
 
 static void
 scroll(int n) {
@@ -484,5 +474,3 @@ a_ungrabkeys(char * opt[]) {
 	return 0;
 }
 
-	
-	
