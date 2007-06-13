@@ -445,6 +445,7 @@ a_scrollhome(char * opt[]) {
 	if(dzen.slave_win.max_lines) {
 		dzen.slave_win.first_line_vis = 0; 
 		dzen.slave_win.last_line_vis  = dzen.slave_win.max_lines;
+
 		x_draw_body();
 	}
 	return 0;
@@ -455,6 +456,7 @@ a_scrollend(char * opt[]) {
 	if(dzen.slave_win.max_lines) {
 		dzen.slave_win.first_line_vis = dzen.slave_win.tcnt - dzen.slave_win.max_lines ; 
 		dzen.slave_win.last_line_vis  = dzen.slave_win.tcnt;
+		
 		x_draw_body();
 	}
 	return 0;

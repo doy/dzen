@@ -23,7 +23,6 @@
 Dzen dzen = {0};
 static int last_cnt = 0;
 typedef void sigfunc(int);
-int isfocused = 0;
 
 
 static void 
