@@ -224,9 +224,9 @@ fill_ev_table(char *input) {
 						break;
 					}
 					if(str4 == kommatoken && str4 != token && eid != -1) {
-						if((ah = (void *)get_action_handler(dptoken)) == NULL) {
+						if((ah = (void *)get_action_handler(dptoken)) != NULL) {
 							new_event(eid);
-							add_handler(eid, i, get_action_handler(dptoken));
+							add_handler(eid, i, ah);
 							i++;
 						}
 					}
