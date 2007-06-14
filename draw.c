@@ -40,7 +40,7 @@ drawtext(const char *text, int reverse, int line, int align) {
 	else {            /* slave window */
 		mgc = reverse ? dzen.rgc : dzen.gc;
 		
-		if(!dzen.slave_win.tbuf[line].text) {
+		if(!dzen.slave_win.tbuf[line+dzen.slave_win.first_line_vis].text) {
 			reverse ?
 				XSetForeground(dzen.dpy, mgc, dzen.norm[ColFG]):
 				XSetForeground(dzen.dpy, mgc, dzen.norm[ColBG]);
@@ -49,10 +49,9 @@ drawtext(const char *text, int reverse, int line, int align) {
 				XSetForeground(dzen.dpy, mgc, dzen.slave_win.tbuf[line+dzen.slave_win.first_line_vis].fg):
 				XSetForeground(dzen.dpy, mgc, dzen.slave_win.tbuf[line+dzen.slave_win.first_line_vis].bg);
 		}
-
 		XFillRectangles(dzen.dpy, dzen.slave_win.drawable[line], mgc, &r, 1);
 
-		if(!dzen.slave_win.tbuf[line].text) {
+		if(!dzen.slave_win.tbuf[line+dzen.slave_win.first_line_vis].text) {
 			reverse ?
 				XSetForeground(dzen.dpy, mgc, dzen.norm[ColBG]):
 				XSetForeground(dzen.dpy, mgc, dzen.norm[ColFG]);
@@ -125,13 +124,14 @@ drawtext(const char *text, int reverse, int line, int align) {
 	}
 }
 
-unsigned long
+long
 getcolor(const char *colstr) {
 	Colormap cmap = DefaultColormap(dzen.dpy, dzen.screen);
 	XColor color;
 
 	if(!XAllocNamedColor(dzen.dpy, cmap, colstr, &color, &color))
-		eprint("dzen: error, cannot allocate color '%s'\n", colstr);
+		return -1;
+		//eprint("dzen: error, cannot allocate color '%s'\n", colstr);
 	return color.pixel;
 }
 
@@ -186,13 +186,15 @@ setlinecolor(char * text, unsigned long * colfg, unsigned long * colbg) {
 	if(text[0] == '^' && text[1] == '#') {
 		strncpy(fgcolor, text+1, 7);
 		fgcolor[7] = '\0';
-		newfg = getcolor(fgcolor);
+		if((newfg = getcolor(fgcolor)) == -1)
+			return NULL;
 		*colfg = newfg;
 		
 		if(text[8] == '^' && text[9] == '#') {
 			strncpy(bgcolor, text+9, 7);
 			bgcolor[7] = '\0';
-			newbg = getcolor(bgcolor);
+			if((newbg = getcolor(bgcolor)) == -1)
+					return NULL;
 			*colbg = newbg;
 
 			return text+16;
@@ -218,7 +220,6 @@ drawheader(char * text) {
 		if( (ctext = setlinecolor(text, &colfg, &colbg)) ) {
 			XSetForeground(dzen.dpy, dzen.gc, colfg);
 			XSetBackground(dzen.dpy, dzen.gc, colbg);
-			printf("FG: %lu, BG: %lu\n", colfg, colbg);
 			drawtext(ctext, 0, -1, dzen.title_win.alignment);
 			XSetForeground(dzen.dpy, dzen.gc, dzen.norm[ColFG]);
 			XSetBackground(dzen.dpy, dzen.gc, dzen.norm[ColBG]);

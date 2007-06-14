@@ -123,7 +123,7 @@ extern void drawtext(const char *text,
 		int reverse,
 		int line,
 		int aligne);	                        
-extern unsigned long getcolor(const char *colstr);	/* returns color of colstr */
+extern long getcolor(const char *colstr);	/* returns color of colstr */
 extern void setfont(const char *fontstr);		    /* sets global font */
 extern unsigned int textw(const char *text);		/* returns width of text in px */
 extern void drawheader(char *text);

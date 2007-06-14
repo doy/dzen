@@ -281,8 +281,10 @@ x_create_windows(void) {
 	root = RootWindow(dzen.dpy, dzen.screen);
 
 	/* style */
-	dzen.norm[ColBG] = getcolor(dzen.bg);
-	dzen.norm[ColFG] = getcolor(dzen.fg);
+	if((dzen.norm[ColBG] = getcolor(dzen.bg)) == -1)
+		eprint("dzen: error, cannot allocate color '%s'\n", dzen.bg);
+	if((dzen.norm[ColFG] = getcolor(dzen.fg)) == -1)
+		eprint("dzen: error, cannot allocate color '%s'\n", dzen.fg);
 	setfont(dzen.fnt);
 
 	/* window attributes */
