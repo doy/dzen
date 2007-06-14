@@ -118,8 +118,9 @@ void
 free_buffer(void) {
 	int i;
 	for(i=0; i<dzen.slave_win.tsize; i++) {
-		free(dzen.slave_win.tbuf[i]);
-		dzen.slave_win.tbuf[i] = NULL;
+		free(dzen.slave_win.tbuf[i].text);
+		dzen.slave_win.tbuf[i].text = NULL;
+		dzen.slave_win.tbuf[i].fg = dzen.norm[ColFG];
 	}
 	dzen.slave_win.tcnt = 
 		dzen.slave_win.last_line_vis = 
@@ -159,14 +160,14 @@ read_stdin(void *ptr) {
 
 void
 x_highlight_line(int line) {
-	drawtext(dzen.slave_win.tbuf[line + dzen.slave_win.first_line_vis], 1, line, dzen.slave_win.alignment);
+	drawtext(dzen.slave_win.tbuf[line + dzen.slave_win.first_line_vis].text, 1, line, dzen.slave_win.alignment);
 	XCopyArea(dzen.dpy, dzen.slave_win.drawable[line], dzen.slave_win.line[line], dzen.rgc,
 			0, 0, dzen.slave_win.width, dzen.line_height, 0, 0);
 }
 
 void
 x_unhighlight_line(int line) {
-	drawtext(dzen.slave_win.tbuf[line + dzen.slave_win.first_line_vis], 0, line, dzen.slave_win.alignment);
+	drawtext(dzen.slave_win.tbuf[line + dzen.slave_win.first_line_vis].text, 0, line, dzen.slave_win.alignment);
 	XCopyArea(dzen.dpy, dzen.slave_win.drawable[line], dzen.slave_win.line[line], dzen.gc,
 			0, 0, dzen.slave_win.width, dzen.line_height, 0, 0);
 }
@@ -192,7 +193,7 @@ x_draw_body(void) {
 
 	for(i=0; i < dzen.slave_win.max_lines; i++) {
 		if(i < dzen.slave_win.last_line_vis) 
-			drawtext(dzen.slave_win.tbuf[i + dzen.slave_win.first_line_vis], 0, i, dzen.slave_win.alignment);
+			drawtext(dzen.slave_win.tbuf[i + dzen.slave_win.first_line_vis].text, 0, i, dzen.slave_win.alignment);
 		else if(i < dzen.slave_win.max_lines) 
 			drawtext("", 0, i, dzen.slave_win.alignment);
 	}
@@ -484,7 +485,7 @@ handle_newl(void) {
 			dzen.slave_win.last_line_vis = 0;
 			x_draw_body();
 		} 
-		/* needed for scrollhome */
+		/* needed for a_scrollhome */
 		else if(wa.map_state != IsUnmapped 
 				&& dzen.slave_win.last_line_vis == dzen.slave_win.max_lines)
 			x_draw_body();
@@ -577,7 +578,7 @@ init_input_buffer(void) {
 	else
 		dzen.slave_win.tsize = MIN_BUF_SIZE;
 
-	dzen.slave_win.tbuf = emalloc(dzen.slave_win.tsize);
+	dzen.slave_win.tbuf = emalloc(dzen.slave_win.tsize * sizeof(Sline));
 }
 
 int

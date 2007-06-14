@@ -28,6 +28,7 @@ typedef struct DZEN Dzen;
 typedef struct Fnt Fnt;
 typedef struct TW TWIN;
 typedef struct SW SWIN;
+typedef struct _Sline Sline;
 
 struct Fnt {
 	XFontStruct *xfont;
@@ -35,6 +36,12 @@ struct Fnt {
 	int ascent;
 	int descent;
 	int height;
+};
+
+struct _Sline {
+	unsigned long fg;
+	unsigned long bg;
+	char * text;
 };
 
 /* title window */
@@ -56,9 +63,12 @@ struct SW {
 	Drawable *drawable;
 
 	/* input buffer */
-	char **tbuf;
+	//char **tbuf;
+	Sline *tbuf;
 	int tsize;
 	int tcnt;
+	/* line fg colors */
+	unsigned long *tcol;
 
 	int max_lines;
 	int first_line_vis;
