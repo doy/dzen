@@ -31,32 +31,38 @@ drawtext(const char *text, int reverse, int line, int align) {
 	XRectangle r = { dzen.x, dzen.y, dzen.w, dzen.h};
 
 
-	if(line != -1) {
-		if(reverse) {
-			if(dzen.slave_win.tbuf[line].text) {
-				XSetForeground(dzen.dpy, dzen.rgc, dzen.norm[ColBG]);
-				XSetBackground(dzen.dpy, dzen.rgc, dzen.slave_win.tbuf[line].fg);
-			} else {
-				XSetForeground(dzen.dpy, dzen.rgc, dzen.norm[ColBG]);
-				XSetBackground(dzen.dpy, dzen.rgc, dzen.norm[ColFG]);
-			}
-		} else {
-			if(dzen.slave_win.tbuf[line].text) {
-				XSetForeground(dzen.dpy, dzen.gc, dzen.slave_win.tbuf[line].fg);
-				XSetBackground(dzen.dpy, dzen.gc, dzen.norm[ColBG]);
-			} else {
-				XSetForeground(dzen.dpy, dzen.gc, dzen.norm[ColFG]);
-				XSetBackground(dzen.dpy, dzen.gc, dzen.norm[ColBG]);
-			}
-		}
+	if(line == -1) {  /* title window */
+		XGetGCValues(dzen.dpy, dzen.gc, GCForeground|GCBackground, &gcv);	
+		XSetForeground(dzen.dpy, dzen.gc, gcv.background);
+		XFillRectangles(dzen.dpy, dzen.title_win.drawable, dzen.gc, &r, 1);
+		XSetForeground(dzen.dpy, dzen.gc, gcv.foreground);
 	}
+	else {            /* slave window */
+		mgc = reverse ? dzen.rgc : dzen.gc;
+		
+		if(!dzen.slave_win.tbuf[line].text) {
+			reverse ?
+				XSetForeground(dzen.dpy, mgc, dzen.norm[ColFG]):
+				XSetForeground(dzen.dpy, mgc, dzen.norm[ColBG]);
+		} else {
+			reverse ?
+				XSetForeground(dzen.dpy, mgc, dzen.slave_win.tbuf[line+dzen.slave_win.first_line_vis].fg):
+				XSetForeground(dzen.dpy, mgc, dzen.slave_win.tbuf[line+dzen.slave_win.first_line_vis].bg);
+		}
 
-	mgc = reverse ? dzen.gc : dzen.rgc;
-	if(line == -1)  /* title window */
-		XFillRectangles(dzen.dpy, dzen.title_win.drawable, mgc, &r, 1);
-	else            /* slave window */
 		XFillRectangles(dzen.dpy, dzen.slave_win.drawable[line], mgc, &r, 1);
-	
+
+		if(!dzen.slave_win.tbuf[line].text) {
+			reverse ?
+				XSetForeground(dzen.dpy, mgc, dzen.norm[ColBG]):
+				XSetForeground(dzen.dpy, mgc, dzen.norm[ColFG]);
+		} else {
+			reverse ?
+				XSetForeground(dzen.dpy, mgc, dzen.slave_win.tbuf[line+dzen.slave_win.first_line_vis].bg):
+				XSetForeground(dzen.dpy, mgc, dzen.slave_win.tbuf[line+dzen.slave_win.first_line_vis].fg);
+		}
+
+	}
 
 	if(!text)
 		return;
@@ -101,7 +107,7 @@ drawtext(const char *text, int reverse, int line, int align) {
 	if(dzen.font.set) {
 		if(line == -1) 
 	 		XmbDrawString(dzen.dpy, dzen.title_win.drawable, dzen.font.set,
-					mgc, x, y, buf, len);
+					dzen.gc, x, y, buf, len);
 		else 
 			XmbDrawString(dzen.dpy, dzen.slave_win.drawable[line], dzen.font.set,
 					mgc, x, y, buf, len);
@@ -115,7 +121,7 @@ drawtext(const char *text, int reverse, int line, int align) {
 					mgc, x, y, buf, len);
 		else
 			XDrawString(dzen.dpy, dzen.title_win.drawable, 
-					mgc, x, y, buf, len);
+					dzen.gc, x, y, buf, len);
 	}
 }
 
@@ -173,15 +179,26 @@ textw(const char *text) {
 }
 
 char *
-setlinecolor(char * text, unsigned long * col) {
-	char fgcolor[8];
-	unsigned long newfg;
+setlinecolor(char * text, unsigned long * colfg, unsigned long * colbg) {
+	char fgcolor[8], bgcolor[8];
+	unsigned long newfg, newbg;
 
 	if(text[0] == '^' && text[1] == '#') {
 		strncpy(fgcolor, text+1, 7);
 		fgcolor[7] = '\0';
 		newfg = getcolor(fgcolor);
-		*col = newfg;
+		*colfg = newfg;
+		
+		if(text[8] == '^' && text[9] == '#') {
+			strncpy(bgcolor, text+9, 7);
+			bgcolor[7] = '\0';
+			newbg = getcolor(bgcolor);
+			*colbg = newbg;
+
+			return text+16;
+		} else
+			*colbg = dzen.norm[ColBG];
+
 		return text+8;
 	}
 
@@ -191,17 +208,20 @@ setlinecolor(char * text, unsigned long * col) {
 void
 drawheader(char * text) {
 	char *ctext;
-	unsigned long col;
+	unsigned long colfg, colbg;
 	dzen.x = 0;
 	dzen.y = 0;
 	dzen.w = dzen.title_win.width;
 	dzen.h = dzen.line_height;
 
 	if(text) {
-		if( (ctext = setlinecolor(text, &col)) ) {
-			XSetForeground(dzen.dpy, dzen.gc, col);
+		if( (ctext = setlinecolor(text, &colfg, &colbg)) ) {
+			XSetForeground(dzen.dpy, dzen.gc, colfg);
+			XSetBackground(dzen.dpy, dzen.gc, colbg);
+			printf("FG: %lu, BG: %lu\n", colfg, colbg);
 			drawtext(ctext, 0, -1, dzen.title_win.alignment);
 			XSetForeground(dzen.dpy, dzen.gc, dzen.norm[ColFG]);
+			XSetBackground(dzen.dpy, dzen.gc, dzen.norm[ColBG]);
 		}
 		else
 			drawtext(text, 0, -1, dzen.title_win.alignment);
@@ -214,16 +234,18 @@ drawheader(char * text) {
 void
 drawbody(char * text) {
 	char *ctext;
-	unsigned long col;
+	unsigned long colfg, colbg;
 
 	if(dzen.slave_win.tcnt == dzen.slave_win.tsize) 
 		free_buffer();
 	if(dzen.slave_win.tcnt < dzen.slave_win.tsize) {
-		if( (ctext = setlinecolor(text, &col)) ) {
-			dzen.slave_win.tbuf[dzen.slave_win.tcnt].fg = col;
+		if( (ctext = setlinecolor(text, &colfg, &colbg)) ) {
+			dzen.slave_win.tbuf[dzen.slave_win.tcnt].fg = colfg;
+			dzen.slave_win.tbuf[dzen.slave_win.tcnt].bg = colbg;
 			dzen.slave_win.tbuf[dzen.slave_win.tcnt].text = estrdup(ctext);
 		} else {
 			dzen.slave_win.tbuf[dzen.slave_win.tcnt].fg = dzen.norm[ColFG];
+			dzen.slave_win.tbuf[dzen.slave_win.tcnt].bg = dzen.norm[ColBG];
 			dzen.slave_win.tbuf[dzen.slave_win.tcnt].text = estrdup(text);
 		}
 		dzen.slave_win.tcnt++;

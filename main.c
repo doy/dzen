@@ -121,6 +121,7 @@ free_buffer(void) {
 		free(dzen.slave_win.tbuf[i].text);
 		dzen.slave_win.tbuf[i].text = NULL;
 		dzen.slave_win.tbuf[i].fg = dzen.norm[ColFG];
+		dzen.slave_win.tbuf[i].fg = dzen.norm[ColBG];
 	}
 	dzen.slave_win.tcnt = 
 		dzen.slave_win.last_line_vis = 
