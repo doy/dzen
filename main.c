@@ -692,8 +692,10 @@ main(int argc, char *argv[]) {
 		}
 		else if(dzen.slave_win.ishmenu) {
 			char edef[] = "enterslave=grabkeys;leaveslave=ungrabkeys;"
+				"button4=scrollup;button5=scrolldown;"
 				"key_Left=scrollup;key_Right=scrolldown;"
-				"button1=menuexec;button3=exit:13";
+				"button1=menuexec;button3=exit:13;"
+				"key_Escape=ungrabkeys,exit";
 			fill_ev_table(edef);
 		}
 		else {
@@ -702,7 +704,7 @@ main(int argc, char *argv[]) {
 				"button1=menuexec;button2=togglestick;button3=exit:13;"
 				"button4=scrollup;button5=scrolldown;"
 				"key_Up=scrollup;key_Down=scrolldown;"
-				"key_q=ungrabkeys,exit";
+				"key_Escape=ungrabkeys,exit";
 			fill_ev_table(edef);
 		}
 	}

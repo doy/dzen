@@ -105,6 +105,7 @@ struct DZEN {
 
 	Bool ispersistent;
 	Bool tsupdate;
+	Bool colorize;
 	unsigned long timeout;
 	long cur_line;
 	int ret_val;

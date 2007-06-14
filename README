@@ -13,6 +13,10 @@ Features
 
     * scriptable in any language
 
+	* dynamic colorizer
+
+    * keyboard support
+
     * single line and/or windows holding multiple lines
 
     * menu functionality
@@ -73,6 +77,8 @@ dzen accepts a couple of options:
     -xs     number of Xinerama screen
     -v      version information
 
+    For dynamic color support see (5).
+
 
 Termination:
 ------------
@@ -85,6 +91,7 @@ dzen uses two different approaches to terminate itself:
 
     * Interactive termination: if mouse button3 is clicked -> terminate
         - this is the default behaviour, see (2)
+        - in some modes the Escape key terminates too, see (2)
 
 
 
@@ -156,6 +163,17 @@ Supported events:
     leaveslave          Mouse leaves the slave window
     sigusr1             SIGUSR1 received 
     sigusr2             SIGUSR2 received
+    key_KEYNAME         Keyboard events (*)
+
+
+    (*) Keyboard events:
+    --------------------
+
+    Every key can be bound to an action (see below). The format is:
+    key_KEYNAME where KEYNAME is the name of the key as defined in
+    keysymdef.h (usually: /usr/include/X11/keysymdef.h).  The part 
+    after 'XK_' in keysymdef.h must be used for KEYNAME.
+
 
 Supported actions:
     exec:command1:..:n  execute all given options
@@ -179,10 +197,31 @@ Supported actions:
 
 Note:   If no events/actions are specified dzen defaults to:
 
-        -e 'entertitle=uncollapse;leaveslave=collapse;
-            button1=menuexec;
-            button2=togglestick;button3=exit:13;
-            button4=scrollup;button5=scrolldown'
+        Title only mode:
+        ----------------
+
+        -e 'button3=exit:13'
+
+
+        Multiple lines and vertical menu mode:
+        --------------------------------------
+
+        -e 'entertitle=uncollapse,grabkeys;
+            enterslave=grabkeys;leaveslave=collapse,ungrabkeys;
+            button1=menuexec;button2=togglestick;button3=exit:13;
+            button4=scrollup;button5=scrolldown;
+            key_Escape=ungrabkeys,exit'
+
+
+        Horizontal menu mode:
+        ---------------------
+
+        -e 'enterslave=grabkeys;leaveslave=ungrabkeys;
+            button4=scrollup;button5=scrolldown;
+            key_Left=scrollup;key_Right=scrolldown;
+            button1=menuexec;button3=exit:13
+            key_Escape=ungrabkeys,exit'
+
 
         If you define any events/actions, there is no default behaviour,
         i.e. you will have to specify _all_ events/actions you want to
@@ -197,11 +236,11 @@ Dzen provides two menu modes, vertical and horizontal menus. You can
 access these modes by adding 'v'(ertical) or 'h'(horizontal) to the 
 '-m' option. If nothing is specified dzen defaults to vertical menus.
 
-Vertical menu, both invocations beeing equivalent:      
+Vertical menu, both invocations beeing equivalent:
     dzen2 -p -l 4 -m < file
     dzen2 -p -l 4 -m v < file
 
-Horizontal menu:    
+Horizontal menu:
     dzen2 -p -l 4 -m h < file
 
 
@@ -238,6 +277,30 @@ The way it works is best described by an example:
 
 For this to work correctly it is essential to provide exactly the number
 of lines to the slave window as defined by the parameter to '-l'.
+
+
+
+(5) Dynamic color support:
+--------------------------
+
+This feature allows to dynamically (at runtime) set foreground and
+background colors for dzen's input (colored text) working in all 
+modes (title only, slave window and menu mode).
+
+The input must be in the following format:
+
+  * Setting only the foreground color:
+
+    ^#rrggbbThe text to colorize
+
+
+  * Setting foreground and background color:
+
+    ^#rrggbb^#rrggbbThe text to colorize
+
+An example:
+
+  echo "^#ffffff^#000000I am white text on black background" | ./dzen2 -p
 
 
 
