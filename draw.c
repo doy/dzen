@@ -60,7 +60,6 @@ drawtext(const char *text, int reverse, int line, int align) {
 				XSetForeground(dzen.dpy, mgc, dzen.slave_win.tbuf[line+dzen.slave_win.first_line_vis].bg):
 				XSetForeground(dzen.dpy, mgc, dzen.slave_win.tbuf[line+dzen.slave_win.first_line_vis].fg);
 		}
-
 	}
 
 	if(!text)
@@ -131,7 +130,7 @@ getcolor(const char *colstr) {
 
 	if(!XAllocNamedColor(dzen.dpy, cmap, colstr, &color, &color))
 		return -1;
-		//eprint("dzen: error, cannot allocate color '%s'\n", colstr);
+
 	return color.pixel;
 }
 

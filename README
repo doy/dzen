@@ -150,6 +150,8 @@ An example:
 
 
 Supported events:
+-----------------
+
     onstart             Perform actions right after startup
     onexit              Perform actions just before exiting
     button1             Mouse button1 released 
@@ -175,7 +177,10 @@ Supported events:
     after 'XK_' in keysymdef.h must be used for KEYNAME.
 
 
+
 Supported actions:
+------------------
+
     exec:command1:..:n  execute all given options
     menuexec            executes selected menu entry
     exit:retval         exit dzen and return 'retval'
@@ -191,8 +196,11 @@ Supported actions:
     raise               raise window to view (above all others)
     lower               lower window (behind all others)
     scrollhome          show head of input
+    scrollend           show tail of input
     scrollup:n          scroll slave window n lines up   (default n=1)
     scrolldown:n        scroll slave window n lines down (default n=1)
+    grabkeys            enable keyboard support
+    ungrabkeys          disable keyboard support
 
 
 Note:   If no events/actions are specified dzen defaults to:
@@ -300,7 +308,7 @@ The input must be in the following format:
 
 An example:
 
-  echo "^#ffffff^#000000I am white text on black background" | ./dzen2 -p
+  echo "^#ffffff^#000000I am white text on black background" | dzen2 -p
 
 
 

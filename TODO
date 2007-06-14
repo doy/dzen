@@ -1,17 +1,13 @@
 #  extend available events:
 
           o input changed event
-          o keyboard support
 
 #  extend available actions
 
-          o set foreground color action
-          o set background color action
           o set font action
           o actions acting like a switch should have a toggleaction function
           o any other useful action
 
 # user interface
 
-          o title and slave window should be allowed to have different bg/fg/font/settings without making the command line arguments a mess
           o split lines longer than window width in multiple lines
