@@ -14,13 +14,13 @@ INCS = -I. -I/usr/include -I${X11INC}
 
 # No Xinerama, comment the following two lines for Xinerama
 LIBS = -L/usr/lib -lc -L${X11LIB} -lX11
-CFLAGS = -Os ${INCS} -DVERSION=\"${VERSION}\"
+#CFLAGS = -Os ${INCS} -DVERSION=\"${VERSION}\"
 
 # With Xinerama, uncomment the following two lines for Xinerama
 #LIBS = -L/usr/lib -lc -L${X11LIB} -lX11 -lXinerama
 #CFLAGS = -Os ${INCS} -DVERSION=\"${VERSION}\" -DDZEN_XINERAMA
 
-LDFLAGS = ${LIBS}
+#LDFLAGS = ${LIBS}
 
 # Solaris, uncomment for Solaris
 #CFLAGS = -fast ${INCS} -DVERSION=\"${VERSION}\"
@@ -28,8 +28,8 @@ LDFLAGS = ${LIBS}
 #CFLAGS += -xtarget=ultra
 
 # Debugging
-#CFLAGS = -g -Wall -O0 ${INCS} -DVERSION=\"${VERSION}\" -DPOSIX_SOURCE
-#LDFLAGS = -g ${LIBS}
+CFLAGS = -g -Wall -O0 ${INCS} -DVERSION=\"${VERSION}\" -DPOSIX_SOURCE
+LDFLAGS = -g ${LIBS}
 
 # compiler and linker
 CC = cc

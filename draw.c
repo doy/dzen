@@ -102,19 +102,17 @@ drawtext(const char *text, int reverse, int line, int align) {
 		if(line == -1) 
 	 		XmbDrawString(dzen.dpy, dzen.title_win.drawable, dzen.font.set,
 					mgc, x, y, buf, len);
-		else {
+		else 
 			XmbDrawString(dzen.dpy, dzen.slave_win.drawable[line], dzen.font.set,
 					mgc, x, y, buf, len);
-		}
 	}
 	else {
 		gcv.font = dzen.font.xfont->fid;
 		XChangeGC(dzen.dpy, mgc, GCForeground | GCFont, &gcv);
 
-		if(line != -1) {
+		if(line != -1)
 			XDrawString(dzen.dpy, dzen.slave_win.drawable[line],
 					mgc, x, y, buf, len);
-		}
 		else
 			XDrawString(dzen.dpy, dzen.title_win.drawable, 
 					mgc, x, y, buf, len);
@@ -200,7 +198,7 @@ drawheader(char * text) {
 	dzen.h = dzen.line_height;
 
 	if(text) {
-		if(ctext = setlinecolor(text, &col)) {
+		if( (ctext = setlinecolor(text, &col)) ) {
 			XSetForeground(dzen.dpy, dzen.gc, col);
 			drawtext(ctext, 0, -1, dzen.title_win.alignment);
 			XSetForeground(dzen.dpy, dzen.gc, dzen.norm[ColFG]);
@@ -221,7 +219,7 @@ drawbody(char * text) {
 	if(dzen.slave_win.tcnt == dzen.slave_win.tsize) 
 		free_buffer();
 	if(dzen.slave_win.tcnt < dzen.slave_win.tsize) {
-		if(ctext = setlinecolor(text, &col)) {
+		if( (ctext = setlinecolor(text, &col)) ) {
 			dzen.slave_win.tbuf[dzen.slave_win.tcnt].fg = col;
 			dzen.slave_win.tbuf[dzen.slave_win.tcnt].text = estrdup(ctext);
 		} else {
