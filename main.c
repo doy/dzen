@@ -97,7 +97,11 @@ chomp(char *inbuf, char *outbuf, int start, int len) {
 		free(rem);
 		rem = NULL;
 	}
-	while((off < len) && (off < MAX_LINE_LEN)) {
+	while(off < len) {
+		if(i > MAX_LINE_LEN) {
+			outbuf[i] = '\0';
+			return ++off;
+		}
 		if(inbuf[off] != '\n') {
 			 outbuf[i++] = inbuf[off++];
 		} else if(inbuf[off] == '\n') {
@@ -105,9 +109,6 @@ chomp(char *inbuf, char *outbuf, int start, int len) {
 			return ++off;
 		}
 	}
-
-	if(off >= MAX_LINE_LEN)
-		return 0;
 
 	outbuf[i] = '\0';
 	rem = estrdup(outbuf);
