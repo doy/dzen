@@ -484,7 +484,9 @@ handle_newl(void) {
 			dzen.slave_win.last_line_vis = 0;
 			x_draw_body();
 		} 
-		else if(wa.map_state != IsUnmapped)
+		/* needed for scrollhome */
+		else if(wa.map_state != IsUnmapped 
+				&& dzen.slave_win.last_line_vis == dzen.slave_win.max_lines)
 			x_draw_body();
 		/* forget state if window was unmapped */
 		else if(wa.map_state == IsUnmapped || !dzen.slave_win.last_line_vis) {
