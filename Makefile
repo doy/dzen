@@ -33,7 +33,7 @@ clean:
 dist: clean
 	@echo creating dist tarball
 	@mkdir -p dzen2-${VERSION}
-	@cp -R LICENSE Makefile README config.mk action.h dzen.h ${SRC} dzen2-${VERSION}
+	@cp -R LICENSE Makefile README help config.mk action.h dzen.h ${SRC} dzen2-${VERSION}
 	@tar -cf dzen2-${VERSION}.tar dzen2-${VERSION}
 	@gzip dzen2-${VERSION}.tar
 	@rm -rf dzen2-${VERSION}

@@ -78,13 +78,13 @@ new_event(long evid) {
 		newitem = emalloc(sizeof (ev_list));
 		newitem->id = evid;
 		item->next = newitem;
-		newitem->next= NULL;
+		newitem->next = NULL;
 	}
 	return 0;
 }
 
 void
-add_handler(long evid, int hpos, void * hcb) {
+add_handler(long evid, int hpos, void* hcb) {
 	ev_list *item;
 
 	item = head;
