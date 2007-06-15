@@ -25,6 +25,7 @@ dzen2: ${OBJ}
 	@echo LD $@
 	@${LD} -o $@ ${OBJ} ${LDFLAGS}
 	@strip $@
+	@echo "Run ./help for documentation"
 
 clean:
 	@echo cleaning
