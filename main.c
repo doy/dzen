@@ -627,11 +627,10 @@ main(int argc, char *argv[]) {
 			dzen.ispersistent = True;
 			if (i+1 < argc) {
 				dzen.timeout = strtoul(argv[i+1], &endptr, 10);
-				if (*endptr) {
+				if(*endptr)
 					dzen.timeout = 0;
-				} else {
+				else
 					i++;
-				}
 			}
 		}
 		else if(!strncmp(argv[i], "-ta", 4)) {
