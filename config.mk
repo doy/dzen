@@ -4,7 +4,7 @@ VERSION = 0.5.0
 # Customize below to fit your system
 
 # paths
-PREFIX = /usr/local
+PREFIX = /home/mauke/usr/local
 MANPREFIX = ${PREFIX}/share/man
 
 X11INC = /usr/X11R6/include
@@ -28,9 +28,9 @@ LDFLAGS = ${LIBS}
 #CFLAGS += -xtarget=ultra
 
 # Debugging
-#CFLAGS = -g -Wall -O0 ${INCS} -DVERSION=\"${VERSION}\" -DPOSIX_SOURCE
+#CFLAGS = ${INCS} -DVERSION=\"${VERSION}\" -std=gnu89 -pedantic -Wall -W -Wno-missing-field-initializers -Wundef -Wendif-labels -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-align -Wwrite-strings -Wstrict-prototypes -Wmissing-prototypes -Wnested-externs -Winline -Wdisabled-optimization -O2 -pipe
 #LDFLAGS = -g ${LIBS}
 
 # compiler and linker
-CC = cc
+CC = gcc
 LD = ${CC}

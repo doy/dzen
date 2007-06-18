@@ -63,7 +63,7 @@ struct SW {
 	Drawable *drawable;
 
 	/* input buffer */
-	//char **tbuf;
+	/* char **tbuf; */
 	Sline *tbuf;
 	int tsize;
 	int tcnt;
@@ -90,9 +90,9 @@ struct DZEN {
 	TWIN title_win;
 	SWIN slave_win;
 
-	char *fnt;
-	char *bg;
-	char *fg;
+	const char *fnt;
+	const char *bg;
+	const char *fg;
 	int line_height;
 
 	Display *dpy;
@@ -127,7 +127,7 @@ extern void drawtext(const char *text,
 extern long getcolor(const char *colstr);	/* returns color of colstr */
 extern void setfont(const char *fontstr);		    /* sets global font */
 extern unsigned int textw(const char *text);		/* returns width of text in px */
-extern void drawheader(char *text);
+extern void drawheader(const char *text);
 extern void drawbody(char *text);
 
 /* util.c */

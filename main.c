@@ -51,21 +51,25 @@ clean_up(void) {
 
 static void
 catch_sigusr1(int s) {
+	(void)s;
 	do_action(sigusr1);
 }
 
 static void
 catch_sigusr2(int s) {
+	(void)s;
 	do_action(sigusr2);
 }
 
 static void
 catch_sigterm(int s) {
+	(void)s;
 	do_action(onexit);
 }
 
 static void
 catch_alrm(int s) {
+	(void)s;
 	do_action(onexit);
 	clean_up();
 	exit(0);
@@ -130,7 +134,7 @@ free_buffer(void) {
 }
 
 static int 
-read_stdin(void *ptr) {
+read_stdin(void) {
 	char buf[MAX_LINE_LEN], 
 		 retbuf[MAX_LINE_LEN];
 	ssize_t n, n_off=0;
@@ -160,14 +164,14 @@ read_stdin(void *ptr) {
 	return 0;
 }
 
-void
+static void
 x_highlight_line(int line) {
 	drawtext(dzen.slave_win.tbuf[line + dzen.slave_win.first_line_vis].text, 1, line, dzen.slave_win.alignment);
 	XCopyArea(dzen.dpy, dzen.slave_win.drawable[line], dzen.slave_win.line[line], dzen.rgc,
 			0, 0, dzen.slave_win.width, dzen.line_height, 0, 0);
 }
 
-void
+static void
 x_unhighlight_line(int line) {
 	drawtext(dzen.slave_win.tbuf[line + dzen.slave_win.first_line_vis].text, 0, line, dzen.slave_win.alignment);
 	XCopyArea(dzen.dpy, dzen.slave_win.drawable[line], dzen.slave_win.line[line], dzen.gc,
@@ -176,11 +180,11 @@ x_unhighlight_line(int line) {
 
 void 
 x_draw_body(void) {
+	int i;
 	dzen.x = 0;
 	dzen.y = 0;
 	dzen.w = dzen.slave_win.width;
 	dzen.h = dzen.line_height;
-	int i;
 
 	if(!dzen.slave_win.last_line_vis) {
 		if(dzen.slave_win.tcnt < dzen.slave_win.max_lines) {
@@ -282,9 +286,9 @@ x_create_windows(void) {
 	root = RootWindow(dzen.dpy, dzen.screen);
 
 	/* style */
-	if((dzen.norm[ColBG] = getcolor(dzen.bg)) == -1)
+	if((dzen.norm[ColBG] = getcolor(dzen.bg)) == ~0lu)
 		eprint("dzen: error, cannot allocate color '%s'\n", dzen.bg);
-	if((dzen.norm[ColFG] = getcolor(dzen.fg)) == -1)
+	if((dzen.norm[ColFG] = getcolor(dzen.fg)) == ~0lu)
 		eprint("dzen: error, cannot allocate color '%s'\n", dzen.fg);
 	setfont(dzen.fnt);
 
@@ -503,7 +507,7 @@ handle_newl(void) {
 }
 
 static void
-event_loop(void *ptr) {
+event_loop(void) {
 	int xfd, ret, dr=0;
 	fd_set rmask;
 
@@ -523,7 +527,7 @@ event_loop(void *ptr) {
 		ret = select(xfd+1, &rmask, NULL, NULL, NULL);
 		if(ret) {
 			if(dr != -2 && FD_ISSET(STDIN_FILENO, &rmask)) {
-				if((dr = read_stdin(NULL)) == -1)
+				if((dr = read_stdin()) == -1)
 					return;
 				handle_newl();
 			}
@@ -623,7 +627,11 @@ main(int argc, char *argv[]) {
 			dzen.ispersistent = True;
 			if (i+1 < argc) {
 				dzen.timeout = strtoul(argv[i+1], &endptr, 10);
-				*endptr ? dzen.timeout = 0 : i++;
+				if (*endptr) {
+					dzen.timeout = 0;
+				} else {
+					i++;
+				}
 			}
 		}
 		else if(!strncmp(argv[i], "-ta", 4)) {
@@ -743,7 +751,7 @@ main(int argc, char *argv[]) {
 	do_action(onstart);
 
 	/* main loop */
-	event_loop(NULL);
+	event_loop();
 
 	do_action(onexit);
 	clean_up();

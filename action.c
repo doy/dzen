@@ -55,7 +55,7 @@ struct action_lookup  ac_lookup_table[] = {
 
 ev_list *head = NULL;
 
-int 
+static int 
 new_event(long evid) {
 	ev_list *item, *newitem;
 
@@ -83,22 +83,22 @@ new_event(long evid) {
 	return 0;
 }
 
-void
-add_handler(long evid, int hpos, void* hcb) {
+static void
+add_handler(long evid, int hpos, handlerf* hcb) {
 	ev_list *item;
 
 	item = head;
 	while(item) {
 		if(item->id == evid) {
 			item->action[hpos] = emalloc(sizeof(As));
-			item->action[hpos]->handler = (handlerf) hcb;
+			item->action[hpos]->handler = hcb;
 			break;
 		}
 		item = item->next;
 	}
 }
 
-void
+static void
 add_option(long evid, int hpos, int opos, char* opt) {
 	ev_list *item;
 
@@ -146,7 +146,7 @@ do_action(long evid) {
 }
 
 int
-get_ev_id(char *evname) {
+get_ev_id(const char *evname) {
 	int i;
 	KeySym ks;
 
@@ -164,15 +164,15 @@ get_ev_id(char *evname) {
 	return -1;
 }
 
-handlerf 
-get_action_handler(char *acname) {
+handlerf *
+get_action_handler(const char *acname) {
 	int i;
 
 	for(i=0; ac_lookup_table[i].name; i++) {
 		if(strcmp(ac_lookup_table[i].name, acname) == 0)
-			return (handlerf) ac_lookup_table[i].handler;
+			return ac_lookup_table[i].handler;
 	}
-	return (handlerf)NULL;
+	return NULL;
 }
 
 
@@ -196,9 +196,9 @@ fill_ev_table(char *input) {
 	char *saveptr1, *saveptr2, *saveptr3, *saveptr4;
 	int j, i=0, k=0;
 	long eid=0;
-	void *ah=0;
+	handlerf *ah=0;
 
-
+	saveptr1 = NULL; /* wtf, gcc? wtf? */
 	for (j = 1, str1 = input; ; j++, str1 = NULL) {
 		token = strtok_r(str1, ";", &saveptr1);
 		if (token == NULL)
@@ -224,7 +224,7 @@ fill_ev_table(char *input) {
 						break;
 					}
 					if(str4 == kommatoken && str4 != token && eid != -1) {
-						if((ah = (void *)get_action_handler(dptoken)) != NULL) {
+						if((ah = get_action_handler(dptoken)) != NULL) {
 							new_event(eid);
 							add_handler(eid, i, ah);
 							i++;
@@ -259,6 +259,7 @@ a_exit(char * opt[]) {
 int
 a_collapse(char * opt[]){
 	int i;
+	(void)opt;
 	if(!dzen.slave_win.ishmenu 
 			&& dzen.slave_win.max_lines 
 			&& !dzen.slave_win.issticky) {
@@ -272,6 +273,7 @@ a_collapse(char * opt[]){
 int
 a_uncollapse(char * opt[]){
 	int i;
+	(void)opt;
 	if(!dzen.slave_win.ishmenu 
 			&& dzen.slave_win.max_lines 
 			&& !dzen.slave_win.issticky) {
@@ -282,13 +284,17 @@ a_uncollapse(char * opt[]){
 	return 0;
 }
 
-int
+#if 0
+static int
 a_togglecollapse(char * opt[]){
+	(void)opt;
 	return 0;
 }
+#endif
 
 int
 a_stick(char * opt[]) {
+	(void)opt;
 	if(!dzen.slave_win.ishmenu 
 			&& dzen.slave_win.max_lines)
 		dzen.slave_win.issticky = True;
@@ -297,6 +303,7 @@ a_stick(char * opt[]) {
 
 int
 a_unstick(char * opt[]) {
+	(void)opt;
 	if(!dzen.slave_win.ishmenu 
 			&& dzen.slave_win.max_lines)
 		dzen.slave_win.issticky = False;
@@ -305,6 +312,7 @@ a_unstick(char * opt[]) {
 
 int
 a_togglestick(char * opt[]) {
+	(void)opt;
 	if(!dzen.slave_win.ishmenu
 			&& dzen.slave_win.max_lines)
 		dzen.slave_win.issticky = dzen.slave_win.issticky ? False : True;
@@ -356,6 +364,7 @@ a_scrolldown(char * opt[]) {
 
 int
 a_hide(char * opt[]) {
+	(void)opt;
 	if(!dzen.title_win.ishidden) {
 		if(!dzen.slave_win.ishmenu)
 			XResizeWindow(dzen.dpy, dzen.title_win.win, dzen.title_win.width, 1);
@@ -369,6 +378,7 @@ a_hide(char * opt[]) {
 
 int
 a_unhide(char * opt[]) {
+	(void)opt;
 	if(dzen.title_win.ishidden) {
 		if(!dzen.slave_win.ishmenu)
 			XResizeWindow(dzen.dpy, dzen.title_win.win, dzen.title_win.width, dzen.line_height);
@@ -403,6 +413,7 @@ a_print(char * opt[]) {
 
 int
 a_menuprint(char * opt[]) {
+	(void)opt;
 	if(dzen.slave_win.ismenu && dzen.slave_win.sel_line != -1 
 			&& (dzen.slave_win.sel_line + dzen.slave_win.first_line_vis) < dzen.slave_win.tcnt) {
 		puts(dzen.slave_win.tbuf[dzen.slave_win.sel_line + dzen.slave_win.first_line_vis].text);
@@ -414,6 +425,7 @@ a_menuprint(char * opt[]) {
 
 int
 a_menuexec(char * opt[]) {
+	(void)opt;
 	if(dzen.slave_win.ismenu && dzen.slave_win.sel_line != -1
 			&& (dzen.slave_win.sel_line + dzen.slave_win.first_line_vis) < dzen.slave_win.tcnt) {
 		spawn(dzen.slave_win.tbuf[dzen.slave_win.sel_line + dzen.slave_win.first_line_vis].text);
@@ -424,6 +436,7 @@ a_menuexec(char * opt[]) {
 
 int
 a_raise(char * opt[]) {
+	(void)opt;
 	XRaiseWindow(dzen.dpy, dzen.title_win.win);
 
 	if(dzen.slave_win.max_lines)
@@ -433,6 +446,7 @@ a_raise(char * opt[]) {
 
 int
 a_lower(char * opt[]) {
+	(void)opt;
 	XLowerWindow(dzen.dpy, dzen.title_win.win);
 
 	if(dzen.slave_win.max_lines)
@@ -442,6 +456,7 @@ a_lower(char * opt[]) {
 
 int
 a_scrollhome(char * opt[]) {
+	(void)opt;
 	if(dzen.slave_win.max_lines) {
 		dzen.slave_win.first_line_vis = 0; 
 		dzen.slave_win.last_line_vis  = dzen.slave_win.max_lines;
@@ -453,6 +468,7 @@ a_scrollhome(char * opt[]) {
 
 int
 a_scrollend(char * opt[]) {
+	(void)opt;
 	if(dzen.slave_win.max_lines) {
 		dzen.slave_win.first_line_vis = dzen.slave_win.tcnt - dzen.slave_win.max_lines ; 
 		dzen.slave_win.last_line_vis  = dzen.slave_win.tcnt;
@@ -464,6 +480,7 @@ a_scrollend(char * opt[]) {
 
 int
 a_grabkeys(char * opt[]) {
+	(void)opt;
 	XGrabKeyboard(dzen.dpy, RootWindow(dzen.dpy, dzen.screen),
 			True, GrabModeAsync, GrabModeAsync, CurrentTime);
 	return 0;
@@ -471,6 +488,7 @@ a_grabkeys(char * opt[]) {
 
 int
 a_ungrabkeys(char * opt[]) {
+	(void)opt;
 	XUngrabKeyboard(dzen.dpy, CurrentTime);
 	return 0;
 }

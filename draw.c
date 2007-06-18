@@ -177,10 +177,10 @@ textw(const char *text) {
 	return textnw(text, strlen(text)) + dzen.font.height;
 }
 
-char *
-setlinecolor(char * text, unsigned long * colfg, unsigned long * colbg) {
+static const char *
+setlinecolor(const char * text, unsigned long * colfg, unsigned long * colbg) {
 	char fgcolor[8], bgcolor[8];
-	unsigned long newfg, newbg;
+	long newfg, newbg;
 
 	if(text[0] == '^' && text[1] == '#') {
 		strncpy(fgcolor, text+1, 7);
@@ -207,8 +207,8 @@ setlinecolor(char * text, unsigned long * colfg, unsigned long * colbg) {
 }
 
 void
-drawheader(char * text) {
-	char *ctext;
+drawheader(const char * text) {
+	const char *ctext;
 	unsigned long colfg, colbg;
 	dzen.x = 0;
 	dzen.y = 0;
@@ -233,7 +233,7 @@ drawheader(char * text) {
 
 void
 drawbody(char * text) {
-	char *ctext;
+	const char *ctext;
 	unsigned long colfg, colbg;
 
 	if(dzen.slave_win.tcnt == dzen.slave_win.tsize) 

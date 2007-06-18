@@ -42,7 +42,7 @@ estrdup(const char *str) {
 }
 void
 spawn(const char *arg) {
-	static char *shell = NULL;
+	static const char *shell = NULL;
 
 	if(!shell && !(shell = getenv("SHELL")))
 		shell = "/bin/sh";
