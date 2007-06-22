@@ -271,6 +271,36 @@ queryscreeninfo(Display *dpy, XRectangle *rect, int screen) {
 }
 #endif
 
+static void set_net_wm_strut_partial_for(Display *dpy, Window w) {
+	unsigned long strut[12] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+	XWindowAttributes wa;
+
+	XGetWindowAttributes(dpy, w, &wa);
+
+	if(wa.y == 0) {
+		strut[2] = wa.height;
+		strut[8] = wa.x;
+		strut[9] = wa.x + wa.width - 1;
+	} else if((wa.y + wa.height) == DisplayHeight(dpy, DefaultScreen(dpy))) {
+		strut[3] = wa.height;
+		strut[10] = wa.x;
+		strut[11] = wa.x + wa.width - 1;
+	}
+
+	if(strut[2] != 0 || strut[3] != 0) {
+		XChangeProperty(
+			dpy, 
+			w, 
+			XInternAtom(dpy, "_NET_WM_STRUT_PARTIAL", False),
+			XInternAtom(dpy, "CARDINAL", False),
+			32, 
+			PropModeReplace,
+			(unsigned char *)&strut,
+			12
+		);
+	}
+}
+
 static void
 x_create_windows(void) {
 	XSetWindowAttributes wa;
@@ -312,6 +342,9 @@ x_create_windows(void) {
 			CWOverrideRedirect | CWBackPixmap | CWEventMask, &wa);
 	dzen.title_win.drawable = XCreatePixmap(dzen.dpy, root, dzen.title_win.width, 
 			dzen.line_height, DefaultDepth(dzen.dpy, dzen.screen));
+
+	/* set some hints for windowmanagers*/
+	set_net_wm_strut_partial_for(dzen.dpy, dzen.title_win.win);
 
 	/* TODO: Smarter approach to window creation so we can reduce the
 	 *       size of this function. 
