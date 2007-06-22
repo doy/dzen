@@ -244,7 +244,7 @@ Dzen provides two menu modes, vertical and horizontal menus. You can
 access these modes by adding 'v'(ertical) or 'h'(horizontal) to the 
 '-m' option. If nothing is specified dzen defaults to vertical menus.
 
-Vertical menu, both invocations beeing equivalent:
+Vertical menu, both invocations are equivalent:
     dzen2 -p -l 4 -m < file
     dzen2 -p -l 4 -m v < file
 
