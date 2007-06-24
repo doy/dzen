@@ -106,6 +106,7 @@ add_option(long evid, int hpos, int opos, char* opt) {
 	while(item) {
 		if(item->id == evid) {
 			item->action[hpos]->options[opos] = estrdup(opt);
+			item->action[hpos]->options[opos+1] = NULL;
 			break;
 		}
 		item = item->next;
