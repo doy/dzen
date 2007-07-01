@@ -13,8 +13,8 @@ typedef struct _ev_list ev_list;
 typedef int handlerf(char **);
 
 enum ev_id {
-	/* startup, exit */
-	onstart, onexit,
+	/* startup, exit, input */
+	onstart, onexit, onnewinput,
 	/* mouse buttons */
 	button1, button2, button3, button4, button5,
 	/* entering/leaving windows */

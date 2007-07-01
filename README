@@ -159,6 +159,7 @@ Supported events:
 
     onstart             Perform actions right after startup
     onexit              Perform actions just before exiting
+    onnewinput          Perform actions if there is new input for the slave window
     button1             Mouse button1 released 
     button2             Mouse button2 released
     button3             Mouse button3 released

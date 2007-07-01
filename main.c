@@ -515,7 +515,10 @@ static void
 handle_newl(void) {
 	XWindowAttributes wa;
 
+
 	if(dzen.slave_win.max_lines && (dzen.slave_win.tcnt > last_cnt)) {
+		do_action(onnewinput);
+
 		if (XGetWindowAttributes(dzen.dpy, dzen.slave_win.win, &wa),
 				wa.map_state != IsUnmapped
 				/* autoscroll and redraw only if  we're 

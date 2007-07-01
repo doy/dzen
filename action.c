@@ -14,6 +14,7 @@
 struct event_lookup ev_lookup_table[] = {
 	{ "onstart",        onstart},
 	{ "onexit",         onexit},
+	{ "onnewinput",     onnewinput},
 	{ "button1",        button1},
 	{ "button2",        button2},
 	{ "button3",        button3},
@@ -25,7 +26,7 @@ struct event_lookup ev_lookup_table[] = {
 	{ "leaveslave",     leaveslave},
 	{ "sigusr1",        sigusr1},
 	{ "sigusr2",        sigusr2},
-	{ "keymarker",		keymarker},
+	{ "keymarker",      keymarker},
 	{ 0, 0 }
 };
 
@@ -47,9 +48,9 @@ struct action_lookup  ac_lookup_table[] = {
 	{ "raise",          a_raise},
 	{ "lower",          a_lower},
 	{ "scrollhome",     a_scrollhome},
-	{ "scrollend",		a_scrollend},
-	{ "grabkeys",		a_grabkeys},
-	{ "ungrabkeys",		a_ungrabkeys},
+	{ "scrollend",      a_scrollend},
+	{ "grabkeys",       a_grabkeys},
+	{ "ungrabkeys",     a_ungrabkeys},
 	{ 0, 0 }
 };
 
