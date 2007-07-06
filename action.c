@@ -36,11 +36,13 @@ struct action_lookup  ac_lookup_table[] = {
 	{ "exit",           a_exit},
 	{ "collapse",       a_collapse},
 	{ "uncollapse",     a_uncollapse},
+	{ "togglecollapse",	a_togglecollapse},
 	{ "stick",          a_stick},
 	{ "unstick",        a_unstick},
 	{ "togglestick",    a_togglestick},
 	{ "hide",           a_hide},
 	{ "unhide",         a_unhide},
+	{ "togglehide",     a_togglehide},
 	{ "scrollup",       a_scrollup},
 	{ "scrolldown",     a_scrolldown},
 	{ "menuprint",      a_menuprint},
@@ -265,8 +267,6 @@ a_collapse(char * opt[]){
 	if(!dzen.slave_win.ishmenu 
 			&& dzen.slave_win.max_lines 
 			&& !dzen.slave_win.issticky) {
-		for(i=0; i < dzen.slave_win.max_lines; i++)
-			XUnmapWindow(dzen.dpy, dzen.slave_win.line[i]);
 		XUnmapWindow(dzen.dpy, dzen.slave_win.win);
 	}
 	return 0;
@@ -286,13 +286,19 @@ a_uncollapse(char * opt[]){
 	return 0;
 }
 
-#if 0
-static int
+int
 a_togglecollapse(char * opt[]){
+	XWindowAttributes wa;
 	(void)opt;
+
+	if(dzen.slave_win.max_lines && 
+			(XGetWindowAttributes(dzen.dpy, dzen.slave_win.win, &wa), wa.map_state == IsUnmapped))
+		a_uncollapse(NULL);
+	else
+		a_collapse(NULL);
+
 	return 0;
 }
-#endif
 
 int
 a_stick(char * opt[]) {
@@ -389,6 +395,17 @@ a_unhide(char * opt[]) {
 
 		dzen.title_win.ishidden = False;
 	}
+	return 0;
+}
+
+int
+a_togglehide(char * opt[]) {
+	(void)opt;
+
+	dzen.title_win.ishidden ? 
+		a_unhide(NULL) : 
+		a_hide(NULL);
+
 	return 0;
 }
 

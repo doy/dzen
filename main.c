@@ -271,7 +271,8 @@ queryscreeninfo(Display *dpy, XRectangle *rect, int screen) {
 }
 #endif
 
-static void set_net_wm_strut_partial_for(Display *dpy, Window w) {
+static void 
+set_net_wm_strut_partial_for(Display *dpy, Window w) {
 	unsigned long strut[12] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 	XWindowAttributes wa;
 
@@ -508,6 +509,17 @@ handle_xev(void) {
 			XLookupString(&ev.xkey, buf, sizeof buf, &ksym, 0);
 			do_action(ksym+keymarker);
 			break;
+		
+		/* TODO: XRandR rotation and size chnages */
+#if 0
+
+#ifdef DZEN_XRANDR 
+		case RRScreenChangeNotify:
+			handle_xrandr();
+#endif
+
+#endif
+		
 	}
 }
 
