@@ -85,6 +85,73 @@ dzen accepts a couple of options:
     For dynamic color support see (5).
 
 
+
+Window layout
+------------
+
+Dzen's window layout is as follows:
+
+     ------------------------------------------
+    |        Title window, single line         |
+    `------------------------------------------´
+    |                                          |
+    |               scrollable                 |
+    |              Slave window                |
+    |             multiple lines               |
+    |     lines to display simultaneously      |
+    |           controlled with the            |
+    |              '-l' option                 |
+    |                                          |
+    |                                          |
+    `------------------------------------------´
+
+The first line you provide to dzen always goes to the title window, 
+all other consecutive lines will be drawn to the slave window.
+
+
+QA:
+---
+
+Q1:  I don't want a slave window, what to do?
+
+A1:  Do not provide the '-l' option, all lines will be displayed
+     in the title window, this is the default behaviour.
+
+
+Q2:  I used the '-l' option but no slave window appears.
+
+A2:  With the default event/action handling the slave window will
+     only be displayed if you hoover with the mouse over the title
+     window. See "(2) Events and actions" if you'd like to change
+     this.
+
+
+Q3:  If I echo some text or cat a file dzen closes itself imediatelly.
+
+A3:  There are 2 different approaches dzen uses to terminate itself, 
+     see next section "Termination".
+
+
+Q4:  Ok, the title and slave thing works, can I update the
+     contents of both windows at the same time?
+
+A4:  Sure, see "(4) Simultaneous updates".
+
+
+Q5:  Can i chnage color of my input at runtime?
+
+A5:  Yes, you can change both background and foreground colors.
+     See "(5) Dynamic color support"
+
+
+Q6:  Can I use dzen as a menu?
+
+A7:  Yes, both vertical and horizontal menus are supported. 
+     See "(3) Menu" for further details.
+
+
+
+
 Termination:
 ------------
 dzen uses two different approaches to terminate itself:
@@ -104,7 +171,7 @@ Return values:
 --------------
 0               -   dzen received EOF
 1               -   some error occured, inspect the error message
-user defined    -   set with 'exit:retval' action, see (2))
+user defined    -   set with 'exit:retval' action, see (2)
 
 
 
@@ -194,11 +261,13 @@ Supported actions:
     menuprint           write selected menu entry to STDOUT
     collapse            collapse (roll-up) slave window
     uncollapse          uncollapse (roll-down) slave window
+    togglecollapse      toggle collapsed state
     stick               stick slave window
     unstick             unstick slave window
     togglestick         toggle sticky state
     hide                hide title window
     unhide              unhide title window
+    togglehide          toggle hide state
     raise               raise window to view (above all others)
     lower               lower window (behind all others)
     scrollhome          show head of input
