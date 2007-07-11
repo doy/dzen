@@ -93,9 +93,10 @@ add_handler(long evid, int hpos, handlerf* hcb) {
 	item = head;
 	while(item) {
 		if(item->id == evid) {
-			item->action[hpos] = emalloc(sizeof(As));
-			item->action[hpos]->handler = hcb;
-			item->action[hpos+1]->handler = NULL;
+			if(hpos < MAXACTIONS) {
+				item->action[hpos] = emalloc(sizeof(As));
+				item->action[hpos]->handler = hcb;
+			}
 			break;
 		}
 		item = item->next;
@@ -109,8 +110,10 @@ add_option(long evid, int hpos, int opos, char* opt) {
 	item = head;
 	while(item) {
 		if(item->id == evid) {
-			item->action[hpos]->options[opos] = estrdup(opt);
-			item->action[hpos]->options[opos+1] = NULL;
+			if(opos < MAXOPTIONS) {
+				item->action[hpos]->options[opos] = estrdup(opt);
+				item->action[hpos]->options[opos+1] = NULL;
+			}
 			break;
 		}
 		item = item->next;
