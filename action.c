@@ -95,6 +95,7 @@ add_handler(long evid, int hpos, handlerf* hcb) {
 		if(item->id == evid) {
 			item->action[hpos] = emalloc(sizeof(As));
 			item->action[hpos]->handler = hcb;
+			item->action[hpos+1]->handler = NULL;
 			break;
 		}
 		item = item->next;
