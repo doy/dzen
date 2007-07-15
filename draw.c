@@ -44,7 +44,8 @@ drawtext(const char *text, int reverse, int line, int align) {
 			reverse ?
 				XSetForeground(dzen.dpy, mgc, dzen.norm[ColFG]):
 				XSetForeground(dzen.dpy, mgc, dzen.norm[ColBG]);
-		} else {
+		} 
+		else {
 			reverse ?
 				XSetForeground(dzen.dpy, mgc, dzen.slave_win.tbuf[line+dzen.slave_win.first_line_vis].fg):
 				XSetForeground(dzen.dpy, mgc, dzen.slave_win.tbuf[line+dzen.slave_win.first_line_vis].bg);
@@ -55,7 +56,8 @@ drawtext(const char *text, int reverse, int line, int align) {
 			reverse ?
 				XSetForeground(dzen.dpy, mgc, dzen.norm[ColBG]):
 				XSetForeground(dzen.dpy, mgc, dzen.norm[ColFG]);
-		} else {
+		} 
+		else {
 			reverse ?
 				XSetForeground(dzen.dpy, mgc, dzen.slave_win.tbuf[line+dzen.slave_win.first_line_vis].bg):
 				XSetForeground(dzen.dpy, mgc, dzen.slave_win.tbuf[line+dzen.slave_win.first_line_vis].fg);
@@ -91,7 +93,8 @@ drawtext(const char *text, int reverse, int line, int align) {
 			x = (dzen.slave_win.width - textw(buf)+h)/2;
 		else
 			x = dzen.slave_win.width - textw(buf);
-	} else {
+	} 
+	else {
 		if(!align)
 			x = (dzen.w - textw(buf)+h)/2;
 		else if(align == ALIGNLEFT)
@@ -197,7 +200,8 @@ setlinecolor(const char * text, unsigned long * colfg, unsigned long * colbg) {
 			*colbg = newbg;
 
 			return text+16;
-		} else
+		} 
+		else
 			*colbg = dzen.norm[ColBG];
 
 		return text+8;
@@ -243,7 +247,8 @@ drawbody(char * text) {
 			dzen.slave_win.tbuf[dzen.slave_win.tcnt].fg = colfg;
 			dzen.slave_win.tbuf[dzen.slave_win.tcnt].bg = colbg;
 			dzen.slave_win.tbuf[dzen.slave_win.tcnt].text = estrdup(ctext);
-		} else {
+		} 
+		else {
 			dzen.slave_win.tbuf[dzen.slave_win.tcnt].fg = dzen.norm[ColFG];
 			dzen.slave_win.tbuf[dzen.slave_win.tcnt].bg = dzen.norm[ColBG];
 			dzen.slave_win.tbuf[dzen.slave_win.tcnt].text = estrdup(text);

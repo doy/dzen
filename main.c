@@ -108,7 +108,8 @@ chomp(char *inbuf, char *outbuf, int start, int len) {
 		}
 		if(inbuf[off] != '\n') {
 			 outbuf[i++] = inbuf[off++];
-		} else if(inbuf[off] == '\n') {
+		} 
+		else if(inbuf[off] == '\n') {
 			outbuf[i] = '\0';
 			return ++off;
 		}
@@ -143,9 +144,11 @@ read_stdin(void) {
 		if(!dzen.ispersistent) {
 			dzen.running = False;
 			return -1;
-		} else 
+		} 
+		else 
 			return -2;
-	} else {
+	} 
+	else {
 		while((n_off = chomp(buf, retbuf, n_off, n))) {
 			if(!dzen.slave_win.ishmenu 
 					&& dzen.tsupdate 
@@ -165,14 +168,14 @@ read_stdin(void) {
 }
 
 static void
-x_highlight_line(int line) {
+x_hilight_line(int line) {
 	drawtext(dzen.slave_win.tbuf[line + dzen.slave_win.first_line_vis].text, 1, line, dzen.slave_win.alignment);
 	XCopyArea(dzen.dpy, dzen.slave_win.drawable[line], dzen.slave_win.line[line], dzen.rgc,
 			0, 0, dzen.slave_win.width, dzen.line_height, 0, 0);
 }
 
 static void
-x_unhighlight_line(int line) {
+x_unhilight_line(int line) {
 	drawtext(dzen.slave_win.tbuf[line + dzen.slave_win.first_line_vis].text, 0, line, dzen.slave_win.alignment);
 	XCopyArea(dzen.dpy, dzen.slave_win.drawable[line], dzen.slave_win.line[line], dzen.gc,
 			0, 0, dzen.slave_win.width, dzen.line_height, 0, 0);
@@ -262,7 +265,8 @@ queryscreeninfo(Display *dpy, XRectangle *rect, int screen) {
 
 	if(xsi == NULL || screen > nscreens || screen <= 0) {
 		qsi_no_xinerama(dpy, rect);
-	} else {
+	} 
+	else {
 		rect->x      = xsi[screen-1].x_org;
 		rect->y      = xsi[screen-1].y_org;
 		rect->width  = xsi[screen-1].width;
@@ -282,7 +286,8 @@ set_net_wm_strut_partial_for(Display *dpy, Window w) {
 		strut[2] = wa.height;
 		strut[8] = wa.x;
 		strut[9] = wa.x + wa.width - 1;
-	} else if((wa.y + wa.height) == DisplayHeight(dpy, DefaultScreen(dpy))) {
+	} 
+	else if((wa.y + wa.height) == DisplayHeight(dpy, DefaultScreen(dpy))) {
 		strut[3] = wa.height;
 		strut[10] = wa.x;
 		strut[11] = wa.x + wa.width - 1;
@@ -460,7 +465,7 @@ handle_xev(void) {
 			if(dzen.slave_win.ismenu) { 
 				for(i=0; i < dzen.slave_win.max_lines; i++) 
 					if(ev.xcrossing.window == dzen.slave_win.line[i])
-						x_highlight_line(i);
+						x_hilight_line(i);
 			}
 			if(!dzen.slave_win.ishmenu 
 					&& ev.xcrossing.window == dzen.title_win.win)
@@ -472,7 +477,7 @@ handle_xev(void) {
 			if(dzen.slave_win.ismenu) {
 				for(i=0; i < dzen.slave_win.max_lines; i++)
 					if(ev.xcrossing.window == dzen.slave_win.line[i])
-						x_unhighlight_line(i);
+						x_unhilight_line(i);
 			}
 			if(!dzen.slave_win.ishmenu 
 					&& ev.xcrossing.window == dzen.title_win.win)

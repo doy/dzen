@@ -30,4 +30,14 @@ clean:
 	@echo cleaning
 	@rm -f ${OBJ} dbar
 
-.PHONY: all options clean
+install: all
+	@echo installing executable file to ${DESTDIR}${PREFIX}/bin
+	@mkdir -p ${DESTDIR}${PREFIX}/bin
+	@cp -f dbar ${DESTDIR}${PREFIX}/bin
+	@chmod 755 ${DESTDIR}${PREFIX}/bin/dbar
+
+uninstall:
+	@echo removing executable file from ${DESTDIR}${PREFIX}/bin
+	@rm -f ${DESTDIR}${PREFIX}/bin/dbar
+
+.PHONY: all options clean install uninstall

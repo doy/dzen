@@ -1,13 +1,15 @@
-#  extend available events:
+#  X related
 
-          o input changed event
+          o XRandR support
+
 
 #  extend available actions
 
           o set font action
-          o actions acting like a switch should have a toggleaction function
           o any other useful action
+
 
 # user interface
 
-          o split lines longer than window width in multiple lines
+          o dynamic coloring partial text
+          o support icons

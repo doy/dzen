@@ -66,7 +66,8 @@ new_event(long evid) {
 		head = emalloc(sizeof (ev_list));
 		head->id = evid;
 		head->next = NULL;
-	} else {
+	} 
+	else {
 		item = head;
 		/* check if we already handle this event */
 		while(item) {
@@ -342,7 +343,8 @@ scroll(int n) {
 	else if(dzen.slave_win.last_line_vis + n > dzen.slave_win.tcnt) {
 		dzen.slave_win.first_line_vis = dzen.slave_win.tcnt - dzen.slave_win.max_lines;
 		dzen.slave_win.last_line_vis = dzen.slave_win.tcnt;
-	} else {
+	} 
+	else {
 		dzen.slave_win.first_line_vis += n;
 		dzen.slave_win.last_line_vis  += n;
 	}
