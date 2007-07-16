@@ -433,6 +433,8 @@ x_create_windows(void) {
 	dzen.rgc = XCreateGC(dzen.dpy, root, 0, 0);
 	XSetForeground(dzen.dpy, dzen.rgc, dzen.norm[ColBG]);
 	XSetBackground(dzen.dpy, dzen.rgc, dzen.norm[ColFG]);
+	dzen.tgc = XCreateGC(dzen.dpy, root, 0, 0);
+
 }
 
 static void 

@@ -29,9 +29,6 @@ textnw(const char *text, unsigned int len) {
 
 void
 drawtext(const char *text, int reverse, int line, int align) {
-	int x=0, y=0, w, h;
-	static char buf[1024];
-	unsigned int len, olen;
 	XRectangle r = { dzen.x, dzen.y, dzen.w, dzen.h};
 
 
@@ -45,28 +42,6 @@ drawtext(const char *text, int reverse, int line, int align) {
 		XFillRectangles(dzen.dpy, dzen.slave_win.drawable[line], dzen.rgc, &r, 1);
 		XSetForeground(dzen.dpy, dzen.rgc, dzen.norm[ColBG]);
 	}
-
-
-	w = 0;
-	olen = len = strlen(text);
-	/*
-	if(len >= sizeof buf)
-		len = sizeof buf - 1;
-	memcpy(buf, text, len);
-	buf[len] = 0;
-	h = dzen.font.ascent + dzen.font.descent;
-
-	while(len && (w = textnw(buf, len)) > dzen.w - h)
-		buf[--len] = 0;
-	if(len < olen) {
-		if(len > 1)
-			buf[len - 1] = '.';
-		if(len > 2)
-			buf[len - 2] = '.';
-		if(len > 3)
-			buf[len - 3] = '.';
-	}
-	*/
 
 	if(dzen.font.set) 
 		parse_line(text, line, align, reverse);
@@ -144,7 +119,7 @@ get_tokval(const char* line, char **retdata) {
 
 int
 get_token(const char *line, int * t, char **tval) {
-	int off=0, next_pos;
+	int off=0, next_pos=0;
 	char *tokval = NULL;
 
 	if(*(line+1) == '^')
@@ -176,16 +151,14 @@ get_token(const char *line, int * t, char **tval) {
 
 void
 parse_line(const char *line, int lnr, int align, int reverse) {
-	int i, next_pos=0, j=0, px=0, py=0, xorig, h;
-	char lbuf[1024];
-	int cnr=0, oc, he=0;
+	int i, next_pos=0, j=0, px=0, py=0, xorig, h, tw, ow;
+	char lbuf[MAX_LINE_LEN];
 	int t=-1;
 	char *tval=NULL;
 	Drawable pm;
-	GC tgc;
+	XRectangle r = { dzen.x, dzen.y, dzen.w, dzen.h};
 
 
-	tgc  = XCreateGC(dzen.dpy, RootWindow(dzen.dpy, DefaultScreen(dzen.dpy)), 0, 0);
 	h = dzen.font.ascent + dzen.font.descent;
 	xorig = 0; py = dzen.font.ascent + (dzen.line_height - h) / 2;;
 
@@ -199,30 +172,28 @@ parse_line(const char *line, int lnr, int align, int reverse) {
 	}
 
 	if(!reverse) {
-		XSetBackground(dzen.dpy, tgc, dzen.norm[ColBG]);
-		XSetForeground(dzen.dpy, tgc, dzen.norm[ColBG]);
+		XSetBackground(dzen.dpy, dzen.tgc, dzen.norm[ColBG]);
+		XSetForeground(dzen.dpy, dzen.tgc, dzen.norm[ColBG]);
 	}
 	else {
-		XSetBackground(dzen.dpy, tgc, dzen.norm[ColFG]);
-		XSetForeground(dzen.dpy, tgc, dzen.norm[ColFG]);
+		XSetBackground(dzen.dpy, dzen.tgc, dzen.norm[ColFG]);
+		XSetForeground(dzen.dpy, dzen.tgc, dzen.norm[ColFG]);
 	}
-	XRectangle r = { dzen.x, dzen.y, dzen.w, dzen.h};
-	XFillRectangles(dzen.dpy, pm, tgc, &r, 1);
+	XFillRectangles(dzen.dpy, pm, dzen.tgc, &r, 1);
 
 	if(!reverse) {
-		XSetForeground(dzen.dpy, tgc, dzen.norm[ColFG]);
+		XSetForeground(dzen.dpy, dzen.tgc, dzen.norm[ColFG]);
 	}
 	else {
-		XSetForeground(dzen.dpy, tgc, dzen.norm[ColBG]);
+		XSetForeground(dzen.dpy, dzen.tgc, dzen.norm[ColBG]);
 	}
 
 	if( (lnr + dzen.slave_win.first_line_vis) >= dzen.slave_win.tcnt) {
 			XmbDrawImageString(dzen.dpy, pm, dzen.font.set,
-					tgc, px, py, "  ", strlen("  "));
+					dzen.tgc, px, py, "", 0);
 			XCopyArea(dzen.dpy, pm, dzen.slave_win.drawable[lnr], dzen.gc,
 					0, 0, px, dzen.line_height, xorig, 0);
 			XFreePixmap(dzen.dpy, pm);
-			XFreeGC(dzen.dpy, tgc);
 			return;
 	}
 
@@ -234,19 +205,35 @@ parse_line(const char *line, int lnr, int align, int reverse) {
 				switch(t) {
 					case fg:
 						reverse ?
-							XSetBackground(dzen.dpy, tgc, getcolor(tval)) :
-							XSetForeground(dzen.dpy, tgc, getcolor(tval));
+							XSetBackground(dzen.dpy, dzen.tgc, getcolor(tval)) :
+							XSetForeground(dzen.dpy, dzen.tgc, getcolor(tval));
 						break;
 					case bg:
 						reverse ? 
-							XSetForeground(dzen.dpy, tgc, getcolor(tval)) :
-							XSetBackground(dzen.dpy, tgc, getcolor(tval));
+							XSetForeground(dzen.dpy, dzen.tgc, getcolor(tval)) :
+							XSetBackground(dzen.dpy, dzen.tgc, getcolor(tval));
 						break;
 				}
 			}
+			ow = j;
+			tw = textnw(lbuf, strlen(lbuf));
+			while( (tw + px) > (dzen.w - h)) {
+				lbuf[--j] = '\0';
+				tw = textnw(lbuf, strlen(lbuf));
+			}
+			if(j < ow) {
+				if(j > 1)
+					lbuf[j - 1] = '.';
+				if(j > 2)
+					lbuf[j - 2] = '.';
+				if(j > 3)
+					lbuf[j - 3] = '.';
+			}
+
+				
 			XmbDrawImageString(dzen.dpy, pm, dzen.font.set,
-					tgc, px, py, lbuf, strlen(lbuf));
-			px += textnw(lbuf, strlen(lbuf));
+					dzen.tgc, px, py, lbuf, tw);
+			px += tw;
 
 			j=0; t=-1; tval=NULL;
 			/* get values */
@@ -269,19 +256,34 @@ parse_line(const char *line, int lnr, int align, int reverse) {
 		switch(t) {
 			case fg:
 				reverse ?
-					XSetBackground(dzen.dpy, tgc, getcolor(tval)) :
-					XSetForeground(dzen.dpy, tgc, getcolor(tval));
+					XSetBackground(dzen.dpy, dzen.tgc, getcolor(tval)) :
+					XSetForeground(dzen.dpy, dzen.tgc, getcolor(tval));
 				break;
 			case bg:
 				reverse ? 
-					XSetForeground(dzen.dpy, tgc, getcolor(tval)) :
-					XSetBackground(dzen.dpy, tgc, getcolor(tval));
+					XSetForeground(dzen.dpy, dzen.tgc, getcolor(tval)) :
+					XSetBackground(dzen.dpy, dzen.tgc, getcolor(tval));
 				break;
 		}
 	}
+	ow = j;
+	tw = textnw(lbuf, strlen(lbuf));
+	while( (tw + px) > (dzen.w - h)) {
+		lbuf[--j] = '\0';
+		tw = textnw(lbuf, strlen(lbuf));
+	}
+	if(j < ow) {
+		if(j > 1)
+			lbuf[j - 1] = '.';
+		if(j > 2)
+			lbuf[j - 2] = '.';
+		if(j > 3)
+			lbuf[j - 3] = '.';
+	}
+
 	XmbDrawImageString(dzen.dpy, pm, dzen.font.set,
-			tgc, px, py, lbuf, strlen(lbuf));
-	px += textnw(lbuf, strlen(lbuf));
+			dzen.tgc, px, py, lbuf, tw);
+	px += tw;
 
 	if(align == ALIGNLEFT)
 		xorig = h/2;
@@ -305,13 +307,10 @@ parse_line(const char *line, int lnr, int align, int reverse) {
 				0, 0, px, dzen.line_height, xorig, 0);
 	}
 	XFreePixmap(dzen.dpy, pm);
-	XFreeGC(dzen.dpy, tgc);
 }
 
 void
 drawheader(const char * text) {
-	const char *ctext;
-	unsigned long colfg, colbg;
 	dzen.x = 0;
 	dzen.y = 0;
 	dzen.w = dzen.title_win.width;
@@ -331,9 +330,6 @@ drawheader(const char * text) {
 
 void
 drawbody(char * text) {
-	const char *ctext;
-	unsigned long colfg, colbg;
-
 	if(dzen.slave_win.tcnt == dzen.slave_win.tsize) 
 		free_buffer();
 	if(dzen.slave_win.tcnt < dzen.slave_win.tsize) {

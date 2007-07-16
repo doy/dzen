@@ -202,12 +202,14 @@ void
 fill_ev_table(char *input) {
 	char *str1, *str2, *str3, *str4,
 		 *token, *subtoken, *kommatoken, *dptoken;
-	char *saveptr1, *saveptr2, *saveptr3, *saveptr4;
+	char *saveptr1=NULL, 
+		 *saveptr2=NULL, 
+		 *saveptr3=NULL, 
+		 *saveptr4=NULL;
 	int j, i=0, k=0;
 	long eid=0;
 	handlerf *ah=0;
 
-	saveptr1 = NULL; /* wtf, gcc? wtf? */
 	for (j = 1, str1 = input; ; j++, str1 = NULL) {
 		token = strtok_r(str1, ";", &saveptr1);
 		if (token == NULL)
@@ -267,7 +269,6 @@ a_exit(char * opt[]) {
 
 int
 a_collapse(char * opt[]){
-	int i;
 	(void)opt;
 	if(!dzen.slave_win.ishmenu 
 			&& dzen.slave_win.max_lines 

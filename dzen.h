@@ -100,7 +100,7 @@ struct DZEN {
 	unsigned int depth;
 
 	Visual *visual;
-	GC gc, rgc;
+	GC gc, rgc, tgc;
 	Fnt font;
 
 	Bool ispersistent;

@@ -374,7 +374,8 @@ of lines to the slave window as defined by the parameter to '-l'.
 
 This feature allows to dynamically (at runtime) set foreground and
 background colors for dzen's input (colored text) working in all 
-modes (title only, slave window and menu mode).
+modes (title only, slave window and menu mode). You can specify the
+colors by using their symbolic names or '#rrggbb' values.
 
 The input must be in the following format:
 
@@ -382,16 +383,25 @@ The input must be in the following format:
 
     ^fg(red)I'm red text ^fg(blue)I am blue
 
+    Escaped version, if you view this file with dzen:
+    ^^fg(red)I'm red text ^^fg(blue)I am blue
+
 
   * Setting foreground and/or background colors:
 
     ^bg(#ffaaaa)The ^fg(yellow)text to ^bg(blue)^fg(orange)colorize
+
+    Escaped version, if you view this file with dzen:
+    ^^bg(#ffaaaa)The ^^fg(yellow)text to ^^bg(blue)^fg(orange)colorize
 
 
   * If you need to print '^^' characters double them in order to escape them
     from being interpreted
 
     ^fg(grey70)Some text containing ^^ characters
+
+    Escaped version, if you view this file with dzen:
+    ^^fg(grey70)Some text containing ^^^^ characters
 
 
 
