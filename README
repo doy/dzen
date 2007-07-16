@@ -380,17 +380,18 @@ The input must be in the following format:
 
   * Setting only the foreground color:
 
-    ^#rrggbbThe text to colorize
+    ^fg(red)I'm red text ^fg(blue)I am blue
 
 
-  * Setting foreground and background color:
+  * Setting foreground and/or background colors:
 
-    ^#rrggbb^#rrggbbThe text to colorize
+    ^bg(#ffaaaa)The ^fg(yellow)text to ^bg(blue)^fg(orange)colorize
 
-An example:
 
-  echo "^#ffffff^#000000I am white text on black background" | dzen2 -p
+  * If you need to print '^^' characters double them in order to escape them
+    from being interpreted
 
+    ^fg(grey70)Some text containing ^^ characters
 
 
 

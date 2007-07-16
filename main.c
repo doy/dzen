@@ -45,6 +45,7 @@ clean_up(void) {
 		XDestroyWindow(dzen.dpy, dzen.slave_win.win);
 	}
 	XFreeGC(dzen.dpy, dzen.gc);
+	XFreeGC(dzen.dpy, dzen.rgc);
 	XDestroyWindow(dzen.dpy, dzen.title_win.win);
 	XCloseDisplay(dzen.dpy);
 }
@@ -170,14 +171,14 @@ read_stdin(void) {
 static void
 x_hilight_line(int line) {
 	drawtext(dzen.slave_win.tbuf[line + dzen.slave_win.first_line_vis].text, 1, line, dzen.slave_win.alignment);
-	XCopyArea(dzen.dpy, dzen.slave_win.drawable[line], dzen.slave_win.line[line], dzen.rgc,
+	XCopyArea(dzen.dpy, dzen.slave_win.drawable[line], dzen.slave_win.line[line], dzen.gc,
 			0, 0, dzen.slave_win.width, dzen.line_height, 0, 0);
 }
 
 static void
 x_unhilight_line(int line) {
 	drawtext(dzen.slave_win.tbuf[line + dzen.slave_win.first_line_vis].text, 0, line, dzen.slave_win.alignment);
-	XCopyArea(dzen.dpy, dzen.slave_win.drawable[line], dzen.slave_win.line[line], dzen.gc,
+	XCopyArea(dzen.dpy, dzen.slave_win.drawable[line], dzen.slave_win.line[line], dzen.rgc,
 			0, 0, dzen.slave_win.width, dzen.line_height, 0, 0);
 }
 
@@ -428,7 +429,7 @@ x_create_windows(void) {
 	dzen.gc  = XCreateGC(dzen.dpy, root, 0, 0);
 	XSetForeground(dzen.dpy, dzen.gc, dzen.norm[ColFG]);
 	XSetBackground(dzen.dpy, dzen.gc, dzen.norm[ColBG]);
-	/* reverse GC */
+	/* temporary GC */
 	dzen.rgc = XCreateGC(dzen.dpy, root, 0, 0);
 	XSetForeground(dzen.dpy, dzen.rgc, dzen.norm[ColBG]);
 	XSetBackground(dzen.dpy, dzen.rgc, dzen.norm[ColFG]);
