@@ -317,12 +317,12 @@ drawheader(const char * text) {
 	dzen.h = dzen.line_height;
 	XRectangle r = { dzen.x, dzen.y, dzen.w, dzen.h};
 
-	XSetForeground(dzen.dpy, dzen.gc, dzen.norm[ColBG]);
-	XFillRectangles(dzen.dpy, dzen.title_win.drawable, dzen.gc, &r, 1);
-	XSetForeground(dzen.dpy, dzen.gc, dzen.norm[ColFG]);
-
-	if(text)
+	if(text) {
+		XSetForeground(dzen.dpy, dzen.gc, dzen.norm[ColBG]);
+		XFillRectangles(dzen.dpy, dzen.title_win.drawable, dzen.gc, &r, 1);
+		XSetForeground(dzen.dpy, dzen.gc, dzen.norm[ColFG]);
 		parse_line(text, -1, dzen.title_win.alignment, 0);
+	}
 
 	XCopyArea(dzen.dpy, dzen.title_win.drawable, dzen.title_win.win, 
 			dzen.gc, 0, 0, dzen.title_win.width, dzen.line_height, 0, 0);

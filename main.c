@@ -46,6 +46,7 @@ clean_up(void) {
 	}
 	XFreeGC(dzen.dpy, dzen.gc);
 	XFreeGC(dzen.dpy, dzen.rgc);
+	XFreeGC(dzen.dpy, dzen.tgc);
 	XDestroyWindow(dzen.dpy, dzen.title_win.win);
 	XCloseDisplay(dzen.dpy);
 }
