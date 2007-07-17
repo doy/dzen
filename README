@@ -392,7 +392,7 @@ The input must be in the following format:
     ^bg(#ffaaaa)The ^fg(yellow)text to ^bg(blue)^fg(orange)colorize
 
     Escaped version, if you view this file with dzen:
-    ^^bg(#ffaaaa)The ^^fg(yellow)text to ^^bg(blue)^fg(orange)colorize
+    ^^bg(#ffaaaa)The ^^fg(yellow)text to ^^bg(blue)^^fg(orange)colorize
 
 
   * If you need to print '^^' characters double them in order to escape them
