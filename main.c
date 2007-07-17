@@ -459,10 +459,14 @@ handle_xev(void) {
 						&& ev.xexpose.window == dzen.title_win.win) 
 					drawheader(NULL);
 				if(ev.xexpose.window == dzen.slave_win.win)
-					x_draw_body();;
-				for(i=0; i < dzen.slave_win.max_lines; i++) 
-					if(ev.xcrossing.window == dzen.slave_win.line[i])
-						x_draw_body();
+					x_draw_body();
+				else {
+					for(i=0; i < dzen.slave_win.max_lines; i++) 
+						if(ev.xcrossing.window == dzen.slave_win.line[i]) {
+							XCopyArea(dzen.dpy, dzen.slave_win.drawable[i], dzen.slave_win.line[i], dzen.gc,
+									0, 0, dzen.slave_win.width, dzen.line_height, 0, 0);
+						}
+				}
 			}
 			break;
 		case EnterNotify:
@@ -558,6 +562,7 @@ handle_newl(void) {
 		else if(wa.map_state == IsUnmapped || !dzen.slave_win.last_line_vis) {
 			dzen.slave_win.first_line_vis = 0;
 			dzen.slave_win.last_line_vis = 0;
+			x_draw_body();
 		}
 		last_cnt = dzen.slave_win.tcnt;
 	}
