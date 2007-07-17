@@ -350,6 +350,7 @@ x_create_windows(void) {
 			CWOverrideRedirect | CWBackPixmap | CWEventMask, &wa);
 	dzen.title_win.drawable = XCreatePixmap(dzen.dpy, root, dzen.title_win.width, 
 			dzen.line_height, DefaultDepth(dzen.dpy, dzen.screen));
+	XStoreName(dzen.dpy, dzen.title_win.win, "dzen title");
 
 	/* set some hints for windowmanagers*/
 	set_net_wm_strut_partial_for(dzen.dpy, dzen.title_win.win);
@@ -379,6 +380,7 @@ x_create_windows(void) {
 					DefaultDepth(dzen.dpy, dzen.screen), CopyFromParent,
 					DefaultVisual(dzen.dpy, dzen.screen),
 					CWOverrideRedirect | CWBackPixmap | CWEventMask, &wa);
+			XStoreName(dzen.dpy, dzen.slave_win.win, "dzen slave");
 
 			for(i=0; i < dzen.slave_win.max_lines; i++)
 				dzen.slave_win.drawable[i] = XCreatePixmap(dzen.dpy, root, ew+r, 
@@ -412,6 +414,7 @@ x_create_windows(void) {
 					DefaultDepth(dzen.dpy, dzen.screen), CopyFromParent,
 					DefaultVisual(dzen.dpy, dzen.screen),
 					CWOverrideRedirect | CWBackPixmap | CWEventMask, &wa);
+			XStoreName(dzen.dpy, dzen.slave_win.win, "dzen slave");
 
 			for(i=0; i < dzen.slave_win.max_lines; i++)
 				dzen.slave_win.drawable[i] = XCreatePixmap(dzen.dpy, root, dzen.slave_win.width, 
