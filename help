@@ -6,7 +6,7 @@ OPTS='-bg #323232 -fg #5FBF77 -p -l 20 -e onstart=uncollapse,scrollhome;button5=
 
 if [ -e ./dzen2 ]; then
 	(echo "^fg(#323232)^bg(#5FBF77)Documentation (use: scrollwheel, arrow keys, \
-PgUP/PgDown to scroll. Escape or right mouse button to quit)"; cat README) | ./dzen2 $OPTS
+PgUP/PgDown to scroll. Escape or right mouse button to quit)"; cat README.dzen) | ./dzen2 $OPTS
 else
 	echo "Please type 'make' to build dzen and rerun help"
 fi
