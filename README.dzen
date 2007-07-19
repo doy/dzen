@@ -374,34 +374,41 @@ of lines to the slave window as defined by the parameter to '-l'.
 
 This feature allows to dynamically (at runtime) set foreground and
 background colors for dzen's input (colored text) working in all 
-modes (title only, slave window and menu mode). You can specify the
-colors by using their symbolic names or '#rrggbb' values.
+modes (title only, slave window and menu mode).
 
-The input must be in the following format:
+Syntax:
 
-  * Setting only the foreground color:
-
-    ^fg(red)I'm red text ^fg(blue)I am blue
-
-    Escaped version, if you view this file with dzen:
-    ^^fg(red)I'm red text ^^fg(blue)I am blue
+Foreground color:  ^^fg(color)
+Background color:  ^^bg(color)
 
 
-  * Setting foreground and/or background colors:
+These commands can appear anywhere and in any combination in dzen's
+input. The color can be specified either as symbolic name (e.g. red,
+darkgreen, etc.) or as #rrggbb hex-value (e.g. #ffffaa).
 
-    ^bg(#ffaaaa)The ^fg(yellow)text to ^bg(blue)^fg(orange)colorize
+Doubling the '^^' character removes the special meaning from it.
 
-    Escaped version, if you view this file with dzen:
-    ^^bg(#ffaaaa)The ^^fg(yellow)text to ^^bg(blue)^^fg(orange)colorize
+Some examples:
+
+   Input:  
+          ^^fg(red)I'm red text ^^fg(blue)I am blue
+
+   Resulting in: 
+          ^fg(red)I'm red text ^fg(blue)I am blue
 
 
-  * If you need to print '^^' characters double them in order to escape them
-    from being interpreted
+    Input:
+          ^^bg(#ffaaaa)The ^^fg(yellow)text to ^^bg(blue)^^fg(orange)colorize
 
-    ^fg(grey70)Some text containing ^^ characters
+    Resulting in:
+          ^bg(#ffaaaa)The ^fg(yellow)text to ^bg(blue)^fg(orange)colorize
 
-    Escaped version, if you view this file with dzen:
-    ^^fg(grey70)Some text containing ^^^^ characters
+
+    Input:
+          ^^fg(grey70)Some text containing ^^^^ characters
+
+    Resulting in:
+          ^fg(grey70)Some text containing ^^ characters
 
 
 

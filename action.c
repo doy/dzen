@@ -439,23 +439,30 @@ a_print(char * opt[]) {
 
 int
 a_menuprint(char * opt[]) {
+	char *text;
 	(void)opt;
+
 	if(dzen.slave_win.ismenu && dzen.slave_win.sel_line != -1 
 			&& (dzen.slave_win.sel_line + dzen.slave_win.first_line_vis) < dzen.slave_win.tcnt) {
-		puts(dzen.slave_win.tbuf[dzen.slave_win.sel_line + dzen.slave_win.first_line_vis].text);
+		text = parse_line(NULL, dzen.slave_win.sel_line, 0, 0, 1);
+		puts(text); fflush(stdout);
 		dzen.slave_win.sel_line = -1;
-		fflush(stdout);
+		free(text);
 	}
 	return 0;
 }
 
 int
 a_menuexec(char * opt[]) {
+	char *text;
 	(void)opt;
+
 	if(dzen.slave_win.ismenu && dzen.slave_win.sel_line != -1
 			&& (dzen.slave_win.sel_line + dzen.slave_win.first_line_vis) < dzen.slave_win.tcnt) {
-		spawn(dzen.slave_win.tbuf[dzen.slave_win.sel_line + dzen.slave_win.first_line_vis].text);
+		text = parse_line(NULL, dzen.slave_win.sel_line, 0, 0, 1);
+		spawn(text);
 		dzen.slave_win.sel_line = -1;
+		free(text);
 	}
 	return 0;
 }
