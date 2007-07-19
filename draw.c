@@ -222,8 +222,11 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 			if(dzen.font.set)
 				XmbDrawImageString(dzen.dpy, pm, dzen.font.set,
 						dzen.tgc, px, py, "", 0);
-			else
+			else {
+				gcv.font = dzen.font.xfont->fid;
+				XChangeGC(dzen.dpy, dzen.tgc, GCFont, &gcv);
 				XDrawImageString(dzen.dpy, pm, dzen.tgc, px, py, "", 0);
+			}
 
 			XCopyArea(dzen.dpy, pm, dzen.slave_win.drawable[lnr], dzen.gc,
 					0, 0, px, dzen.line_height, xorig, 0);
@@ -264,7 +267,7 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 							dzen.tgc, px, py, lbuf, tw);
 				else {
 					gcv.font = dzen.font.xfont->fid;
-					XChangeGC(dzen.dpy, dzen.tgc, GCForeground | GCFont, &gcv);
+					XChangeGC(dzen.dpy, dzen.tgc, GCFont, &gcv);
 					XDrawImageString(dzen.dpy, pm, dzen.tgc, px, py, lbuf, tw); 
 				}
 				px += tw;
@@ -311,7 +314,7 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 					dzen.tgc, px, py, lbuf, tw);
 		else {
 			gcv.font = dzen.font.xfont->fid;
-			XChangeGC(dzen.dpy, dzen.tgc, GCForeground | GCFont, &gcv);
+			XChangeGC(dzen.dpy, dzen.tgc, GCFont, &gcv);
 			XDrawImageString(dzen.dpy, pm, dzen.tgc, px, py, lbuf, tw);
 		}
 		px += tw;
