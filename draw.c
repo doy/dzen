@@ -172,6 +172,7 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 	char lbuf[MAX_LINE_LEN], *rbuf = NULL;
 	int t=-1;
 	char *tval=NULL;
+	XGCValues gcv;
 	Drawable pm;
 	XRectangle r = { dzen.x, dzen.y, dzen.w, dzen.h};
 
@@ -261,8 +262,11 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 				if(dzen.font.set) 
 					XmbDrawImageString(dzen.dpy, pm, dzen.font.set,
 							dzen.tgc, px, py, lbuf, tw);
-				else
+				else {
+					gcv.font = dzen.font.xfont->fid;
+					XChangeGC(dzen.dpy, dzen.tgc, GCForeground | GCFont, &gcv);
 					XDrawImageString(dzen.dpy, pm, dzen.tgc, px, py, lbuf, tw); 
+				}
 				px += tw;
 			}
 
@@ -305,8 +309,11 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 		if(dzen.font.set)
 			XmbDrawImageString(dzen.dpy, pm, dzen.font.set,
 					dzen.tgc, px, py, lbuf, tw);
-		else
-			XDrawImageString(dzen.dpy, pm, dzen.tgc, px, py, lbuf, tw); 
+		else {
+			gcv.font = dzen.font.xfont->fid;
+			XChangeGC(dzen.dpy, dzen.tgc, GCForeground | GCFont, &gcv);
+			XDrawImageString(dzen.dpy, pm, dzen.tgc, px, py, lbuf, tw);
+		}
 		px += tw;
 
 
