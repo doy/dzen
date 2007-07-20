@@ -461,8 +461,12 @@ handle_xev(void) {
 				if(!dzen.slave_win.ishmenu
 						&& ev.xexpose.window == dzen.title_win.win) 
 					drawheader(NULL);
-				if(ev.xexpose.window == dzen.slave_win.win)
-					x_draw_body();
+				if(ev.xexpose.window == dzen.slave_win.win) {
+					/*x_draw_body();*/
+					for(i=0; i < dzen.slave_win.max_lines; i++)
+						XCopyArea(dzen.dpy, dzen.slave_win.drawable[i], dzen.slave_win.line[i], dzen.gc,
+								0, 0, dzen.slave_win.width, dzen.line_height, 0, 0);
+				}
 				else {
 					for(i=0; i < dzen.slave_win.max_lines; i++) 
 						if(ev.xcrossing.window == dzen.slave_win.line[i]) {
@@ -685,7 +689,7 @@ main(int argc, char *argv[]) {
 			}
 		}
 		else if(!strncmp(argv[i], "-u", 3)){
-				dzen.tsupdate = True;
+			dzen.tsupdate = True;
 		}
 		else if(!strncmp(argv[i], "-p", 3)) {
 			dzen.ispersistent = True;
