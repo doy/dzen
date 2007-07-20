@@ -39,7 +39,7 @@ typedef struct _Fnt {
 Fnt font;
 Display *dpy;
 
-static unsigned int
+unsigned int
 textw(const char *text, unsigned int len) {
 	XRectangle r;
 
@@ -110,7 +110,7 @@ main(int argc, char *argv[])
 	}
 
 	setfont(myfont);
-	printf("%d\n", textw(text, strlen(text)));
+	printf("%u\n", textw(text, strlen(text)));
 
 	return EXIT_SUCCESS;
 }

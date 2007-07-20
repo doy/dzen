@@ -41,7 +41,6 @@ install: all
 	@mkdir -p ${DESTDIR}${PREFIX}/bin
 	@cp -f dbar ${DESTDIR}${PREFIX}/bin
 	@chmod 755 ${DESTDIR}${PREFIX}/bin/dbar
-	@mkdir -p ${DESTDIR}${PREFIX}/textwidth
 	@cp -f textwidth ${DESTDIR}${PREFIX}/bin
 	@chmod 755 ${DESTDIR}${PREFIX}/bin/textwidth
 
