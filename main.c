@@ -685,7 +685,6 @@ main(int argc, char *argv[]) {
 			}
 		}
 		else if(!strncmp(argv[i], "-u", 3)){
-			if(dzen.slave_win.max_lines)
 				dzen.tsupdate = True;
 		}
 		else if(!strncmp(argv[i], "-p", 3)) {
@@ -748,6 +747,9 @@ main(int argc, char *argv[]) {
 				   "             [-xs <screen>]\n"
 #endif
 				  );
+
+	if(dzen.tsupdate && !dzen.slave_win.max_lines)
+		dzen.tsupdate = False;
 
 	if(!dzen.title_win.width)
 		dzen.title_win.width = dzen.slave_win.width;
