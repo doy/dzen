@@ -461,8 +461,7 @@ handle_xev(void) {
 				if(!dzen.slave_win.ishmenu
 						&& ev.xexpose.window == dzen.title_win.win) 
 					drawheader(NULL);
-				if(ev.xexpose.window == dzen.slave_win.win) {
-					/*x_draw_body();*/
+				if(!dzen.tsupdate && ev.xexpose.window == dzen.slave_win.win) {
 					for(i=0; i < dzen.slave_win.max_lines; i++)
 						XCopyArea(dzen.dpy, dzen.slave_win.drawable[i], dzen.slave_win.line[i], dzen.gc,
 								0, 0, dzen.slave_win.width, dzen.line_height, 0, 0);

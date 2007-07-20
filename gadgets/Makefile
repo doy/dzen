@@ -3,10 +3,10 @@
 
 include config.mk
 
-SRC = dbar.c
+SRC = dbar.c textwidth.c
 OBJ = ${SRC:.c=.o}
 
-all: options dbar
+all: options dbar textwidth
 
 options:
 	@echo dzen2 gadgets build options:
@@ -23,21 +23,31 @@ ${OBJ}: config.mk
 
 dbar: ${OBJ}
 	@echo LD $@
-	@${LD} -o $@ ${OBJ} ${LDFLAGS}
+	@${LD} -o $@ dbar.o ${LDFLAGS}
+	@strip $@
+
+textwidth: ${OBJ}
+	@echo LD $@
+	@${LD} -o $@ textwidth.o ${LDFLAGS} -L${X11LIB} -lX11
 	@strip $@
 
 clean:
 	@echo cleaning
 	@rm -f ${OBJ} dbar
+	@rm -f ${OBJ} textwidth
 
 install: all
 	@echo installing executable file to ${DESTDIR}${PREFIX}/bin
 	@mkdir -p ${DESTDIR}${PREFIX}/bin
 	@cp -f dbar ${DESTDIR}${PREFIX}/bin
 	@chmod 755 ${DESTDIR}${PREFIX}/bin/dbar
+	@mkdir -p ${DESTDIR}${PREFIX}/textwidth
+	@cp -f textwidth ${DESTDIR}${PREFIX}/bin
+	@chmod 755 ${DESTDIR}${PREFIX}/bin/textwidth
 
 uninstall:
 	@echo removing executable file from ${DESTDIR}${PREFIX}/bin
 	@rm -f ${DESTDIR}${PREFIX}/bin/dbar
+	@rm -f ${DESTDIR}${PREFIX}/bin/textwidth
 
 .PHONY: all options clean install uninstall
