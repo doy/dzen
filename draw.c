@@ -152,9 +152,6 @@ get_token(const char *line, int * t, char **tval) {
 
 void 
 set_opts(int type, char * value, int reverse) {
-	unsigned int w, h, xh, yh;
-	Pixmap * bm;
-
 	switch(type) {
 		case fg:
 			reverse ?
