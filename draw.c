@@ -255,6 +255,7 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 								&& ((h/2 + px + bm_w) < dzen.w)) {
 							XCopyPlane(dzen.dpy, bm, pm, dzen.tgc, 
 									0, 0, bm_w, bm_h, px, 0, 1);
+							XFreePixmap(dzen.dpy, bm);
 							px += bm_w;
 						}
 					}
@@ -310,6 +311,7 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 						&& (h/2 + px + bm_w < dzen.w)) {
 					XCopyPlane(dzen.dpy, bm, pm, dzen.tgc, 
 							0, 0, bm_w, bm_h, px, 0, 1);
+					XFreePixmap(dzen.dpy, bm);
 					px += bm_w;
 				}
 			}
