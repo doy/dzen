@@ -152,6 +152,9 @@ get_token(const char *line, int * t, char **tval) {
 
 void 
 set_opts(int type, char * value, int reverse) {
+	unsigned int w, h, xh, yh;
+	Pixmap * bm;
+
 	switch(type) {
 		case fg:
 			reverse ?
@@ -168,14 +171,14 @@ set_opts(int type, char * value, int reverse) {
 
 char *
 parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
+	unsigned int bm_w, bm_h, bm_xh, bm_yh;
 	int i, next_pos=0, j=0, px=0, py=0, xorig, h=0, tw, ow;
 	char lbuf[MAX_LINE_LEN], *rbuf = NULL;
 	int t=-1;
 	char *tval=NULL;
 	XGCValues gcv;
-	Drawable pm;
+	Drawable pm, bm;
 	XRectangle r = { dzen.x, dzen.y, dzen.w, dzen.h};
-
 
 	/* parse line and return the text without control commands*/
 	if(nodraw) {
@@ -245,12 +248,23 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 				strcat(rbuf, lbuf);
 			}
 			else {
-				if(t != -1 && tval) 
-					set_opts(t, tval, reverse);
+				if(t != -1 && tval){
+					if(t == icon) {
+						if((XReadBitmapFile(dzen.dpy, pm, tval, &bm_w, 
+									&bm_h, &bm, &bm_xh, &bm_yh) == BitmapSuccess)
+								&& ((h/2 + px + bm_w) < dzen.w)) {
+							XCopyPlane(dzen.dpy, bm, pm, dzen.tgc, 
+									0, 0, bm_w, bm_h, px, 0, 1);
+							px += bm_w;
+						}
+					}
+					else
+						set_opts(t, tval, reverse);
+				}
 
 				/* check if text is longer than window's width */
 				ow = j; tw = textnw(lbuf, strlen(lbuf));
-				while((tw + px) > (dzen.w - h)) {
+				while( ((tw + px) > (dzen.w - h)) && j>=0) {
 					lbuf[--j] = '\0';
 					tw = textnw(lbuf, strlen(lbuf));
 				}
@@ -289,12 +303,23 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 		strcat(rbuf, lbuf);
 	}
 	else {
-		if(t != -1 && tval) 
-			set_opts(t, tval, reverse);
+		if(t != -1 && tval){ 
+			if(t == icon) {
+				if(XReadBitmapFile(dzen.dpy, pm, tval, &bm_w, 
+							&bm_h, &bm, &bm_xh, &bm_yh) == BitmapSuccess 
+						&& (h/2 + px + bm_w < dzen.w)) {
+					XCopyPlane(dzen.dpy, bm, pm, dzen.tgc, 
+							0, 0, bm_w, bm_h, px, 0, 1);
+					px += bm_w;
+				}
+			}
+			else
+				set_opts(t, tval, reverse);
+		}
 
 		/* check if text is longer than window's width */
 		ow = j; tw = textnw(lbuf, strlen(lbuf));
-		while((tw + px) > (dzen.w - h)) {
+		while( ((tw + px) > (dzen.w - h)) && j>=0) {
 			lbuf[--j] = '\0';
 			tw = textnw(lbuf, strlen(lbuf));
 		}

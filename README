@@ -156,6 +156,11 @@ A6:  Yes, both vertical and horizontal menus are supported.
      See "(3) Menu" for further details.
 
 
+Q7;  What is the expected format to the '-fn' option?
+
+A7:  Run 'xfontsel' or 'xlsfonts'. These should come with your X 
+     distribution by default. 
+
 
 
 Termination:
