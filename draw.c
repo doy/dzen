@@ -190,7 +190,8 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 	/* parse line and render text */
 	else {
 		h = dzen.font.ascent + dzen.font.descent;
-		xorig = 0; py = dzen.font.ascent + (dzen.line_height - h) / 2;;
+		py = dzen.font.ascent + (dzen.line_height - h) / 2;;
+		xorig = 0; 
 
 		if(lnr != -1) {
 			pm = XCreatePixmap(dzen.dpy, RootWindow(dzen.dpy, DefaultScreen(dzen.dpy)), dzen.slave_win.width, 
@@ -251,7 +252,8 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 									&bm_h, &bm, &bm_xh, &bm_yh) == BitmapSuccess)
 								&& ((h/2 + px + bm_w) < dzen.w)) {
 							XCopyPlane(dzen.dpy, bm, pm, dzen.tgc, 
-									0, 0, bm_w, bm_h, px, 0, 1);
+									0, 0, bm_w, bm_h, px, 
+									dzen.line_height > bm_h ? (dzen.line_height - bm_h)/2 : 0, 1);
 							XFreePixmap(dzen.dpy, bm);
 							px += bm_w;
 						}
@@ -307,7 +309,8 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 							&bm_h, &bm, &bm_xh, &bm_yh) == BitmapSuccess 
 						&& (h/2 + px + bm_w < dzen.w)) {
 					XCopyPlane(dzen.dpy, bm, pm, dzen.tgc, 
-							0, 0, bm_w, bm_h, px, 0, 1);
+							0, 0, bm_w, bm_h, px, 
+							dzen.line_height > bm_h ? (dzen.line_height - bm_h)/2 : 0, 1);
 					XFreePixmap(dzen.dpy, bm);
 					px += bm_w;
 				}
