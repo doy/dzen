@@ -35,8 +35,10 @@ dist: clean
 	@echo creating dist tarball
 	@mkdir -p dzen2-${VERSION}
 	@mkdir -p dzen2-${VERSION}/gadgets
+	@mkdir -p dzen2-${VERSION}/bitmaps
 	@cp -R LICENSE Makefile README.dzen README help config.mk action.h dzen.h ${SRC} dzen2-${VERSION}
-	@cp -R gadgets/Makefile  gadgets/config.mk gadgets/README.dbar gadgets/dbar.c dzen2-${VERSION}/gadgets
+	@cp -R gadgets/Makefile  gadgets/config.mk gadgets/README.dbar gadgets/textwidth.c gadgets/README.textwidth gadgets/dbar.c dzen2-${VERSION}/gadgets
+	@cp -R bitmaps/alert.xbm bitmaps/ball.xbm bitmaps/battery.xbm bitmaps/envelope.xbm bitmaps/volume.xbm dzen2-${VERSION}/bitmaps
 	@tar -cf dzen2-${VERSION}.tar dzen2-${VERSION}
 	@gzip dzen2-${VERSION}.tar
 	@rm -rf dzen2-${VERSION}
