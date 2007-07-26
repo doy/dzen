@@ -9,7 +9,7 @@ The "gadgets" subdirectory contains some tools that you can
 use in combination with dzen.
 
 Script archive with a collection of interesting ideas:
-^fg(lightblue)  http://gotmor.googlepages.com/dzenscriptarchive
+  http://gotmor.googlepages.com/dzenscriptarchive
 
 
 
@@ -79,10 +79,10 @@ dzen accepts a couple of options:
     -tw     title window width
     -sa     alignment of slave window, see "-ta"
     -l      lines, see (1)
-    -e      events and actions, ^fg(green)see (2)
-    -m      menu mode, ^fg(green)see (3)
+    -e      events and actions, see (2)
+    -m      menu mode, see (3)
     -u      update contents of title and 
-            slave window simultaneously, ^fg(green)see (4)
+            slave window simultaneously, see (4)
     -p      persist EOF (optional timeout in seconds)
     -x      x position
     -y      y position
