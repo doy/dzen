@@ -10,7 +10,7 @@
 #include <string.h>
 
 /* command types for the in text parser */
-enum ctype {bg, fg, icon};
+enum ctype {bg, fg, icon, rect};
 
 int get_tokval(const char* line, char **retdata);
 int get_token(const char*  line, int * t, char **tval);
@@ -145,6 +145,12 @@ get_token(const char *line, int * t, char **tval) {
 		next_pos = get_tokval(line+off, &tokval);
 		*t = icon;
 	}
+	/* ^r(widthxheight) */
+	if((*line == 'r') && (*(line+1) == '(')) {
+		off = 2;
+		next_pos = get_tokval(line+off, &tokval);
+		*t = rect;
+	}
 
 	*tval = tokval;
 	return next_pos+off;
@@ -166,9 +172,25 @@ set_opts(int type, char * value, int reverse) {
 	}
 }
 
+static void
+get_rect_vals(char *s, int *w, int *h) {
+    int i;
+    char buf[128];
+
+    *w = 0; *h = 0;
+
+    for(i=0; (s[i] != 'x') && i<128; i++) {
+        buf[i] = s[i];
+    }
+    buf[++i] = '\0';
+    *w = atoi(buf);
+    *h = atoi(s+i);
+}
+
 char *
 parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 	unsigned int bm_w, bm_h, bm_xh, bm_yh;
+    int rectw, recth;
 	int i, next_pos=0, j=0, px=0, py=0, xorig, h=0, tw, ow;
 	char lbuf[MAX_LINE_LEN], *rbuf = NULL;
 	int t=-1;
@@ -189,8 +211,8 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 	}
 	/* parse line and render text */
 	else {
-		h = dzen.font.ascent + dzen.font.descent;
-		py = dzen.font.ascent + (dzen.line_height - h) / 2;;
+		h = dzen.font.height;
+		py = dzen.font.ascent + (dzen.line_height - h) / 2;
 		xorig = 0; 
 
 		if(lnr != -1) {
@@ -248,16 +270,25 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 			else {
 				if(t != -1 && tval){
 					if(t == icon) {
-						if((XReadBitmapFile(dzen.dpy, pm, tval, &bm_w, 
-									&bm_h, &bm, &bm_xh, &bm_yh) == BitmapSuccess)
-								&& ((h/2 + px + bm_w) < dzen.w)) {
-							XCopyPlane(dzen.dpy, bm, pm, dzen.tgc, 
-									0, 0, bm_w, bm_h, px, 
-									dzen.line_height > bm_h ? (dzen.line_height - bm_h)/2 : 0, 1);
-							XFreePixmap(dzen.dpy, bm);
-							px += bm_w;
+						if(t == icon) {
+							if(XReadBitmapFile(dzen.dpy, pm, tval, &bm_w, 
+										&bm_h, &bm, &bm_xh, &bm_yh) == BitmapSuccess 
+									&& (h/2 + px + bm_w < dzen.w)) {
+								XCopyPlane(dzen.dpy, bm, pm, dzen.tgc, 
+										0, 0, bm_w, bm_h, px, 
+										dzen.line_height >= bm_h ? (dzen.line_height - bm_h)/2 : 0, 1);
+								XFreePixmap(dzen.dpy, bm);
+								px += bm_w;
+							}
 						}
 					}
+                    else if(t == rect) {
+                        get_rect_vals(tval, &rectw, &recth);
+                        rectw = rectw+px > dzen.w ? dzen.w-px : rectw;
+                        recth = recth > dzen.line_height ? dzen.line_height : recth;
+                        XFillRectangle(dzen.dpy, pm, dzen.tgc, px, (dzen.line_height - recth)/2, rectw, recth);
+                        px += rectw;
+                    }
 					else
 						set_opts(t, tval, reverse);
 				}
@@ -280,9 +311,9 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 
 				if(dzen.font.set) 
 					XmbDrawImageString(dzen.dpy, pm, dzen.font.set,
-							dzen.tgc, px, py, lbuf, tw);
+							dzen.tgc, px, py, lbuf, strlen(lbuf));
 				else 
-					XDrawImageString(dzen.dpy, pm, dzen.tgc, px, py, lbuf, tw); 
+					XDrawImageString(dzen.dpy, pm, dzen.tgc, px, py, lbuf, strlen(lbuf)); 
 				px += tw;
 			}
 
@@ -315,6 +346,13 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 					px += bm_w;
 				}
 			}
+            else if(t == rect) {
+                get_rect_vals(tval, &rectw, &recth);
+                rectw = rectw+px > dzen.w ? dzen.w-px : rectw;
+                recth = recth > dzen.line_height ? dzen.line_height : recth;
+                XFillRectangle(dzen.dpy, pm, dzen.tgc, px, (dzen.line_height - recth)/2, rectw, recth);
+                px += rectw;
+            }
 			else
 				set_opts(t, tval, reverse);
 		}
@@ -337,9 +375,9 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 
 		if(dzen.font.set)
 			XmbDrawImageString(dzen.dpy, pm, dzen.font.set,
-					dzen.tgc, px, py, lbuf, tw);
+					dzen.tgc, px, py, lbuf, strlen(lbuf));
 		else 
-			XDrawImageString(dzen.dpy, pm, dzen.tgc, px, py, lbuf, tw);
+			XDrawImageString(dzen.dpy, pm, dzen.tgc, px, py, lbuf, strlen(lbuf));
 		
 		px += tw;
 

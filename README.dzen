@@ -26,6 +26,8 @@ Script archive with a collection of interesting ideas:
 
     * menu functionality
 
+    * in-text formating language
+
     * flexible event/action mechanism
 
     * hideable, collapsable
@@ -88,7 +90,7 @@ dzen accepts a couple of options:
     -xs     number of Xinerama screen
     -v      version information
 
-    For dynamic color support ^fg(green)see (5).
+    ^fg(green)see (5)^fg(#5FBF77) for the in-text formating language.
 
 
 
@@ -146,8 +148,8 @@ A4:  Sure, see "(4) Simultaneous updates".
 
 Q5:  Can i chnage color of my input at runtime?
 
-A5:  Yes, you can change both background and foreground colors.
-     See "(5) Dynamic color support"
+A5:  Yes, you can change both background and foreground colors and 
+     much more See "(5) In-Text formating language"
 
 
 Q6:  Can I use dzen as a menu?
@@ -369,24 +371,37 @@ of lines to the slave window as defined by the parameter to '-l'.
 
 
 
-^fg(green)(5) Dynamic color support:
-^fg(green)--------------------------
+^fg(green)(5) In-text formating language:
+^fg(green)-------------------------------
 
-This feature allows to dynamically (at runtime) set foreground and
-background colors for dzen's input (colored text) working in all 
-modes (title only, slave window and menu mode).
+This feature allows to dynamically (at runtime) format the text dzen
+displays.
 
-Syntax:
+Currently the following commands are supported:
 
-Foreground color:  ^^fg(color)
-Background color:  ^^bg(color)
 
+    ^^fg(color)         set foreground color
+    ^^bg(color)         set background color
+    ^^i(path)           draw icon specified by path
+    ^^r(WIDTHxHEIGHT)   draw a rectangle with the dimensions 
+                        WIDTH and HEIGHT
 
 These commands can appear anywhere and in any combination in dzen's
-input. The color can be specified either as symbolic name (e.g. red,
+input. 
+
+The color can be specified either as symbolic name (e.g. red,
 darkgreen, etc.) or as #rrggbb hex-value (e.g. #ffffaa).
 
+Icons must be in the XBM format, see the "bitmaps" directory for some
+sample icons. With the standard "bitmap" application you can easily draw
+your own icons, though there are lots floating around on your harddisk
+or on the web.
+
+Rectangles will be truncated to the maximum possible size if you specify
+a size bigger than dzen's window.
+
 Doubling the '^^' character removes the special meaning from it.
+
 
 Some examples:
 
@@ -397,18 +412,32 @@ Some examples:
           ^fg(red)I'm red text ^fg(blue)I am blue
 
 
-    Input:
+   Input:
           ^^bg(#ffaaaa)The ^^fg(yellow)text to ^^bg(blue)^^fg(orange)colorize
 
-    Resulting in:
+   Resulting in:
           ^bg(#ffaaaa)The ^fg(yellow)text to ^bg(blue)^fg(orange)colorize
 
 
-    Input:
+   Input:
           ^^fg(grey70)Some text containing ^^^^ characters
 
-    Resulting in:
+   Resulting in:
           ^fg(grey70)Some text containing ^^ characters
+
+   Input for icons:
+          ^^i(bitmaps/envelope.xbm) I am an envelope ^^fg(yellow)and ^^i(bitmaps/battery.xbm) I'm a baterry.
+
+   Resulting in:
+          ^i(bitmaps/envelope.xbm) I am an envelope ^fg(yellow)and ^i(bitmaps/battery.xbm) I'm a baterry.
+
+   Input for rectangles:
+          6x4 rectangle ^^r(6x4) ^^fg(red)12x8 ^^r(12x8) ^^fg(yellow)and finally 100x15 ^^r(100x15)
+
+   Resulting in:
+          6x4 rectangle ^r(6x4) ^fg(red)12x8 ^r(12x8) ^fg(yellow)and finally 100x15 ^r(100x15)
+
+
 
 
 
