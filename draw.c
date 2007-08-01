@@ -7,10 +7,11 @@
 
 #include "dzen.h"
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
-/* command types for the in text parser */
-enum ctype {bg, fg, icon, rect};
+/* command types for the in-text parser */
+enum ctype {bg, fg, icon, rect, circle, pos, titlewin};
 
 int get_tokval(const char* line, char **retdata);
 int get_token(const char*  line, int * t, char **tval);
@@ -44,10 +45,7 @@ drawtext(const char *text, int reverse, int line, int align) {
 		XSetForeground(dzen.dpy, dzen.rgc, dzen.norm[ColBG]);
 	}
 
-	if(dzen.font.set) 
-		parse_line(text, line, align, reverse, 0);
-	else 
-		parse_line(text, line, align, reverse, 0);
+	parse_line(text, line, align, reverse, 0);
 }
 
 long
@@ -127,29 +125,47 @@ get_token(const char *line, int * t, char **tval) {
 		return 0;
 	
 	line++;
-	/* ^bg(#rrggbb) */
+	/* ^bg(#rrggbb) background color, type: bg */
 	if( (*line == 'b') && (*(line+1) == 'g') && (*(line+2) == '(')) {
 		off = 3;
 		next_pos = get_tokval(line+off, &tokval);
 		*t = bg;
 	}
-	/* ^fg(#rrggbb) */
+	/* ^fg(#rrggbb) foreground color, type: fg */
 	if((*line == 'f') && (*(line+1) == 'g') && (*(line+2) == '(')) {
 		off=3;
 		next_pos = get_tokval(line+off, &tokval);
 		*t = fg;
 	}
-	/* ^i(iconname) */
+	/* ^tw() draw to title window, type: titlewin */
+	if((*line == 't') && (*(line+1) == 'w') && (*(line+2) == '(')) {
+		off=3;
+		next_pos = get_tokval(line+off, &tokval);
+		*t = titlewin;
+	}
+	/* ^i(iconname) bitmap icon, type: icon */
 	if((*line == 'i') && (*(line+1) == '(')) {
 		off = 2;
 		next_pos = get_tokval(line+off, &tokval);
 		*t = icon;
 	}
-	/* ^r(widthxheight) */
+	/* ^r(widthxheight) filled rectangle, type: rect */
 	if((*line == 'r') && (*(line+1) == '(')) {
 		off = 2;
 		next_pos = get_tokval(line+off, &tokval);
 		*t = rect;
+	}
+	/* ^p(widthxheight) relative position, type: pos */
+	if((*line == 'p') && (*(line+1) == '(')) {
+		off = 2;
+		next_pos = get_tokval(line+off, &tokval);
+		*t = pos;
+	}
+	/* circle */
+	if((*line == 'c') && (*(line+1) == '(')) {
+		off = 2;
+		next_pos = get_tokval(line+off, &tokval);
+		*t = circle;
 	}
 
 	*tval = tokval;
@@ -189,14 +205,15 @@ get_rect_vals(char *s, int *w, int *h) {
 
 char *
 parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
-	unsigned int bm_w, bm_h, bm_xh, bm_yh;
-    int rectw, recth;
+	unsigned int bm_w, bm_h; 
+	int bm_xh, bm_yh;
+    int rectw, recth, n_pos, recty;
 	int i, next_pos=0, j=0, px=0, py=0, xorig, h=0, tw, ow;
 	char lbuf[MAX_LINE_LEN], *rbuf = NULL;
 	int t=-1;
 	char *tval=NULL;
 	XGCValues gcv;
-	Drawable pm, bm;
+	Drawable pm=0, bm;
 	XRectangle r = { dzen.x, dzen.y, dzen.w, dzen.h};
 
 	/* parse line and return the text without control commands*/
@@ -206,7 +223,7 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 		if( (lnr + dzen.slave_win.first_line_vis) >= dzen.slave_win.tcnt) 
 			line = NULL;
 		else
-			line = dzen.slave_win.tbuf[dzen.slave_win.first_line_vis+lnr].text;
+			line = dzen.slave_win.tbuf[dzen.slave_win.first_line_vis+lnr];
 
 	}
 	/* parse line and render text */
@@ -268,29 +285,41 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 				strcat(rbuf, lbuf);
 			}
 			else {
-				if(t != -1 && tval){
+				if(t != -1 && tval) {
 					if(t == icon) {
-						if(t == icon) {
-							if(XReadBitmapFile(dzen.dpy, pm, tval, &bm_w, 
-										&bm_h, &bm, &bm_xh, &bm_yh) == BitmapSuccess 
-									&& (h/2 + px + bm_w < dzen.w)) {
-								XCopyPlane(dzen.dpy, bm, pm, dzen.tgc, 
-										0, 0, bm_w, bm_h, px, 
-										dzen.line_height >= bm_h ? (dzen.line_height - bm_h)/2 : 0, 1);
-								XFreePixmap(dzen.dpy, bm);
-								px += bm_w;
-							}
+						if(XReadBitmapFile(dzen.dpy, pm, tval, &bm_w, 
+									&bm_h, &bm, &bm_xh, &bm_yh) == BitmapSuccess 
+								&& (h/2 + px + (signed)bm_w < dzen.w)) {
+							XCopyPlane(dzen.dpy, bm, pm, dzen.tgc, 
+									0, 0, bm_w, bm_h, px, 
+									dzen.line_height >= (signed)bm_h ? (dzen.line_height - bm_h)/2 : 0, 1);
+							XFreePixmap(dzen.dpy, bm);
+							px += bm_w;
 						}
 					}
-                    else if(t == rect) {
-                        get_rect_vals(tval, &rectw, &recth);
-                        rectw = rectw+px > dzen.w ? dzen.w-px : rectw;
-                        recth = recth > dzen.line_height ? dzen.line_height : recth;
-                        XFillRectangle(dzen.dpy, pm, dzen.tgc, px, (dzen.line_height - recth)/2, rectw, recth);
-                        px += rectw;
-                    }
+					else if(t == rect) {
+						get_rect_vals(tval, &rectw, &recth);
+						rectw = rectw+px > dzen.w ? dzen.w-px : rectw;
+						recth = recth > dzen.line_height ? dzen.line_height : recth;
+						recty = (dzen.line_height - recth)/2;
+						XFillRectangle(dzen.dpy, pm, dzen.tgc, px, (int)recty, rectw, recth);
+
+						px += rectw;
+					}
+					else if(t == circle) {
+						rectw = recth = atoi(tval);
+						XFillArc(dzen.dpy, pm, dzen.tgc, px, (dzen.line_height - recth)/2, rectw, recth, 2880, 23040);
+						px += rectw;
+					}
+					else if(t == pos) {
+						if((n_pos = atoi(tval)) < 0)
+							n_pos *= -1;
+						px += n_pos;
+					}
 					else
 						set_opts(t, tval, reverse);
+
+					free(tval);
 				}
 
 				/* check if text is longer than window's width */
@@ -338,10 +367,10 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 			if(t == icon) {
 				if(XReadBitmapFile(dzen.dpy, pm, tval, &bm_w, 
 							&bm_h, &bm, &bm_xh, &bm_yh) == BitmapSuccess 
-						&& (h/2 + px + bm_w < dzen.w)) {
+						&& (h/2 + px + (signed)bm_w < dzen.w)) {
 					XCopyPlane(dzen.dpy, bm, pm, dzen.tgc, 
 							0, 0, bm_w, bm_h, px, 
-							dzen.line_height > bm_h ? (dzen.line_height - bm_h)/2 : 0, 1);
+							dzen.line_height > (signed)bm_h ? (dzen.line_height - bm_h)/2 : 0, 1);
 					XFreePixmap(dzen.dpy, bm);
 					px += bm_w;
 				}
@@ -350,11 +379,24 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
                 get_rect_vals(tval, &rectw, &recth);
                 rectw = rectw+px > dzen.w ? dzen.w-px : rectw;
                 recth = recth > dzen.line_height ? dzen.line_height : recth;
-                XFillRectangle(dzen.dpy, pm, dzen.tgc, px, (dzen.line_height - recth)/2, rectw, recth);
+				recty = (dzen.line_height - recth)/2;
+				XFillRectangle(dzen.dpy, pm, dzen.tgc, px, (int)recty, rectw, recth);
                 px += rectw;
             }
+			else if(t == circle) {
+				rectw = recth = atoi(tval);
+				XFillArc(dzen.dpy, pm, dzen.tgc, px, (dzen.line_height - recth)/2, rectw, recth, 2880, 23040);
+				px += rectw;
+			}
+			else if(t == pos) {
+				if((n_pos = atoi(tval)) < 0)
+					n_pos *= -1;
+				px += n_pos;
+			}
 			else
 				set_opts(t, tval, reverse);
+
+			free(tval);
 		}
 
 		/* check if text is longer than window's width */
@@ -417,10 +459,8 @@ drawheader(const char * text) {
 	dzen.w = dzen.title_win.width;
 	dzen.h = dzen.line_height;
 
-	if(text) {
-		XSetForeground(dzen.dpy, dzen.gc, dzen.norm[ColBG]);
-		XFillRectangles(dzen.dpy, dzen.title_win.drawable, dzen.gc, &r, 1);
-		XSetForeground(dzen.dpy, dzen.gc, dzen.norm[ColFG]);
+	if(text){ 
+		XFillRectangles(dzen.dpy, dzen.title_win.drawable, dzen.rgc, &r, 1);
 		parse_line(text, -1, dzen.title_win.alignment, 0, 0);
 	}
 
@@ -430,10 +470,30 @@ drawheader(const char * text) {
 
 void
 drawbody(char * text) {
+	char *ec;
+
+	/* draw to title window
+	   this routine should be better integrated into
+	   the actual parsing process
+	*/
+	if((ec = strstr(text, "^tw()")) && (*(ec-1) != '^')) {
+		dzen.x = 0;
+		dzen.y = 0;
+		dzen.w = dzen.title_win.width;
+		dzen.h = dzen.line_height;
+		XRectangle r = { dzen.x, dzen.y, dzen.w, dzen.h};
+
+		XFillRectangles(dzen.dpy, dzen.title_win.drawable, dzen.rgc, &r, 1);
+		parse_line(ec+5, -1, dzen.title_win.alignment, 0, 0);
+		XCopyArea(dzen.dpy, dzen.title_win.drawable, dzen.title_win.win, 
+				dzen.gc, 0, 0, dzen.title_win.width, dzen.line_height, 0, 0);
+		return;
+	}
+
 	if(dzen.slave_win.tcnt == dzen.slave_win.tsize) 
 		free_buffer();
 	if(dzen.slave_win.tcnt < dzen.slave_win.tsize) {
-		dzen.slave_win.tbuf[dzen.slave_win.tcnt].text = estrdup(text);
+		dzen.slave_win.tbuf[dzen.slave_win.tcnt] = estrdup(text);
 		dzen.slave_win.tcnt++;
 	}
 }

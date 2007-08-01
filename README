@@ -12,6 +12,8 @@ Script archive with a collection of interesting ideas:
   http://gotmor.googlepages.com/dzenscriptarchive
 
 
+Use "./help" to view a nicely formated version of the documentation.
+
 
 Features
 --------
@@ -114,7 +116,9 @@ Dzen's window layout is as follows:
     `------------------------------------------´
 
 The first line you provide to dzen always goes to the title window, 
-all other consecutive lines will be drawn to the slave window.
+all other consecutive lines will be drawn to the slave window unless
+you explicitly overide this with the (5) In-text formating language
+command ^tw().
 
 
 QA:
@@ -143,7 +147,9 @@ A3:  There are 2 different approaches dzen uses to terminate itself,
 Q4:  Ok, the title and slave thing works, can I update the
      contents of both windows at the same time?
 
-A4:  Sure, see "(4) Simultaneous updates".
+A4:  Sure, see "(4) Simultaneous updates" or use the in-text 
+     command "^tw()" to explicitly draw to the title windwow.
+	 See section (5) for further details
 
 
 Q5:  Can i chnage color of my input at runtime?
@@ -209,7 +215,7 @@ The command line syntax is as follows:
 -e 'event1=action1:option1:...option<n>,...,action<m>;...;event<l>'
 
 Every event can take any number of actions and every action can take any number
-of options. (Currently limited to 64 each, easily changable in action.h)
+of options. (By default limited to 64 each, easily changable in action.h)
 
 An example:
     -e 'button1=exec:xterm:firefox;entertitle=uncollapse,unhide;button3=exit'
@@ -384,7 +390,15 @@ Currently the following commands are supported:
     ^bg(color)         set background color
     ^i(path)           draw icon specified by path
     ^r(WIDTHxHEIGHT)   draw a rectangle with the dimensions 
-                        WIDTH and HEIGHT
+                       WIDTH and HEIGHT
+    ^c(RADIUS)         draw a circel with size RADIUS pixels
+    ^p(PIXEL)          increment momentary position by PIXEL
+    ^tw()              draw to title window
+                       This command has some annoyances, as only 
+                       the input after the command will be drawn
+                       to the title window, so it is best used 
+                       only once and as first command per line.
+                       Subject to be improved in the future.
 
 These commands can appear anywhere and in any combination in dzen's
 input. 
@@ -425,6 +439,9 @@ Some examples:
           6x4 rectangle ^r(6x4) ^fg(red)12x8 ^r(12x8) ^fg(yellow)and finally 100x15 ^r(100x15)
 
 
+   Input for relative positioning:
+          Some text^p(100)^fg(yellow)100 pixels to the right^p(50)^fg(red)50 more pixels to the right
+
 
 
 
@@ -446,9 +463,8 @@ Examples:
 * Display header and a message with multiple lines:
     (echo Header; cal; sleep 20) | dzen2 -l 8
 
-    Displays "Header" in the main alert window and
-    the output of cal in the 8 lines high slave
-    window.
+    Displays "Header" in the title window and the output of cal in the 8
+    lines high slave window.
 
 
 * Display updating messages:

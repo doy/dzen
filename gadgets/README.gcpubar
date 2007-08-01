@@ -1,0 +1,29 @@
+====================================
+ gcpubar, (c) 20007 by Robert Manea
+====================================
+
+gcpubar is a CPU utilization meter for Linux. It relies on the existence
+of the "/proc/stat" file and generateѕ fully graphical meters viewable with
+dzen >= 0.7.0.
+
+Command line options:
+---------------------
+
+
+  -i  :  Update interval in seconds    (default:   1)
+         You can use positive values
+         less than 1 for intervals 
+         shorter than a second
+
+  -c  :  Terminate after diplaying     (default: infite)
+         argument to '-c' values
+
+  -w  :  Width of the meter in pixels  (default: 100)
+
+  -h  :  Height of the meter in pixels (default:  10)
+
+  -fg :  Meter foreground color        (default: white)
+
+  -bg :  Meter background color        (default: darkgrey)
+
+

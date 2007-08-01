@@ -3,10 +3,10 @@
 
 include config.mk
 
-SRC = dbar.c textwidth.c
+SRC = dbar.c gdbar.c gcpubar.c textwidth.c
 OBJ = ${SRC:.c=.o}
 
-all: options dbar textwidth
+all: options dbar gdbar gcpubar textwidth
 
 options:
 	@echo dzen2 gadgets build options:
@@ -26,6 +26,16 @@ dbar: ${OBJ}
 	@${LD} -o $@ dbar.o ${LDFLAGS}
 	@strip $@
 
+gdbar: ${OBJ}
+	@echo LD $@
+	@${LD} -o $@ gdbar.o ${LDFLAGS} -L${X11LIB} -lX11
+	@strip $@
+
+gcpubar: ${OBJ}
+	@echo LD $@
+	@${LD} -o $@ gcpubar.o ${LDFLAGS} -L${X11LIB}
+	@strip $@
+
 textwidth: ${OBJ}
 	@echo LD $@
 	@${LD} -o $@ textwidth.o ${LDFLAGS} -L${X11LIB} -lX11
@@ -34,6 +44,8 @@ textwidth: ${OBJ}
 clean:
 	@echo cleaning
 	@rm -f ${OBJ} dbar
+	@rm -f ${OBJ} gdbar
+	@rm -f ${OBJ} gcpubar
 	@rm -f ${OBJ} textwidth
 
 install: all
@@ -41,12 +53,18 @@ install: all
 	@mkdir -p ${DESTDIR}${PREFIX}/bin
 	@cp -f dbar ${DESTDIR}${PREFIX}/bin
 	@chmod 755 ${DESTDIR}${PREFIX}/bin/dbar
+	@cp -f gdbar ${DESTDIR}${PREFIX}/bin
+	@chmod 755 ${DESTDIR}${PREFIX}/bin/gdbar
+	@cp -f gcpubar ${DESTDIR}${PREFIX}/bin
+	@chmod 755 ${DESTDIR}${PREFIX}/bin/gcpubar
 	@cp -f textwidth ${DESTDIR}${PREFIX}/bin
 	@chmod 755 ${DESTDIR}${PREFIX}/bin/textwidth
 
 uninstall:
 	@echo removing executable file from ${DESTDIR}${PREFIX}/bin
 	@rm -f ${DESTDIR}${PREFIX}/bin/dbar
+	@rm -f ${DESTDIR}${PREFIX}/bin/gdbar
+	@rm -f ${DESTDIR}${PREFIX}/bin/gcpubar
 	@rm -f ${DESTDIR}${PREFIX}/bin/textwidth
 
 .PHONY: all options clean install uninstall

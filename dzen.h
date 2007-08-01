@@ -18,7 +18,7 @@
 #define ALIGNLEFT   1
 #define ALIGNRIGHT  2
 
-#define MIN_BUF_SIZE   512
+#define MIN_BUF_SIZE   524
 #define MAX_LINE_LEN   512
 
 /* gui data structures */
@@ -36,12 +36,6 @@ struct Fnt {
 	int ascent;
 	int descent;
 	int height;
-};
-
-struct _Sline {
-	unsigned long fg;
-	unsigned long bg;
-	char * text;
 };
 
 /* title window */
@@ -63,8 +57,7 @@ struct SW {
 	Drawable *drawable;
 
 	/* input buffer */
-	/* char **tbuf; */
-	Sline *tbuf;
+	char **tbuf; 
 	int tsize;
 	int tcnt;
 	/* line fg colors */
