@@ -36,7 +36,7 @@ dist: clean
 	@mkdir -p dzen2-${VERSION}
 	@mkdir -p dzen2-${VERSION}/gadgets
 	@mkdir -p dzen2-${VERSION}/bitmaps
-	@cp -R LICENSE Makefile README.dzen README help config.mk action.h dzen.h ${SRC} dzen2-${VERSION}
+	@cp -R LICENSE Makefile INSTALL README.dzen README help config.mk action.h dzen.h ${SRC} dzen2-${VERSION}
 	@cp -R gadgets/Makefile  gadgets/config.mk gadgets/README.dbar gadgets/textwidth.c gadgets/README.textwidth gadgets/dbar.c gadgets/gdbar.c gadgets/README.gdbar gadgets/gcpubar.c gadgets/README.gcpubar gadgets/kittscanner.sh gadgets/README.kittscanner dzen2-${VERSION}/gadgets
 	@cp -R bitmaps/alert.xbm bitmaps/ball.xbm bitmaps/battery.xbm bitmaps/envelope.xbm bitmaps/volume.xbm bitmaps/pause.xbm bitmaps/play.xbm bitmaps/music.xbm  dzen2-${VERSION}/bitmaps
 	@tar -cf dzen2-${VERSION}.tar dzen2-${VERSION}
