@@ -51,7 +51,7 @@ pbar(const char* label, double perc, int maxc, int height, int pnl) {
 	else
 		rp = (int)perc;
 
-	printf("%s %3d%% ^fg(%s)^r(%dx%d)^fg(%s)^r(%dx%d)%s", 
+	printf("%s %3d%% ^fg(%s)^r(%dx%d)^fg(%s)^r(%dx%d)^fg()%s", 
 			label ? label : "", rp, 
 			fg, (int)l, height,
 			bg, maxc-(int)l, height,

@@ -11,15 +11,15 @@
 #endif
 
 #define FONT		"-*-fixed-*-*-*-*-*-*-*-*-*-*-*-*"
-#define BGCOLOR		"#ab0b0b"
-#define FGCOLOR		"#efefef"
+#define BGCOLOR		"#111111"
+#define FGCOLOR		"grey70"
 
 #define ALIGNCENTER 0
 #define ALIGNLEFT   1
 #define ALIGNRIGHT  2
 
-#define MIN_BUF_SIZE   524
-#define MAX_LINE_LEN   512
+#define MIN_BUF_SIZE   1024
+#define MAX_LINE_LEN   1024
 
 /* gui data structures */
 enum { ColFG, ColBG, ColLast };

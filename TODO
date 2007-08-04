@@ -11,4 +11,6 @@
 
 # user interface
 
-          o in-text command to draw to the title window
+          o improve in-text command to draw 
+            to the title window
+          o auto fit window width to text length

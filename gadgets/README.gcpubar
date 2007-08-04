@@ -15,7 +15,7 @@ Command line options:
          less than 1 for intervals 
          shorter than a second
 
-  -c  :  Terminate after diplaying     (default: infite)
+  -c  :  Terminate after diplaying     (default: infinite)
          argument to '-c' values
 
   -w  :  Width of the meter in pixels  (default: 100)
@@ -25,5 +25,10 @@ Command line options:
   -fg :  Meter foreground color        (default: white)
 
   -bg :  Meter background color        (default: darkgrey)
+
+  -nonl:  no new line, don't put
+          '\n' at the end of the bar    (default: do print '\n')
+
+
 
 

@@ -387,17 +387,25 @@ Currently the following commands are supported:
 
 
     ^fg(color)         set foreground color
+    ^fg()              without arguments, sets default fg color
     ^bg(color)         set background color
-    ^i(path)           draw icon specified by path
+    ^bg()              without arguments, sets default bg color
+
     ^r(WIDTHxHEIGHT)   draw a rectangle with the dimensions 
                        WIDTH and HEIGHT
-    ^c(RADIUS)         draw a circel with size RADIUS pixels
+    ^ro(WIDTHxHEIGHT)  rectangle outline
+
+    ^c(RADIUS)         draw a circle with size RADIUS pixels
+    ^co(RADIUS)        circle outline
+
     ^p(PIXEL)          increment momentary position by PIXEL
+    ^i(path)           draw icon specified by path
+
     ^tw()              draw to title window
                        This command has some annoyances, as only 
                        the input after the command will be drawn
                        to the title window, so it is best used 
-                       only once and as first command per line.
+                       only once and as first command per line
                        Subject to be improved in the future.
 
 These commands can appear anywhere and in any combination in dzen's

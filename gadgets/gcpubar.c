@@ -32,7 +32,7 @@ THE SOFTWARE.
 /* bar color for critical values */
 #define CRITCOL "red"
 
-static void pbar (double, int, int);
+static void pbar (double, int, int, int);
 
 struct cpu_info {
 	unsigned long long user;
@@ -44,7 +44,7 @@ struct cpu_info {
 char *bg, *fg;
 
 static void
-pbar(double perc, int maxc, int height) {
+pbar(double perc, int maxc, int height, int print_nl) {
 	int i, rp;
 	double l;
 
@@ -57,9 +57,9 @@ pbar(double perc, int maxc, int height) {
 	else
 		rp = (int)perc;
 
-	printf("CPU: %3d%% ^fg(%s)^r(%dx%d)^fg(%s)^r(%dx%d)\n", rp, 
+	printf("CPU: %3d%% ^fg(%s)^r(%dx%d)^fg(%s)^r(%dx%d)^fg()%s", rp, 
 			(rp>=CPUCRIT) ? CRITCOL : fg, (int)l, height,
-			bg, maxc-(int)l, height);
+			bg, maxc-(int)l, height, print_nl ? "\n" : "");
 
 	fflush(stdout);
 }
@@ -74,11 +74,11 @@ main(int argc, char *argv[])
 	char buf[256], *ep;
 
 	/* defaults */
-	double ival=1.0;
-	int counts = 0;
-	int barwidth=100;
-	int barheight=10;
-	char *myfont = NULL;
+	double ival   = 1.0;
+	int counts    = 0;
+	int barwidth  = 100;
+	int barheight = 10;
+	int print_nl  = 1;
 
 	for(i=1; i < argc; i++) {
 		if(!strncmp(argv[i], "-i", 3)) {
@@ -120,8 +120,11 @@ main(int argc, char *argv[])
 				strcpy(bg, "darkgrey");
 			}
 		}
+		else if(!strncmp(argv[i], "-nonl", 6)) {
+			print_nl = 0;
+		}
 		else {
-			printf("usage: %s [-i <interval>] [-c <count>] [-fg <color>] [-bg <color>] [-w <pixel>] [-h <pixel>]\n", argv[0]);
+			printf("usage: %s [-i <interval>] [-c <count>] [-fg <color>] [-bg <color>] [-w <pixel>] [-h <pixel>] [-nonl]\n", argv[0]);
 			return EXIT_FAILURE;
 		}
 	}
@@ -163,7 +166,7 @@ main(int argc, char *argv[])
 				total  = (mcpu.user + mcpu.sys + mcpu.idle + mcpu.iowait) / 100.0;
 				myload = (mcpu.user + mcpu.sys + mcpu.iowait) / total;
 
-				pbar(myload, barwidth, barheight);
+				pbar(myload, barwidth, barheight, print_nl);
 				ocpu = ncpu;
 			}
 		}

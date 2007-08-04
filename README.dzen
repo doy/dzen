@@ -1,6 +1,6 @@
-^fg(lightgreen)==================================
-^fg(#6fbf47) dzen, (c) 2007 by Robert Manea
-^fg(lightgreen)==================================
+^fg(lightgreen)^r(190x4)^fg(#6fbf47)^r(38x4)^fg(darkgreen)^r(9x4)
+^fg(#6fbf47)  dzen, (c) 2007 by Robert Manea
+^fg(darkgreen)^r(9x4)^fg(#6fbf47)^r(38x4)^fg(lightgreen)^r(190x4)
 
 A general purpose messaging, notification and menu program
 
@@ -16,23 +16,23 @@ Script archive with a collection of interesting ideas:
 ^fg(#6fbf47)Features
 ^fg(#6fbf47)--------
 
-    * scriptable in any language
+    ^co(4x4) scriptable in any language
 
-    * dynamic colorizer
+    ^co(4x4) dynamic colorizer
 
-    * keyboard support
+    ^co(4x4) keyboard support
 
-    * single line and/or windows holding multiple lines
+    ^co(4x4) single line and/or windows holding multiple lines
 
-    * menu functionality
+    ^co(4x4) menu functionality
 
-    * in-text formating language
+    ^co(4x4) in-text formating language
 
-    * flexible event/action mechanism
+    ^co(4x4) flexible event/action mechanism
 
-    * hideable, collapsable
+    ^co(4x4) hideable, collapsable
 
-    * Xinerama support
+    ^co(4x4) Xinerama support
 
 
 ^fg(#6fbf47)Requirements
@@ -90,7 +90,7 @@ dzen accepts a couple of options:
     -xs     number of Xinerama screen
     -v      version information
 
-    ^fg(#6fbf47)see (5)^fg(grey70), for the in-text formating language.
+    ^fg(#6fbf47)see (5)^fg(), for the in-text formating language.
 
 
 
@@ -116,7 +116,7 @@ Dzen's window layout is as follows:
 The first line you provide to dzen always goes to the title window, 
 all other consecutive lines will be drawn to the slave window unless
 you explicitly overide this with the ^fg(#6fbf47)(5) In-text formating language
-^fg(grey70)command ^^tw().
+^fg()command ^^tw().
 
 
 ^fg(#6fbf47)QA:
@@ -132,33 +132,33 @@ Q2:  I used the '-l' option but no slave window appears.
 
 A2:  With the default event/action handling the slave window will
      only be displayed if you hoover with the mouse over the title
-     window. See ^fg(#6fbf47)(2) Events and actions ^fg(grey70)if you'd like to change
+     window. See ^fg(#6fbf47)(2) Events and actions ^fg()if you'd like to change
      this.
 
 
 Q3:  If I echo some text or cat a file dzen closes itself imediatelly.
 
 A3:  There are 2 different approaches dzen uses to terminate itself, 
-     see next section ^fg(#6fbf47)Termination^fg(grey70).
+     see next section ^fg(#6fbf47)Termination^fg().
 
 
 Q4:  Ok, the title and slave thing works, can I update the
      contents of both windows at the same time?
 
-A4:  Sure, see ^fg(#6fbf47)(4) Simultaneous updates ^fg(grey70)or use the in-text 
+A4:  Sure, see ^fg(#6fbf47)(4) Simultaneous updates ^fg()or use the in-text 
      command ^^tw() to explicitly draw to the title windwow.
-     See ^fg(#6fbf47)(5) In-Text formating language ^fg(grey70)for further details
+     See ^fg(#6fbf47)(5) In-Text formating language ^fg()for further details
 
 Q5:  Can i chnage color of my input at runtime?
 
 A5:  Yes, you can change both background and foreground colors and 
-     much more See ^fg(#6fbf47)(5) In-Text formating language^fg(grey70).
+     much more See ^fg(#6fbf47)(5) In-Text formating language^fg().
 
 
 Q6:  Can I use dzen as a menu?
 
 A6:  Yes, both vertical and horizontal menus are supported. 
-     See ^fg(#6fbf47)(3) Menu ^fg(grey70)for further details.
+     See ^fg(#6fbf47)(3) Menu ^fg()for further details.
 
 
 
@@ -167,12 +167,12 @@ A6:  Yes, both vertical and horizontal menus are supported.
 ^fg(#6fbf47)------------
 dzen uses two different approaches to terminate itself:
 
-    * Timed termination: if EOF is received -> terminate
+    ^co(4x4) Timed termination: if EOF is received -> terminate
         - unless the '-p' option is set
             · '-p' without argument persist forever
             · '-p' with argument n  persist for n seconds
 
-    * Interactive termination: if mouse button3 is clicked -> terminate
+    ^co(4x4) Interactive termination: if mouse button3 is clicked -> terminate
         - this is the default behaviour, ^fg(#6fbf47)see (2)
         - in some modes the Escape key terminates too, ^fg(#6fbf47)see (2)
 
@@ -384,12 +384,20 @@ Currently the following commands are supported:
 
 
     ^^fg(color)         set foreground color
+    ^^fg()              without arguments, sets default fg color
     ^^bg(color)         set background color
-    ^^i(path)           draw icon specified by path
+    ^^bg()              without arguments, sets default bg color
+
     ^^r(WIDTHxHEIGHT)   draw a rectangle with the dimensions 
                        WIDTH and HEIGHT
-    ^^c(RADIUS)         draw a circel with size RADIUS pixels
+    ^^ro(WIDTHxHEIGHT)  rectangle outline
+
+    ^^c(RADIUS)         draw a circle with size RADIUS pixels
+    ^^co(RADIUS)        circle outline
+
     ^^p(PIXEL)          increment momentary position by PIXEL
+    ^^i(path)           draw icon specified by path
+
     ^^tw()              draw to title window
                        This command has some annoyances, as only 
                        the input after the command will be drawn
@@ -431,10 +439,10 @@ Some examples:
 
 
    Input:
-          ^^fg(grey70)Some text containing ^^^^ characters
+          ^^fg(white)Some text containing ^^^^ characters
 
    Resulting in:
-          ^fg(grey70)Some text containing ^^ characters
+          ^fg(white)Some text containing ^^ characters
 
 
    Input for icons:
@@ -464,55 +472,55 @@ Some examples:
 ^fg(#6fbf47)Examples:
 ^fg(#6fbf47)---------
 
-* Display message and timeout after 10 seconds:
+^co(4x4) Display message and timeout after 10 seconds:
 ^fg(grey85)    (echo "This is a message"; sleep 10) | dzen2 -bg darkred -fg grey85 -fn fixed 
 
 
-* Display message and never timeout:
+^co(4x4) Display message and never timeout:
 ^fg(grey85)    echo "This is a message"| dzen2 -p
 
 
-* Display updating single line message:
+^co(4x4) Display updating single line message:
 ^fg(grey85)    for i in $(seq 1 20); do A=${A}'='; print $A; sleep 1; done | dzen2
 
 
-* Display header and a message with multiple lines:
+^co(4x4) Display header and a message with multiple lines:
 ^fg(grey85)    (echo Header; cal; sleep 20) | dzen2 -l 8
 
     Displays "Header" in the title window and the output of cal in the
     8 lines high slave window.
 
 
-* Display updating messages:
+^co(4x4) Display updating messages:
 ^fg(grey85)    (echo Header; while true; do echo test$((i++)); sleep 1; done) | dzen2 -l 12
 
     The slave window will update contents if new input has arrived.
 
 
-* Display log files:
+^co(4x4) Display log files:
 ^fg(grey85)    (su -c "echo LOGFILENAME; tail -f /var/log/messages") | dzen2 -l 20 -x 100 -y 300 -w 500
 
 
-* Monthly schedule with remind:
+^co(4x4) Monthly schedule with remind:
 ^fg(grey85)    (echo Monthly Schedule; remind -c1 -m) | dzen2 -l 52 -w 410 -p -fn lime -bg '#e0e8ea' -fg black -x 635
 
 
-* Simple menu:
+^co(4x4) Simple menu:
 ^fg(grey85)    echo "Applications" | dzen2 -l 4 -p -m < menufile
 
 
-* Horizontal menu without any files:
+^co(4x4) Horizontal menu without any files:
 ^fg(grey85)    {echo Menu; echo -e "xterm\nxclock\nxeyes\nxfontsel"} | dzen2 -l 4 -m h -p
 
 
-* Extract PIDs from the process table:
+^co(4x4) Extract PIDs from the process table:
 
 ^fg(grey85)    {echo Procs; ps -a} | dzen2 -m -l 12 -p \
 ^fg(grey85)    -e 'button1=menuprint;button3=exit;button4=scrollup:3;button5=scrolldown:3;entertitle=uncollapse;leaveslave=collapse' \
 ^fg(grey85)            | awk '{print $1}'
 
 
-* Dzen as xmonad (see http://xmonad.org) statusbar:
+^co(4x4) Dzen as xmonad (see http://xmonad.org) statusbar:
 
 ^fg(grey85)    status.sh | dzen2 -ta r -fn '-*-profont-*-*-*-*-11-*-*-*-*-*-iso8859' -bg '#aecf96' -fg black \
 ^fg(grey85)        -p -e 'sigusr1=raise;sigusr2=lower;onquit=exec:rm /tmp/dzen2-pid;button3=exit' & echo $! > /tmp/dzen2-pid

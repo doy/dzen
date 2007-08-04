@@ -11,11 +11,11 @@
 #include <string.h>
 
 /* command types for the in-text parser */
-enum ctype {bg, fg, icon, rect, circle, pos, titlewin};
+enum ctype {bg, fg, icon, rect, recto, circle, circleo, pos, titlewin};
 
 int get_tokval(const char* line, char **retdata);
 int get_token(const char*  line, int * t, char **tval);
-void set_opts(int type, char * value, int reverse); 
+static void set_opts(int type, char * value, int reverse); 
 
 static unsigned int
 textnw(const char *text, unsigned int len) {
@@ -132,58 +132,74 @@ get_token(const char *line, int * t, char **tval) {
 		*t = bg;
 	}
 	/* ^fg(#rrggbb) foreground color, type: fg */
-	if((*line == 'f') && (*(line+1) == 'g') && (*(line+2) == '(')) {
+	else if((*line == 'f') && (*(line+1) == 'g') && (*(line+2) == '(')) {
 		off=3;
 		next_pos = get_tokval(line+off, &tokval);
 		*t = fg;
 	}
 	/* ^tw() draw to title window, type: titlewin */
-	if((*line == 't') && (*(line+1) == 'w') && (*(line+2) == '(')) {
+	else if((*line == 't') && (*(line+1) == 'w') && (*(line+2) == '(')) {
 		off=3;
 		next_pos = get_tokval(line+off, &tokval);
 		*t = titlewin;
 	}
 	/* ^i(iconname) bitmap icon, type: icon */
-	if((*line == 'i') && (*(line+1) == '(')) {
+	else if((*line == 'i') && (*(line+1) == '(')) {
 		off = 2;
 		next_pos = get_tokval(line+off, &tokval);
 		*t = icon;
 	}
 	/* ^r(widthxheight) filled rectangle, type: rect */
-	if((*line == 'r') && (*(line+1) == '(')) {
+	else if((*line == 'r') && (*(line+1) == '(')) {
 		off = 2;
 		next_pos = get_tokval(line+off, &tokval);
 		*t = rect;
 	}
+	/* ^ro(widthxheight) outlined rectangle, type: recto */
+	else if((*line == 'r') && (*(line+1) == 'o') && (*(line+2) == '(')) {
+		off = 3;
+		next_pos = get_tokval(line+off, &tokval);
+		*t = recto;
+	}
 	/* ^p(widthxheight) relative position, type: pos */
-	if((*line == 'p') && (*(line+1) == '(')) {
+	else if((*line == 'p') && (*(line+1) == '(')) {
 		off = 2;
 		next_pos = get_tokval(line+off, &tokval);
 		*t = pos;
 	}
-	/* circle */
-	if((*line == 'c') && (*(line+1) == '(')) {
+	/*^c(radius) filled circle, type: circle */
+	else if((*line == 'c') && (*(line+1) == '(')) {
 		off = 2;
 		next_pos = get_tokval(line+off, &tokval);
 		*t = circle;
+	}
+	/* ^co(radius) outlined circle, type: circleo */
+	else if((*line == 'c') && (*(line+1) == 'o') && (*(line+2) == '(')) {
+		off = 3;
+		next_pos = get_tokval(line+off, &tokval);
+		*t = circleo;
 	}
 
 	*tval = tokval;
 	return next_pos+off;
 }
 
-void 
+static void 
 set_opts(int type, char * value, int reverse) {
+
+	if(!strncmp(value, "", 1))
+		value = NULL;
+
 	switch(type) {
 		case fg:
 			reverse ?
-				XSetBackground(dzen.dpy, dzen.tgc, getcolor(value)) :
-				XSetForeground(dzen.dpy, dzen.tgc, getcolor(value));
+				XSetBackground(dzen.dpy, dzen.tgc, value ? getcolor(value) : dzen.norm[ColFG]):
+				XSetForeground(dzen.dpy, dzen.tgc, value ? getcolor(value) : dzen.norm[ColFG]);
 			break;
 		case bg:
 			reverse ? 
-				XSetForeground(dzen.dpy, dzen.tgc, getcolor(value)) :
-				XSetBackground(dzen.dpy, dzen.tgc, getcolor(value));
+				XSetForeground(dzen.dpy, dzen.tgc, value ? getcolor(value) : dzen.norm[ColBG]):
+				XSetBackground(dzen.dpy, dzen.tgc, value ? getcolor(value) : dzen.norm[ColBG]);
 			break;
 	}
 }
@@ -306,9 +322,22 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 
 						px += rectw;
 					}
+					else if(t == recto) {
+						get_rect_vals(tval, &rectw, &recth);
+						rectw = rectw+px > dzen.w ? dzen.w-px : rectw;
+						recth = recth > dzen.line_height ? dzen.line_height : recth-1;
+						recty = (dzen.line_height - recth)/2;
+						XDrawRectangle(dzen.dpy, pm, dzen.tgc, px, (int)recty, rectw-1, recth);
+						px += rectw;
+					}
 					else if(t == circle) {
 						rectw = recth = atoi(tval);
 						XFillArc(dzen.dpy, pm, dzen.tgc, px, (dzen.line_height - recth)/2, rectw, recth, 2880, 23040);
+						px += rectw;
+					}
+					else if(t == circleo) {
+						rectw = recth = atoi(tval);
+						XDrawArc(dzen.dpy, pm, dzen.tgc, px, (dzen.line_height - recth)/2, rectw-1, recth-1, 2880, 23040);
 						px += rectw;
 					}
 					else if(t == pos) {
@@ -383,9 +412,22 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 				XFillRectangle(dzen.dpy, pm, dzen.tgc, px, (int)recty, rectw, recth);
                 px += rectw;
             }
+            else if(t == recto) {
+                get_rect_vals(tval, &rectw, &recth);
+                rectw = rectw+px > dzen.w ? dzen.w-px : rectw;
+                recth = recth > dzen.line_height ? dzen.line_height : recth-1;
+				recty = (dzen.line_height - recth)/2;
+				XDrawRectangle(dzen.dpy, pm, dzen.tgc, px, (int)recty, rectw-1, recth);
+                px += rectw;
+            }
 			else if(t == circle) {
 				rectw = recth = atoi(tval);
 				XFillArc(dzen.dpy, pm, dzen.tgc, px, (dzen.line_height - recth)/2, rectw, recth, 2880, 23040);
+				px += rectw;
+			}
+			else if(t == circleo) {
+				rectw = recth = atoi(tval);
+				XDrawArc(dzen.dpy, pm, dzen.tgc, px, (dzen.line_height - recth)/2, rectw-1, recth-1, 2880, 23040);
 				px += rectw;
 			}
 			else if(t == pos) {
