@@ -8,7 +8,7 @@ other than just displaying text ;).
 It implements sort of a KITT (Knight Rider, TV series) scanner in shell
 script.
 
-There are some setting that you can tweak to your likings, see
-"kitt-scanner.sh" for further details.
+There are some settings that you can tweak to your likings, see
+"kittscanner.sh" for further details.
 
 

@@ -194,7 +194,7 @@ x_draw_body(void) {
 			dzen.slave_win.first_line_vis = 0;
 			dzen.slave_win.last_line_vis  = dzen.slave_win.tcnt;
 		}
-		if(dzen.slave_win.tcnt >= dzen.slave_win.max_lines) {
+		else {
 			dzen.slave_win.first_line_vis = dzen.slave_win.tcnt - dzen.slave_win.max_lines;
 			dzen.slave_win.last_line_vis  = dzen.slave_win.tcnt;
 		}
@@ -747,7 +747,7 @@ main(int argc, char *argv[]) {
 		else if(!strncmp(argv[i], "-w", 3)) {
 			if(++i < argc) dzen.slave_win.width = atoi(argv[i]);
 		}
-		else if(!strncmp(argv[i], "-tw", 3)) {
+		else if(!strncmp(argv[i], "-tw", 4)) {
 			if(++i < argc) dzen.title_win.width = atoi(argv[i]);
 		}
 #ifdef DZEN_XINERAMA

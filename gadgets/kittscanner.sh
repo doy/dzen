@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# (c) 2007 by Robert Manea <rob dot manea @ gmail dot com>
+# (c) 2007 by Robert Manea <rob dot manea at gmail dot com>
 #
 # KITT Scanner for dzen - a man, a car, a dzen
 #
@@ -31,6 +31,7 @@ RECT="^r(${LED_WIDTH}x${LED_HEIGHT})"
 
 i=; j=1; SIGN='+'
 
+# build a number list "1 2 ... $SCANNER_LEDS"
 nr_list_leds() {
 	l=1
 	lnr=$1
@@ -42,9 +43,10 @@ nr_list_leds() {
 
 	echo $NRLIST
 }
+LED_LIST=`nr_list_leds $SCANNER_LEDS`
 
 while :; do
-    for i in `nr_list_leds $SCANNER_LEDS`; do
+    for i in $LED_LIST; do
         if [ "$i" -eq "$j" ]; then
             KBAR=${KBAR}"^p(${LED_SPACING})"${LFG}${RECT}${DFG}
         else
@@ -58,8 +60,7 @@ while :; do
     if [ $SIGN = '+' ] && [ $j -ge $SCANNER_LEDS ]; then
         j=$SCANNER_LEDS
         SIGN='-'
-    fi
-    if [ $SIGN = '-' ] && [ $j -eq 1 ]; then
+    elif [ $SIGN = '-' ] && [ $j -eq 1 ]; then
         j=1
         SIGN='+'
     fi
