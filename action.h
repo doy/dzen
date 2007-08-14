@@ -80,4 +80,6 @@ int a_scrollhome(char **);
 int a_scrollend(char **);
 int a_grabkeys(char **);
 int a_ungrabkeys(char **);
+int a_grabmouse(char **);
+int a_ungrabmouse(char **);
 

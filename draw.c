@@ -9,6 +9,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#ifdef DZEN_XPM
+#include <X11/xpm.h>
+#endif
 
 /* command types for the in-text parser */
 enum ctype {bg, fg, icon, rect, recto, circle, circleo, pos, titlewin};
@@ -184,24 +187,14 @@ get_token(const char *line, int * t, char **tval) {
 	return next_pos+off;
 }
 
-static void 
-set_opts(int type, char * value, int reverse) {
+static void
+setcolor(Drawable *pm, int x, int width, long fg, long bg, int reverse) {
 
-	if(!strncmp(value, "", 1))
-		value = NULL;
-
-	switch(type) {
-		case fg:
-			reverse ?
-				XSetBackground(dzen.dpy, dzen.tgc, value ? getcolor(value) : dzen.norm[ColFG]):
-				XSetForeground(dzen.dpy, dzen.tgc, value ? getcolor(value) : dzen.norm[ColFG]);
-			break;
-		case bg:
-			reverse ? 
-				XSetForeground(dzen.dpy, dzen.tgc, value ? getcolor(value) : dzen.norm[ColBG]):
-				XSetBackground(dzen.dpy, dzen.tgc, value ? getcolor(value) : dzen.norm[ColBG]);
-			break;
-	}
+	XSetForeground(dzen.dpy, dzen.tgc, reverse ? fg : bg);
+	//XSetBackground(dzen.dpy, dzen.tgc, reverse ? bg : fg);
+	XFillRectangle(dzen.dpy, *pm, dzen.tgc, x, 0, width, dzen.line_height);
+	XSetForeground(dzen.dpy, dzen.tgc, reverse ? bg : fg);
+	XSetBackground(dzen.dpy, dzen.tgc, reverse ? fg : bg);
 }
 
 static void
@@ -228,9 +221,17 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 	char lbuf[MAX_LINE_LEN], *rbuf = NULL;
 	int t=-1;
 	char *tval=NULL;
+	long lastfg = dzen.norm[ColFG], lastbg = dzen.norm[ColBG];
 	XGCValues gcv;
 	Drawable pm=0, bm;
+#ifdef DZEN_XPM
+	int free_xpm_attrib = 0;
+	Pixmap xpm_pm;
+	XpmAttributes xpma;
+	XpmColorSymbol xpms;
+#endif
 	XRectangle r = { dzen.x, dzen.y, dzen.w, dzen.h};
+
 
 	/* parse line and return the text without control commands*/
 	if(nodraw) {
@@ -248,6 +249,7 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 		py = dzen.font.ascent + (dzen.line_height - h) / 2;
 		xorig = 0; 
 
+
 		if(lnr != -1) {
 			pm = XCreatePixmap(dzen.dpy, RootWindow(dzen.dpy, DefaultScreen(dzen.dpy)), dzen.slave_win.width, 
 					dzen.line_height, DefaultDepth(dzen.dpy, dzen.screen));
@@ -260,10 +262,16 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 		if(!reverse) {
 			XSetBackground(dzen.dpy, dzen.tgc, dzen.norm[ColBG]);
 			XSetForeground(dzen.dpy, dzen.tgc, dzen.norm[ColBG]);
+#ifdef DZEN_XPM
+			xpms.pixel = dzen.norm[ColBG];
+#endif
 		}
 		else {
 			XSetBackground(dzen.dpy, dzen.tgc, dzen.norm[ColFG]);
 			XSetForeground(dzen.dpy, dzen.tgc, dzen.norm[ColFG]);
+#ifdef DZEN_XPM
+			xpms.pixel = dzen.norm[ColFG];
+#endif
 		}
 		XFillRectangles(dzen.dpy, pm, dzen.tgc, &r, 1);
 
@@ -273,6 +281,18 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 		else {
 			XSetForeground(dzen.dpy, dzen.tgc, dzen.norm[ColBG]);
 		}
+
+#ifdef DZEN_XPM
+		xpms.name = NULL;
+		xpms.value = "none";
+
+		xpma.colormap = DefaultColormap(dzen.dpy, dzen.screen);
+		xpma.depth = DefaultDepth(dzen.dpy, dzen.screen);
+		xpma.visual = DefaultVisual(dzen.dpy, dzen.screen);
+		xpma.colorsymbols = &xpms;
+		xpma.numsymbols = 1;
+		xpma.valuemask = XpmColormap|XpmDepth|XpmVisual|XpmColorSymbols;
+#endif
 
 		if(!dzen.font.set){ 
 			gcv.font = dzen.font.xfont->fid;
@@ -306,18 +326,32 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 						if(XReadBitmapFile(dzen.dpy, pm, tval, &bm_w, 
 									&bm_h, &bm, &bm_xh, &bm_yh) == BitmapSuccess 
 								&& (h/2 + px + (signed)bm_w < dzen.w)) {
+							setcolor(&pm, px, bm_w, lastfg, lastbg, reverse);
 							XCopyPlane(dzen.dpy, bm, pm, dzen.tgc, 
 									0, 0, bm_w, bm_h, px, 
 									dzen.line_height >= (signed)bm_h ? (dzen.line_height - bm_h)/2 : 0, 1);
 							XFreePixmap(dzen.dpy, bm);
 							px += bm_w;
 						}
+#ifdef DZEN_XPM
+						else if(XpmReadFileToPixmap(dzen.dpy, dzen.title_win.win, tval, &xpm_pm, NULL, &xpma) == XpmSuccess) {
+							setcolor(&pm, px, xpma.width, lastfg, lastbg, reverse);
+							XCopyArea(dzen.dpy, xpm_pm, pm, dzen.tgc, 
+									0, 0, xpma.width, xpma.height, px, 
+									dzen.line_height >= (signed)xpma.height ? (dzen.line_height - xpma.height)/2 : 0);
+							px += xpma.width;
+
+							XFreePixmap(dzen.dpy, xpm_pm);
+							free_xpm_attrib = 1;
+						}
+#endif
 					}
 					else if(t == rect) {
 						get_rect_vals(tval, &rectw, &recth);
 						rectw = rectw+px > dzen.w ? dzen.w-px : rectw;
 						recth = recth > dzen.line_height ? dzen.line_height : recth;
 						recty = (dzen.line_height - recth)/2;
+						setcolor(&pm, px, rectw, lastfg, lastbg, reverse);
 						XFillRectangle(dzen.dpy, pm, dzen.tgc, px, (int)recty, rectw, recth);
 
 						px += rectw;
@@ -327,27 +361,40 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 						rectw = rectw+px > dzen.w ? dzen.w-px : rectw;
 						recth = recth > dzen.line_height ? dzen.line_height : recth-1;
 						recty = (dzen.line_height - recth)/2;
+						setcolor(&pm, px, rectw, lastfg, lastbg, reverse);
 						XDrawRectangle(dzen.dpy, pm, dzen.tgc, px, (int)recty, rectw-1, recth);
 						px += rectw;
 					}
 					else if(t == circle) {
 						rectw = recth = atoi(tval);
+						setcolor(&pm, px, rectw, lastfg, lastbg, reverse);
 						XFillArc(dzen.dpy, pm, dzen.tgc, px, (dzen.line_height - recth)/2, rectw, recth, 2880, 23040);
 						px += rectw;
 					}
 					else if(t == circleo) {
 						rectw = recth = atoi(tval);
+						setcolor(&pm, px, rectw, lastfg, lastbg, reverse);
 						XDrawArc(dzen.dpy, pm, dzen.tgc, px, (dzen.line_height - recth)/2, rectw-1, recth-1, 2880, 23040);
 						px += rectw;
 					}
 					else if(t == pos) {
 						if((n_pos = atoi(tval)) < 0)
 							n_pos *= -1;
+						setcolor(&pm, px, n_pos, lastfg, lastbg, reverse);
 						px += n_pos;
 					}
-					else
-						set_opts(t, tval, reverse);
+					else {
+						if(!strncmp(tval, "", 1))
+							tval = NULL;
 
+						if(t == bg) {
+							lastbg = (tval ? getcolor(tval) : dzen.norm[ColBG]);
+						}
+						else if(t == fg) {
+							lastfg = tval ? getcolor(tval) : dzen.norm[ColFG];
+							XSetForeground(dzen.dpy, dzen.tgc, lastfg);
+						}
+					}
 					free(tval);
 				}
 
@@ -367,11 +414,12 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 				}
 
 
+				setcolor(&pm, px, tw, lastfg, lastbg, reverse);
 				if(dzen.font.set) 
-					XmbDrawImageString(dzen.dpy, pm, dzen.font.set,
+					XmbDrawString(dzen.dpy, pm, dzen.font.set,
 							dzen.tgc, px, py, lbuf, strlen(lbuf));
 				else 
-					XDrawImageString(dzen.dpy, pm, dzen.tgc, px, py, lbuf, strlen(lbuf)); 
+					XDrawString(dzen.dpy, pm, dzen.tgc, px, py, lbuf, strlen(lbuf)); 
 				px += tw;
 			}
 
@@ -392,52 +440,80 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 		strcat(rbuf, lbuf);
 	}
 	else {
-		if(t != -1 && tval){ 
+		if(t != -1 && tval) {
 			if(t == icon) {
 				if(XReadBitmapFile(dzen.dpy, pm, tval, &bm_w, 
 							&bm_h, &bm, &bm_xh, &bm_yh) == BitmapSuccess 
 						&& (h/2 + px + (signed)bm_w < dzen.w)) {
+					setcolor(&pm, px, bm_w, lastfg, lastbg, reverse);
 					XCopyPlane(dzen.dpy, bm, pm, dzen.tgc, 
 							0, 0, bm_w, bm_h, px, 
-							dzen.line_height > (signed)bm_h ? (dzen.line_height - bm_h)/2 : 0, 1);
+							dzen.line_height >= (signed)bm_h ? (dzen.line_height - bm_h)/2 : 0, 1);
 					XFreePixmap(dzen.dpy, bm);
 					px += bm_w;
 				}
+#ifdef DZEN_XPM
+				else if(XpmReadFileToPixmap(dzen.dpy, dzen.title_win.win, tval, &xpm_pm, NULL, &xpma) == XpmSuccess) {
+					setcolor(&pm, px, xpma.width, lastfg, lastbg, reverse);
+					XCopyArea(dzen.dpy, xpm_pm, pm, dzen.tgc, 
+							0, 0, xpma.width, xpma.height, px, 
+							dzen.line_height >= (signed)xpma.height ? (dzen.line_height - xpma.height)/2 : 0);
+					px += xpma.width;
+
+					XFreePixmap(dzen.dpy, xpm_pm);
+					free_xpm_attrib = 1;
+				}
+#endif
 			}
-            else if(t == rect) {
-                get_rect_vals(tval, &rectw, &recth);
-                rectw = rectw+px > dzen.w ? dzen.w-px : rectw;
-                recth = recth > dzen.line_height ? dzen.line_height : recth;
+			else if(t == rect) {
+				get_rect_vals(tval, &rectw, &recth);
+				rectw = rectw+px > dzen.w ? dzen.w-px : rectw;
+				recth = recth > dzen.line_height ? dzen.line_height : recth;
 				recty = (dzen.line_height - recth)/2;
+				setcolor(&pm, px, rectw, lastfg, lastbg, reverse);
 				XFillRectangle(dzen.dpy, pm, dzen.tgc, px, (int)recty, rectw, recth);
-                px += rectw;
-            }
-            else if(t == recto) {
-                get_rect_vals(tval, &rectw, &recth);
-                rectw = rectw+px > dzen.w ? dzen.w-px : rectw;
-                recth = recth > dzen.line_height ? dzen.line_height : recth-1;
+
+				px += rectw;
+			}
+			else if(t == recto) {
+				get_rect_vals(tval, &rectw, &recth);
+				rectw = rectw+px > dzen.w ? dzen.w-px : rectw;
+				recth = recth > dzen.line_height ? dzen.line_height : recth-1;
 				recty = (dzen.line_height - recth)/2;
+				setcolor(&pm, px, rectw, lastfg, lastbg, reverse);
 				XDrawRectangle(dzen.dpy, pm, dzen.tgc, px, (int)recty, rectw-1, recth);
-                px += rectw;
-            }
+				px += rectw;
+			}
 			else if(t == circle) {
 				rectw = recth = atoi(tval);
+				setcolor(&pm, px, rectw, lastfg, lastbg, reverse);
 				XFillArc(dzen.dpy, pm, dzen.tgc, px, (dzen.line_height - recth)/2, rectw, recth, 2880, 23040);
 				px += rectw;
 			}
 			else if(t == circleo) {
 				rectw = recth = atoi(tval);
+				setcolor(&pm, px, rectw, lastfg, lastbg, reverse);
 				XDrawArc(dzen.dpy, pm, dzen.tgc, px, (dzen.line_height - recth)/2, rectw-1, recth-1, 2880, 23040);
 				px += rectw;
 			}
 			else if(t == pos) {
 				if((n_pos = atoi(tval)) < 0)
 					n_pos *= -1;
+				setcolor(&pm, px, n_pos, lastfg, lastbg, reverse);
 				px += n_pos;
 			}
-			else
-				set_opts(t, tval, reverse);
+			else {
+				if(!strncmp(tval, "", 1))
+					tval = NULL;
 
+				if(t == bg) {
+					lastbg = (tval ? getcolor(tval) : dzen.norm[ColBG]);
+				}
+				else if(t == fg) {
+					lastfg = tval ? getcolor(tval) : dzen.norm[ColFG];
+					XSetForeground(dzen.dpy, dzen.tgc, lastfg);
+				}
+			}
 			free(tval);
 		}
 
@@ -457,12 +533,12 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 		}
 
 
-		if(dzen.font.set)
-			XmbDrawImageString(dzen.dpy, pm, dzen.font.set,
+		setcolor(&pm, px, tw, lastfg, lastbg, reverse);
+		if(dzen.font.set) 
+			XmbDrawString(dzen.dpy, pm, dzen.font.set,
 					dzen.tgc, px, py, lbuf, strlen(lbuf));
 		else 
-			XDrawImageString(dzen.dpy, pm, dzen.tgc, px, py, lbuf, strlen(lbuf));
-		
+			XDrawString(dzen.dpy, pm, dzen.tgc, px, py, lbuf, strlen(lbuf)); 
 		px += tw;
 
 
@@ -488,6 +564,13 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 					0, 0, px, dzen.line_height, xorig, 0);
 		}
 		XFreePixmap(dzen.dpy, pm);
+
+#ifdef DZEN_XPM
+		if(free_xpm_attrib) {
+			XFreeColors(dzen.dpy, xpma.colormap, xpma.pixels, xpma.npixels, xpma.depth);
+			XpmFreeAttributes(&xpma);
+		}
+#endif
 	}
 
 	return nodraw ? rbuf : NULL;

@@ -18,7 +18,7 @@ Optionally if you want to use dzen's gadgets:
     make clean install
 
 
-Note:       By default dzen will not be compiled with Xinerama support.
+Note:       By default dzen will not be compiled with Xinerama and XPM support.
             Uncomment the respective lines in config.mk to change this.
 
 

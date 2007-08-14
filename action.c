@@ -53,6 +53,8 @@ struct action_lookup  ac_lookup_table[] = {
 	{ "scrollend",      a_scrollend},
 	{ "grabkeys",       a_grabkeys},
 	{ "ungrabkeys",     a_ungrabkeys},
+	{ "grabmouse",       a_grabmouse},
+	{ "ungrabmouse",     a_ungrabmouse},
 	{ 0, 0 }
 };
 
@@ -523,6 +525,21 @@ int
 a_ungrabkeys(char * opt[]) {
 	(void)opt;
 	XUngrabKeyboard(dzen.dpy, CurrentTime);
+	return 0;
+}
+
+int
+a_grabmouse(char * opt[]) {
+	(void)opt;
+	XGrabPointer(dzen.dpy, RootWindow(dzen.dpy, dzen.screen),
+			True, ButtonReleaseMask, GrabModeAsync, GrabModeAsync, None, None, CurrentTime);
+	return 0;
+}
+
+int
+a_ungrabmouse(char * opt[]) {
+	(void)opt;
+	XUngrabPointer(dzen.dpy, CurrentTime);
 	return 0;
 }
 

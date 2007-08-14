@@ -20,6 +20,8 @@ Script archive with a collection of interesting ideas:
 
     ^co(4x4) dynamic colorizer
 
+    ^co(4x4) icons support
+
     ^co(4x4) keyboard support
 
     ^co(4x4) single line and/or windows holding multiple lines
@@ -57,7 +59,7 @@ Optionally if you want to use dzen's gadgets:
     ^fg(grey85)make clean install
 
 
-^fg(Khaki)Note:       By default dzen will ^fg(red)not^fg(Khaki) be compiled with Xinerama support.
+^fg(Khaki)Note:       By default dzen will ^fg(red)not^fg(Khaki) be compiled with Xinerama and XPM support.
             ^fg(Khaki)Uncomment the respective lines in config.mk to change this.
 
 
@@ -86,6 +88,7 @@ dzen accepts a couple of options:
     -p      persist EOF (optional timeout in seconds)
     -x      x position
     -y      y position
+    -h      line height (default: fontheight + 2 pixels)
     -w      width
     -xs     number of Xinerama screen
     -v      version information
@@ -287,6 +290,10 @@ An example:
     scrolldown:n        scroll slave window n lines down (default n=1)
     grabkeys            enable keyboard support
     ungrabkeys          disable keyboard support
+    grabmouse           enable mouse support 
+                        only needed with specific windowmanagers, such as fluxbox
+    ungrabmouse         release mouse 
+                        only needed with specific windowmanagers, such as fluxbox
 
 
 ^fg(Khaki)Note:   If no events/actions are specified dzen defaults to:
@@ -396,7 +403,9 @@ Currently the following commands are supported:
     ^^co(RADIUS)        circle outline
 
     ^^p(PIXEL)          increment momentary position by PIXEL
+
     ^^i(path)           draw icon specified by path
+                       Supported formats: XBM and optionally XPM
 
     ^^tw()              draw to title window
                        This command has some annoyances, as only 
@@ -411,10 +420,13 @@ input.
 The color can be specified either as symbolic name (e.g. red,
 darkgreen, etc.) or as #rrggbb hex-value (e.g. #ffffaa).
 
-Icons must be in the XBM format, see the "bitmaps" directory for some
-sample icons. With the standard "bitmap" application you can easily draw
-your own icons, though there are lots floating around on your harddisk
-or on the web.
+Icons must be in the XBM or optionally XPM format, see the "bitmaps"
+directory for some sample icons. With the standard "bitmap" application
+you can easily draw your own icons.
+
+^fg(Khaki)Note:   Displaying XPM (pixmap) files imposes a somewhat
+        ^fg(Khaki)higher load than lightweight XBM files, so use
+        ^fg(Khaki)them with care in tight loops.
 
 Rectangles will be truncated to the maximum possible size if you specify
 a size bigger than dzen's window.

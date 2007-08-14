@@ -239,7 +239,8 @@ x_check_geometry(XRectangle si) {
 		if(dzen.slave_win.x + dzen.slave_win.width > si.x + si.width)
 			dzen.slave_win.x = si.x + (si.width - dzen.slave_win.width);
 	}
-	dzen.line_height = dzen.font.height + 2;
+	if(!dzen.line_height)
+		dzen.line_height = dzen.font.height + 2;
 
 	if (dzen.title_win.y + dzen.line_height > si.y + si.height)
 		dzen.title_win.y = 0;
@@ -693,6 +694,7 @@ main(int argc, char *argv[]) {
 	dzen.running = True;
 	dzen.xinescreen = 0;
 	dzen.tsupdate = 0;
+	dzen.line_height = 0;
 
 	/* cmdline args */
 	for(i = 1; i < argc; i++)
@@ -746,6 +748,9 @@ main(int argc, char *argv[]) {
 		}
 		else if(!strncmp(argv[i], "-w", 3)) {
 			if(++i < argc) dzen.slave_win.width = atoi(argv[i]);
+		}
+		else if(!strncmp(argv[i], "-h", 3)) {
+			if(++i < argc) dzen.line_height= atoi(argv[i]);
 		}
 		else if(!strncmp(argv[i], "-tw", 4)) {
 			if(++i < argc) dzen.title_win.width = atoi(argv[i]);
