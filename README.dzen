@@ -415,7 +415,9 @@ Positioning:
 ------------
 
     ^^p(PIXEL)          position next input amount of PIXELs to the right
+                       or left of the current position
                        a.k.a. relative positioning
+
     ^^pa(PIXEL)         position next input at PIXEL
                        a.k.a. absolute positioning
                        For maximum predictability ^^pa() should only be
@@ -437,10 +439,10 @@ Other:
                        in order to position the input inside other already
                        drawn input.
 
-Example: 
-^^ib(1)^^pa(4)^^fg(red)^^ro(100x15)^^pa(6)^^fg(blue)^^r(20x10)^^fg(orange)^^pa(28)^^r(40x10)^^pa(70)^^p(2)^^fg(darkgreen)^^co(12)^^p(2)^^c(12)
-Giving:
-^ib(1)^pa(4)^fg(red)^ro(100x15)^pa(6)^fg(blue)^r(20x10)^fg(orange)^pa(28)^r(40x10)^pa(70)^p(2)^fg(darkgreen)^co(12)^p(2)^c(12)
+                       Example: 
+                         ^^ib(1)^^fg(red)^^ro(100x15)^^p(-98)^^fg(blue)^^r(20x10)^^fg(orange)^^p(3)^^r(40x10)^^p(4)^^fg(darkgreen)^^co(12)^^p(2)^^c(10)
+                       Giving:
+                         ^ib(1)^fg(red)^ro(100x15)^p(-98)^fg(blue)^r(20x10)^fg(orange)^p(3)^r(40x10)^p(4)^fg(darkgreen)^co(12)^p(2)^c(10)
 
 
 
