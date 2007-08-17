@@ -45,7 +45,7 @@ LDFLAGS = ${LIBS}
 #CFLAGS += -xtarget=ultra
 
 # Debugging
-#CFLAGS = ${INCS} -DVERSION=\"${VERSION}\" -std=gnu89 -pedantic -Wall -W -Wno-missing-field-initializers -Wundef -Wendif-labels -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-align -Wwrite-strings -Wstrict-prototypes -Wmissing-prototypes -Wnested-externs -Winline -Wdisabled-optimization -O2 -pipe
+#CFLAGS = ${INCS} -DVERSION=\"${VERSION}\" -std=gnu89 -pedantic -Wall -W -Wno-missing-field-initializers -Wundef -Wendif-labels -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-align -Wwrite-strings -Wstrict-prototypes -Wmissing-prototypes -Wnested-externs -Winline -Wdisabled-optimization -O2 -pipe -DDZEN_XPM
 #LDFLAGS = -g ${LIBS}
 
 # compiler and linker

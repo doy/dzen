@@ -19,8 +19,10 @@ BG=black
 
 SLEEP=0.1
 
-DZEN=/usr/local/bin/dzen2
-DZENOPTS="-bg $BG -fg $INACTIVE_LED_COLOR"
+#DZEN=/usr/local/bin/dzen2
+DZEN=../dzen2
+#DZENOPTS="-bg $BG -fg $INACTIVE_LED_COLOR"
+DZENOPTS="-bg $BG -fg $INACTIVE_LED_COLOR -xs 1 -y 30"
 
 #-----------------------------------------------------------------------
 

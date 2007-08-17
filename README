@@ -391,10 +391,19 @@ displays.
 Currently the following commands are supported:
 
 
+Colors:
+-------
+
     ^fg(color)         set foreground color
     ^fg()              without arguments, sets default fg color
     ^bg(color)         set background color
     ^bg()              without arguments, sets default bg color
+
+Graphics:
+---------
+
+    ^i(path)           draw icon specified by path
+                       Supported formats: XBM and optionally XPM
 
     ^r(WIDTHxHEIGHT)   draw a rectangle with the dimensions 
                        WIDTH and HEIGHT
@@ -403,11 +412,17 @@ Currently the following commands are supported:
     ^c(RADIUS)         draw a circle with size RADIUS pixels
     ^co(RADIUS)        circle outline
 
-    ^p(PIXEL)          increment momentary position by PIXEL
+Positioning:
+------------
 
-    ^i(path)           draw icon specified by path
-                       Supported formats: XBM and optionally XPM
-                       
+    ^p(PIXEL)          position next input amount of PIXELs to the right
+                       a.k.a. relative positioning
+    ^pa(PIXEL)         position next input at PIXEL
+                       a.k.a. absolute positioning
+                       For maximum predictability ^^pa() should only be
+                       used with '-ta l' or '-sa l'
+Other:
+------
 
     ^tw()              draw to title window
                        This command has some annoyances, as only 
@@ -415,6 +430,17 @@ Currently the following commands are supported:
                        to the title window, so it is best used 
                        only once and as first command per line
                        Subject to be improved in the future.
+
+    ^ib(VALUE)         ignore background setting, VALUE can be either
+                       1 to ignore or 0 to not ignore the bg color set
+                       with ^bg(color)
+                       This command is useful in combination with ^^pa()
+                       in order to position the input inside other already
+                       drawn input.
+
+Example: 
+^ib(1)^pa(4)^fg(red)^ro(100x15)^pa(6)^fg(blue)^r(20x10)^fg(orange)^pa(28)^r(40x10)^pa(70)^p(2)^fg(darkgreen)^co(12)^p(2)^c(12)
+
 
 These commands can appear anywhere and in any combination in dzen's
 input. 
