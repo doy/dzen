@@ -308,7 +308,7 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 			XChangeGC(dzen.dpy, dzen.tgc, GCFont, &gcv);
 		}
 
-		if( (lnr + dzen.slave_win.first_line_vis) >= dzen.slave_win.tcnt) {
+		if( lnr != -1 && (lnr + dzen.slave_win.first_line_vis >= dzen.slave_win.tcnt)) {
 			XCopyArea(dzen.dpy, pm, dzen.slave_win.drawable[lnr], dzen.gc,
 					0, 0, px, dzen.line_height, xorig, 0);
 			XFreePixmap(dzen.dpy, pm);
@@ -387,9 +387,13 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 							break;
 
 						case pos:
-							if((n_pos = atoi(tval)) < 0)
-								n_pos *= -1;
-							setcolor(&pm, px, n_pos, lastfg, lastbg, reverse, nobg);
+							if((n_pos = atoi(tval)) < 0) {
+								n_pos = px + n_pos < 0 ? 0 : n_pos;
+								setcolor(&pm, n_pos, px, lastfg, lastbg, reverse, nobg);
+							}
+							else
+								setcolor(&pm, px, n_pos, lastfg, lastbg, reverse, nobg);
+
 							px += n_pos;
 							break;
 
@@ -520,9 +524,13 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 					break;
 
 				case pos:
-					if((n_pos = atoi(tval)) < 0)
-						n_pos *= -1;
-					setcolor(&pm, px, n_pos, lastfg, lastbg, reverse, nobg);
+					if((n_pos = atoi(tval)) < 0) {
+						n_pos = px + n_pos < 0 ? 0 :  px + n_pos;
+						setcolor(&pm, n_pos, px, lastfg, lastbg, reverse, nobg);
+					}
+					else
+						setcolor(&pm, px, n_pos, lastfg, lastbg, reverse, nobg);
+
 					px += n_pos;
 					break;
 
@@ -610,7 +618,10 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 void
 drawheader(const char * text) {
 	if(text){ 
-		XFillRectangle(dzen.dpy, dzen.title_win.drawable, dzen.rgc, 0, 0, dzen.title_win.width, dzen.line_height);
+		dzen.w = dzen.title_win.width;
+		dzen.h = dzen.line_height;
+
+		XFillRectangle(dzen.dpy, dzen.title_win.drawable, dzen.rgc, 0, 0, dzen.w, dzen.h);
 		parse_line(text, -1, dzen.title_win.alignment, 0, 0);
 	}
 
@@ -627,10 +638,13 @@ drawbody(char * text) {
 	   the actual parsing process
 	   */
 	if((ec = strstr(text, "^tw()")) && (*(ec-1) != '^')) {
-		XFillRectangle(dzen.dpy, dzen.title_win.drawable, dzen.rgc, 0, 0, dzen.title_win.width, dzen.line_height);
+		dzen.w = dzen.title_win.width;
+		dzen.h = dzen.line_height;
+
+		XFillRectangle(dzen.dpy, dzen.title_win.drawable, dzen.rgc, 0, 0, dzen.w, dzen.h);
 		parse_line(ec+5, -1, dzen.title_win.alignment, 0, 0);
 		XCopyArea(dzen.dpy, dzen.title_win.drawable, dzen.title_win.win, 
-				dzen.gc, 0, 0, dzen.title_win.width, dzen.line_height, 0, 0);
+				dzen.gc, 0, 0, dzen.w, dzen.h, 0, 0);
 		return;
 	}
 
