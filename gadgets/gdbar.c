@@ -56,6 +56,8 @@ pbar(const char* label, double perc, int maxc, int height, int pnl) {
 			fg, (int)l, height,
 			bg, maxc-(int)l, height,
 			pnl ? "\n" : "");
+
+	fflush(stdout);
 }
 
 	int
