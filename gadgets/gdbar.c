@@ -42,7 +42,7 @@ pbar(const char* label, double perc, int maxc, int height, int pnl, int mode) {
 	double l;
 
 
-	l = perc * ((double)maxc / 100);
+	l = perc * ((mode ? (double)(maxc-2) : (double) maxc) / 100);
 	if((int)(l + 0.5) >= (int)l)
 		l = l + 0.5;
 

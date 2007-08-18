@@ -48,7 +48,7 @@ pbar(double perc, int maxc, int height, int print_nl, int mode) {
 	int i, rp;
 	double l;
 
-	l = perc * ((double)maxc / 100);
+	l = perc * ((mode ? (double)(maxc-2) : (double) maxc) / 100);
 	if((int)(l + 0.5) >= (int)l)
 		l = l + 0.5;
 
@@ -60,7 +60,7 @@ pbar(double perc, int maxc, int height, int print_nl, int mode) {
 	if(mode)
 		printf("CPU: %3d%% ^ib(1)^fg(%s)^ro(%dx%d)^p(%d)^fg(%s)^r(%dx%d)^fg()%s", 
 				rp, bg, maxc, height, -1*(maxc-1),
-				(rp>=CPUCRIT) ? CRITCOL : fg, (int)l-2, height-2, print_nl ? "\n" : "");
+				(rp>=CPUCRIT) ? CRITCOL : fg, (int)l, height-2, print_nl ? "\n" : "");
 	else
 		printf("CPU: %3d%% ^fg(%s)^r(%dx%d)^fg(%s)^r(%dx%d)^fg()%s", 
 				rp, (rp>=CPUCRIT) ? CRITCOL : fg, (int)l, height,
