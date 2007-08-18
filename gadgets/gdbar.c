@@ -31,13 +31,13 @@ THE SOFTWARE.
 
 #define MAXLEN 512
 
-static void pbar (const char *, double, int, int, int);
+static void pbar (const char *, double, int, int, int, int);
 
 char *bg, *fg;
 
 
 static void
-pbar(const char* label, double perc, int maxc, int height, int pnl) {
+pbar(const char* label, double perc, int maxc, int height, int pnl, int mode) {
 	int i, rp;
 	double l;
 
@@ -51,11 +51,18 @@ pbar(const char* label, double perc, int maxc, int height, int pnl) {
 	else
 		rp = (int)perc;
 
-	printf("%s %3d%% ^fg(%s)^r(%dx%d)^fg(%s)^r(%dx%d)^fg()%s", 
-			label ? label : "", rp, 
-			fg, (int)l, height,
-			bg, maxc-(int)l, height,
-			pnl ? "\n" : "");
+	if(mode)
+		printf("%s %3d%% ^ib(1)^fg(%s)^ro(%dx%d)^p(%d)^fg(%s)^r(%dx%d)^p(%d)^ib(0)^fg()%s", 
+				label ? label : "", rp, 
+				bg, (int)maxc, height, -1*(maxc-1),
+				fg, (int)l, height-2,
+				maxc-(int)l-1, pnl ? "\n" : "");
+	else
+		printf("%s %3d%% ^fg(%s)^r(%dx%d)^fg(%s)^r(%dx%d)^fg()%s", 
+				label ? label : "", rp, 
+				fg, (int)l, height,
+				bg, maxc-(int)l, height,
+				pnl ? "\n" : "");
 
 	fflush(stdout);
 }
@@ -68,6 +75,7 @@ main(int argc, char *argv[])
 	char aval[MAXLEN], *endptr;
 
 	/* defaults */
+	int mode      =    0; 
 	int barwidth  =   80;
 	int barheight =   10;
 	double minval =    0;
@@ -84,6 +92,9 @@ main(int argc, char *argv[])
 		else if(!strncmp(argv[i], "-h", 3)) {
 			if(++i < argc)
 				barheight = atoi(argv[i]);
+		}
+		else if(!strncmp(argv[i], "-o", 3)) {
+				mode = 1;
 		}
 		else if(!strncmp(argv[i], "-fg", 4)) {
 			if(++i < argc)
@@ -127,7 +138,7 @@ main(int argc, char *argv[])
 			print_nl = 0;
 		}
 		else {
-			fprintf(stderr, "usage: dbar [-w <pixel>] [-h <pixel>] [-fg <color>] [-bg <color>] [-min <minvalue>] [-max <maxvalue>] [-l <string>] [-nonl]\n");
+			fprintf(stderr, "usage: dbar [-w <pixel>] [-h <pixel>] [-fg <color>] [-bg <color>] [-min <minvalue>] [-max <maxvalue>] [-l <string>] [-nonl] [-o]\n");
 			return EXIT_FAILURE;
 		}
 	}
@@ -148,7 +159,7 @@ main(int argc, char *argv[])
 			minval = 0;
 		}
 
-		pbar(label, (100*(val-minval))/(maxval-minval), barwidth, barheight, print_nl);
+		pbar(label, (100*(val-minval))/(maxval-minval), barwidth, barheight, print_nl, mode);
 	}
 
 	return EXIT_SUCCESS;

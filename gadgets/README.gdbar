@@ -21,6 +21,7 @@ Options:
      -h   :  bar height
      -l   :  label to be prepended to 
              the bar                       (default: '' )
+     -o   :  Draw conky style meters
      -nonl:  no new line, don't put 
              '\n' at the end of the bar    (default: do print '\n')
 

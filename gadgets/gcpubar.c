@@ -32,7 +32,7 @@ THE SOFTWARE.
 /* bar color for critical values */
 #define CRITCOL "red"
 
-static void pbar (double, int, int, int);
+static void pbar (double, int, int, int, int);
 
 struct cpu_info {
 	unsigned long long user;
@@ -44,7 +44,7 @@ struct cpu_info {
 char *bg, *fg;
 
 static void
-pbar(double perc, int maxc, int height, int print_nl) {
+pbar(double perc, int maxc, int height, int print_nl, int mode) {
 	int i, rp;
 	double l;
 
@@ -57,9 +57,14 @@ pbar(double perc, int maxc, int height, int print_nl) {
 	else
 		rp = (int)perc;
 
-	printf("CPU: %3d%% ^fg(%s)^r(%dx%d)^fg(%s)^r(%dx%d)^fg()%s", rp, 
-			(rp>=CPUCRIT) ? CRITCOL : fg, (int)l, height,
-			bg, maxc-(int)l, height, print_nl ? "\n" : "");
+	if(mode)
+		printf("CPU: %3d%% ^ib(1)^fg(%s)^ro(%dx%d)^p(%d)^fg(%s)^r(%dx%d)^fg()%s", 
+				rp, bg, maxc, height, -1*(maxc-1),
+				(rp>=CPUCRIT) ? CRITCOL : fg, (int)l-2, height-2, print_nl ? "\n" : "");
+	else
+		printf("CPU: %3d%% ^fg(%s)^r(%dx%d)^fg(%s)^r(%dx%d)^fg()%s", 
+				rp, (rp>=CPUCRIT) ? CRITCOL : fg, (int)l, height,
+				bg, maxc-(int)l, height, print_nl ? "\n" : "");
 
 	fflush(stdout);
 }
@@ -74,6 +79,7 @@ main(int argc, char *argv[])
 	char buf[256], *ep;
 
 	/* defaults */
+	int mode      = 0; 
 	double ival   = 1.0;
 	int counts    = 0;
 	int barwidth  = 100;
@@ -91,6 +97,9 @@ main(int argc, char *argv[])
 				else
 					i++;
 			}
+		}
+		else if(!strncmp(argv[i], "-o", 3)) {
+				mode = 1;
 		}
 		else if(!strncmp(argv[i], "-c", 3)) {
 			if(++i < argc)
@@ -166,7 +175,7 @@ main(int argc, char *argv[])
 				total  = (mcpu.user + mcpu.sys + mcpu.idle + mcpu.iowait) / 100.0;
 				myload = (mcpu.user + mcpu.sys + mcpu.iowait) / total;
 
-				pbar(myload, barwidth, barheight, print_nl);
+				pbar(myload, barwidth, barheight, print_nl, mode);
 				ocpu = ncpu;
 			}
 		}

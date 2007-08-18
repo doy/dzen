@@ -26,6 +26,8 @@ Command line options:
 
   -bg :  Meter background color        (default: darkgrey)
 
+  -o  :  Toggle conky style meter drawing
+
   -nonl:  no new line, don't put
           '\n' at the end of the bar    (default: do print '\n')
 
