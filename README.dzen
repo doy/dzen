@@ -246,6 +246,8 @@ An example:
     button3             Mouse button3 released
     button4             Mouse button4 released (usually scrollwheel)
     button5             Mouse button5 released (usually scrollwheel)
+    button6             Mouse button6 released
+    button7             Mouse button7 released
     entertitle          Mouse enters the title window
     leavetitle          Mouse leaves the title window
     enterslave          Mouse enters the slave window

@@ -20,6 +20,8 @@ struct event_lookup ev_lookup_table[] = {
 	{ "button3",        button3},
 	{ "button4",        button4},
 	{ "button5",        button5},
+	{ "button6",        button6},
+	{ "button7",        button7},
 	{ "entertitle",     entertitle},
 	{ "leavetitle",     leavetitle},
 	{ "enterslave",     enterslave},

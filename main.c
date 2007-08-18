@@ -541,6 +541,12 @@ handle_xev(void) {
 				case Button5:
 					do_action(button5);
 					break;
+				case Button6:
+					do_action(button6);
+					break;
+				case Button7:
+					do_action(button7);
+					break;
 			}
 			break;
 		case KeyPress:

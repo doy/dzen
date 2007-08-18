@@ -21,6 +21,14 @@
 #define MIN_BUF_SIZE   1024
 #define MAX_LINE_LEN   1024
 
+#ifndef Button6
+# define Button6 6
+#endif
+
+#ifndef Button7
+# define Button7 7
+#endif
+
 /* gui data structures */
 enum { ColFG, ColBG, ColLast };
 

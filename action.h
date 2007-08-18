@@ -16,7 +16,7 @@ enum ev_id {
 	/* startup, exit, input */
 	onstart, onexit, onnewinput,
 	/* mouse buttons */
-	button1, button2, button3, button4, button5,
+	button1, button2, button3, button4, button5,  button6,  button7,
 	/* entering/leaving windows */
 	entertitle, leavetitle, enterslave, leaveslave, 
 	/* external signals */
