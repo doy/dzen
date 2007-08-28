@@ -58,15 +58,19 @@ pbar(double perc, int maxc, int height, int print_nl, int mode) {
 		rp = (int)perc;
 
 	if(mode)
-		printf("CPU: %3d%% ^ib(1)^fg(%s)^ro(%dx%d)^p(%d)^fg(%s)^r(%dx%d)^fg()%s", 
+		printf("CPU: %3d%% ^ib(1)^fg(%s)^ro(%dx%d)^p(%d)^fg(%s)^r(%dx%d)^p(%d)^ib(0)^fg()%s", 
 				rp, bg, maxc, height, -1*(maxc-1),
-				(rp>=CPUCRIT) ? CRITCOL : fg, (int)l, height-2, print_nl ? "\n" : "");
+				(rp>=CPUCRIT) ? CRITCOL : fg, (int)l, height-2, (maxc-1)-(int)l, print_nl ? "\n" : "");
 	else
 		printf("CPU: %3d%% ^fg(%s)^r(%dx%d)^fg(%s)^r(%dx%d)^fg()%s", 
 				rp, (rp>=CPUCRIT) ? CRITCOL : fg, (int)l, height,
 				bg, maxc-(int)l, height, print_nl ? "\n" : "");
 
 	fflush(stdout);
+}
+
+static void
+mkstat() {
 }
 
 int 
@@ -133,7 +137,7 @@ main(int argc, char *argv[])
 			print_nl = 0;
 		}
 		else {
-			printf("usage: %s [-i <interval>] [-c <count>] [-fg <color>] [-bg <color>] [-w <pixel>] [-h <pixel>] [-nonl]\n", argv[0]);
+			printf("usage: %s [-i <interval>] [-c <count>] [-fg <color>] [-bg <color>] [-w <pixel>] [-h <pixel>] [-o] [-nonl]\n", argv[0]);
 			return EXIT_FAILURE;
 		}
 	}
