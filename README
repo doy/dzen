@@ -443,7 +443,7 @@ Other:
                        other already drawn input.
 
                        Example: 
-                         ^^ib(1)^^fg(red)^^ro(100x15)^^p(-98)^^fg(blue)^^r(20x10)^^fg(orange)^^p(3)^^r(40x10)^^p(4)^^fg(darkgreen)^^co(12)^^p(2)^^c(10)
+                         ^ib(1)^fg(red)^ro(100x15)^p(-98)^fg(blue)^r(20x10)^fg(orange)^p(3)^r(40x10)^p(4)^fg(darkgreen)^co(12)^p(2)^c(10)
 
 
 

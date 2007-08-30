@@ -364,9 +364,13 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 
 						case recto:
 							get_rect_vals(tval, &rectw, &recth);
+							if (!rectw) break;
+
 							rectw = rectw+px > dzen.w ? dzen.w-px : rectw;
 							recth = recth > dzen.line_height ? dzen.line_height-2 : recth-1;
 							recty = (dzen.line_height - recth)/2;
+							/* prevent from stairs effect when rounding recty */
+							if (!((dzen.line_height - recth) % 2)) recty--;
 							setcolor(&pm, px, rectw, lastfg, lastbg, reverse, nobg);
 							XDrawRectangle(dzen.dpy, pm, dzen.tgc, px, (int)recty, rectw-1, recth);
 							px += rectw;
@@ -501,9 +505,13 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 
 				case recto:
 					get_rect_vals(tval, &rectw, &recth);
+					if (!rectw) break;
+
 					rectw = rectw+px > dzen.w ? dzen.w-px : rectw;
 					recth = recth > dzen.line_height ? dzen.line_height-2 : recth-1;
 					recty = (dzen.line_height - recth)/2;
+					/* prevent from stairs effect when rounding recty */
+					if (!((dzen.line_height - recth) % 2)) recty--;
 					setcolor(&pm, px, rectw, lastfg, lastbg, reverse, nobg);
 					XDrawRectangle(dzen.dpy, pm, dzen.tgc, px, (int)recty, rectw-1, recth);
 					px += rectw;
