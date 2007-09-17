@@ -419,6 +419,7 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 							lastfg = tval[0] ? (unsigned)getcolor(tval) : dzen.norm[ColFG];
 							XSetForeground(dzen.dpy, dzen.tgc, lastfg);
 							break;
+
 					}
 					free(tval);
 				}
@@ -658,6 +659,10 @@ drawbody(char * text) {
 
 	if(dzen.slave_win.tcnt == dzen.slave_win.tsize) 
 		free_buffer();
+	if(text[0] == '^' && text[1] == 'c' && text[2] == 's') {
+		free_buffer();
+		return;
+	}
 	if(dzen.slave_win.tcnt < dzen.slave_win.tsize) {
 		dzen.slave_win.tbuf[dzen.slave_win.tcnt] = estrdup(text);
 		dzen.slave_win.tcnt++;
