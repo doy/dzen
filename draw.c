@@ -641,6 +641,7 @@ drawheader(const char * text) {
 void
 drawbody(char * text) {
 	char *ec;
+	int i;
 
 	/* draw to title window
 	   this routine should be better integrated into
@@ -661,6 +662,9 @@ drawbody(char * text) {
 		free_buffer();
 	if(text[0] == '^' && text[1] == 'c' && text[2] == 's') {
 		free_buffer();
+		for(i=0; i < dzen.slave_win.max_lines; i++)
+			XFillRectangle(dzen.dpy, dzen.slave_win.drawable[i], dzen.rgc, 0, 0, dzen.slave_win.width, dzen.line_height);
+		x_draw_body();
 		return;
 	}
 	if(dzen.slave_win.tcnt < dzen.slave_win.tsize) {
