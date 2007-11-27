@@ -212,8 +212,14 @@ x_draw_body(void) {
 
 static void
 x_check_geometry(XRectangle si) {
-	dzen.title_win.x += si.x;
-	dzen.title_win.y += si.y;
+
+	dzen.title_win.x = dzen.title_win.x < 0 ?
+		si.width + dzen.title_win.x + si.x :
+		dzen.title_win.x + si.x;
+	dzen.title_win.y = dzen.title_win.y < 0 ?
+		si.height + dzen.title_win.y + si.y :
+		dzen.title_win.y + si.x;
+
 
 	if(dzen.title_win.x > si.x + si.width)
 		dzen.title_win.x = si.x;
@@ -500,7 +506,7 @@ handle_xev(void) {
 					if(ev.xcrossing.window == dzen.slave_win.line[i])
 						x_hilight_line(i);
 			}
-			if(!dzen.slave_win.ishmenu 
+if(!dzen.slave_win.ishmenu 
 					&& ev.xcrossing.window == dzen.title_win.win)
 				do_action(entertitle);
 			if(ev.xcrossing.window == dzen.slave_win.win)
@@ -710,6 +716,23 @@ main(int argc, char *argv[]) {
 				init_input_buffer();
 			}
 		}
+		else if(!strncmp(argv[i], "-geometry", 8)) {
+			if(++i < argc) { 
+				int t;
+				unsigned int tx, ty, tw, th;
+
+				t = XParseGeometry(argv[i], &tx, &ty, &tw, &th);
+
+				if(t & XValue) 
+					dzen.title_win.x = (signed int) tx;
+				if(t & YValue)
+					dzen.title_win.y = (signed int) ty;
+				if(t & WidthValue)
+					dzen.title_win.width = (signed int) tw;
+				if(t & HeightValue)
+					dzen.line_height = (signed int) th;
+			}
+		}
 		else if(!strncmp(argv[i], "-u", 3)){
 			dzen.tsupdate = True;
 		}
@@ -770,7 +793,7 @@ main(int argc, char *argv[]) {
 			eprint("dzen-"VERSION", (C)opyright 2007 Robert Manea\n");
 		else
 			eprint("usage: dzen2 [-v] [-p [seconds]] [-m [v|h]] [-ta <l|c|r>] [-sa <l|c|r>]\n"
-                   "             [-x <pixel>] [-y <pixel>] [-w <pixel>] [-tw <pixel>] [-u] \n"
+                   "             [-geometry <g>] [-x <pixel>] [-y <pixel>] [-w <pixel>] [-tw <pixel>] [-u] \n"
 				   "             [-e <string>] [-l <lines>]  [-fn <font>] [-bg <color>] [-fg <color>]\n"
 #ifdef DZEN_XINERAMA
 				   "             [-xs <screen>]\n"

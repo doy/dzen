@@ -433,7 +433,10 @@ Other:
                        the input after the command will be drawn
                        to the title window, so it is best used 
                        only once and as first command per line.
-                       Subject to be improved in the future.
+
+    ^cs()              clear slave window
+                       This command must be the first and only command
+                       per line.
 
     ^ib(VALUE)         ignore background setting, VALUE can be either
                        1 to ignore or 0 to not ignore the bg color set

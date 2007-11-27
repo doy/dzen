@@ -19,10 +19,8 @@ BG=black
 
 SLEEP=0.1
 
-#DZEN=/usr/local/bin/dzen2
-DZEN=../dzen2
-#DZENOPTS="-bg $BG -fg $INACTIVE_LED_COLOR"
-DZENOPTS="-bg $BG -fg $INACTIVE_LED_COLOR -xs 1 -y 30"
+DZEN=dzen2
+DZENOPTS="-bg $BG -fg $INACTIVE_LED_COLOR"
 
 #-----------------------------------------------------------------------
 
@@ -70,4 +68,4 @@ while :; do
     j=`expr $j $SIGN 1`
 
     sleep $SLEEP;
-done | $DZEN $DZENOPTS
+done | $DZEN $DZENOPTS -h `expr $LED_HEIGHT + 4`
