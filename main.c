@@ -218,7 +218,7 @@ x_check_geometry(XRectangle si) {
 		dzen.title_win.x + si.x;
 	dzen.title_win.y = dzen.title_win.y < 0 ?
 		si.height + dzen.title_win.y + si.y :
-		dzen.title_win.y + si.x;
+		dzen.title_win.y + si.y;
 
 
 	if(dzen.title_win.x > si.x + si.width)
