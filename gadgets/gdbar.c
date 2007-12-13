@@ -44,7 +44,7 @@ pbar(const char* label, double perc, int maxc, int height, int pnl, int mode) {
 
 	l = perc * ((mode ? (double)(maxc-2) : (double) maxc) / 100);
 	if((int)(l + 0.5) >= (int)l)
-		l = l + 0.5;
+		l += 0.5;
 
 	if((int)(perc + 0.5) >= (int)perc)
 		rp = (int)(perc + 0.5);
@@ -67,7 +67,7 @@ pbar(const char* label, double perc, int maxc, int height, int pnl, int mode) {
 	fflush(stdout);
 }
 
-	int
+int
 main(int argc, char *argv[])
 {
 	int i, nv;

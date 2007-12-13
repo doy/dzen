@@ -284,6 +284,7 @@ queryscreeninfo(Display *dpy, XRectangle *rect, int screen) {
 static void 
 set_net_wm_strut_partial_for(Display *dpy, Window w) {
 	unsigned long strut[12] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+	unsigned long strut_s[4] = { 0, 0, 0, 0 };
 	XWindowAttributes wa;
 
 	XGetWindowAttributes(dpy, w, &wa);
@@ -292,11 +293,15 @@ set_net_wm_strut_partial_for(Display *dpy, Window w) {
 		strut[2] = wa.height;
 		strut[8] = wa.x;
 		strut[9] = wa.x + wa.width - 1;
+
+		strut_s[2] = wa.height; 
 	} 
 	else if((wa.y + wa.height) == DisplayHeight(dpy, DefaultScreen(dpy))) {
 		strut[3] = wa.height;
 		strut[10] = wa.x;
 		strut[11] = wa.x + wa.width - 1;
+
+		strut_s[3] = wa.height;
 	}
 
 	if(strut[2] != 0 || strut[3] != 0) {
@@ -309,6 +314,16 @@ set_net_wm_strut_partial_for(Display *dpy, Window w) {
 			PropModeReplace,
 			(unsigned char *)&strut,
 			12
+		);
+		XChangeProperty(
+			dpy, 
+			w, 
+			XInternAtom(dpy, "_NET_WM_STRUT", False),
+			XInternAtom(dpy, "CARDINAL", False),
+			32, 
+			PropModeReplace,
+			(unsigned char *)&strut,
+			4
 		);
 	}
 }
