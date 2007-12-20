@@ -19,7 +19,7 @@
 #define ALIGNRIGHT  2
 
 #define MIN_BUF_SIZE   1024
-#define MAX_LINE_LEN   1024
+#define MAX_LINE_LEN   8192
 
 #ifndef Button6
 # define Button6 6
