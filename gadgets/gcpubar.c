@@ -32,7 +32,7 @@ THE SOFTWARE.
 /* bar color for critical values */
 #define CRITCOL "red"
 
-static void pbar (double, int, int, int, int);
+static void pbar (const char *, double, int, int, int, int);
 
 struct cpu_info {
 	unsigned long long user;
@@ -44,7 +44,7 @@ struct cpu_info {
 char *bg, *fg;
 
 static void
-pbar(double perc, int maxc, int height, int print_nl, int mode) {
+pbar(const char *label, double perc, int maxc, int height, int print_nl, int mode) {
 	int i, rp;
 	double l;
 
@@ -58,13 +58,13 @@ pbar(double perc, int maxc, int height, int print_nl, int mode) {
 		rp = (int)perc;
 
 	if(mode)
-		printf("CPU: %3d%% ^ib(1)^fg(%s)^ro(%dx%d)^p(%d)^fg(%s)^r(%dx%d)^p(%d)^ib(0)^fg()%s", 
-				rp, bg, maxc, height, -1*(maxc-1),
+		printf("%s %3d%% ^ib(1)^fg(%s)^ro(%dx%d)^p(%d)^fg(%s)^r(%dx%d)^p(%d)^ib(0)^fg()%s", 
+				label ? label : "", rp, bg, maxc, height, -1*(maxc-1),
 				(rp>=CPUCRIT) ? CRITCOL : fg, (int)l, height-2, (maxc-1)-(int)l, print_nl ? "\n" : "");
 	else
-		printf("CPU: %3d%% ^fg(%s)^r(%dx%d)^fg(%s)^r(%dx%d)^fg()%s", 
-				rp, (rp>=CPUCRIT) ? CRITCOL : fg, (int)l, height,
-				bg, maxc-(int)l, height, print_nl ? "\n" : "");
+		printf("%s %3d%% ^fg(%s)^r(%dx%d)^fg(%s)^r(%dx%d)^fg()%s", 
+				label ? label : "", rp, (rp>=CPUCRIT) ? CRITCOL : fg, (int)l, 
+				height, bg, maxc-(int)l, height, print_nl ? "\n" : "");
 
 	fflush(stdout);
 }
@@ -81,6 +81,7 @@ main(int argc, char *argv[])
 	struct cpu_info mcpu;
 	FILE *statfp;
 	char buf[256], *ep;
+	const char *label = NULL;
 
 	/* defaults */
 	int mode      = 0; 
@@ -133,11 +134,15 @@ main(int argc, char *argv[])
 				strcpy(bg, "darkgrey");
 			}
 		}
+		else if(!strncmp(argv[i], "-l", 3)) {
+			if(++i < argc)
+				label = argv[i];
+		}
 		else if(!strncmp(argv[i], "-nonl", 6)) {
 			print_nl = 0;
 		}
 		else {
-			printf("usage: %s [-i <interval>] [-c <count>] [-fg <color>] [-bg <color>] [-w <pixel>] [-h <pixel>] [-o] [-nonl]\n", argv[0]);
+			printf("usage: %s [-l <label>] [-i <interval>] [-c <count>] [-fg <color>] [-bg <color>] [-w <pixel>] [-h <pixel>] [-o] [-nonl]\n", argv[0]);
 			return EXIT_FAILURE;
 		}
 	}
@@ -179,7 +184,7 @@ main(int argc, char *argv[])
 				total  = (mcpu.user + mcpu.sys + mcpu.idle + mcpu.iowait) / 100.0;
 				myload = (mcpu.user + mcpu.sys + mcpu.iowait) / total;
 
-				pbar(myload, barwidth, barheight, print_nl, mode);
+				pbar(label, myload, barwidth, barheight, print_nl, mode);
 				ocpu = ncpu;
 			}
 		}

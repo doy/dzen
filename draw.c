@@ -211,25 +211,38 @@ setcolor(Drawable *pm, int x, int width, long tfg, long tbg, int reverse, int no
 }
 
 static void
-get_rect_vals(char *s, int *w, int *h) {
-	int i;
+get_rect_vals(char *s, int *w, int *h, int *x, int *y) {
+	int i, j;
 	char buf[128];
 
-	*w = 0; *h = 0;
+	*w = 0; *h = 0; *x=~0; *y=~0;
 
 	for(i=0; (s[i] != 'x') && i<128; i++) {
 		buf[i] = s[i];
 	}
-	buf[++i] = '\0';
+	buf[i] = '\0';
 	*w = atoi(buf);
-	*h = atoi(s+i);
+
+	for(j=0, i++; s[i] != '+' && s[i] != '-' && j<128; j++, i++)
+		buf[j] = s[i];
+	buf[j] = '\0';
+	*h = atoi(buf);
+
+	for(j=0, i++; s[i] != '+' && s[i] != '-' && j<128; j++, i++)
+		buf[j] = s[i];
+	if(j<2) {
+		buf[j] = '\0';
+		*x = atoi(buf);
+		*y = atoi(s+i);
+	}
+			
 }
 
 char *
 parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 	unsigned int bm_w, bm_h; 
 	int bm_xh, bm_yh;
-	int rectw, recth, n_pos, recty;
+	int rectw, recth, n_pos, rectx, recty;
 	int i, next_pos=0, j=0, px=0, py=0, xorig, h=0, tw, ow;
 	char lbuf[MAX_LINE_LEN], *rbuf = NULL;
 	int t=-1, nobg=0;
@@ -352,27 +365,29 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 							break;
 
 						case rect:
-							get_rect_vals(tval, &rectw, &recth);
+							get_rect_vals(tval, &rectw, &recth, &rectx, &recty);
 							rectw = rectw+px > dzen.w ? dzen.w-px : rectw;
 							recth = recth > dzen.line_height ? dzen.line_height : recth;
-							recty = (dzen.line_height - recth)/2;
+							recty =	recty == ~0 ? (dzen.line_height - recth)/2 : recty;
+							px = (rectx == ~0) ? px : rectx+px;
 							setcolor(&pm, px, rectw, lastfg, lastbg, reverse, nobg);
-							XFillRectangle(dzen.dpy, pm, dzen.tgc, px, (int)recty, rectw, recth);
+							XFillRectangle(dzen.dpy, pm, dzen.tgc, (int)px, (int)recty<0 ? dzen.line_height + recty : recty, rectw, recth);
 
 							px += rectw;
 							break;
 
 						case recto:
-							get_rect_vals(tval, &rectw, &recth);
+							get_rect_vals(tval, &rectw, &recth, &rectx, &recty);
 							if (!rectw) break;
 
 							rectw = rectw+px > dzen.w ? dzen.w-px : rectw;
 							recth = recth > dzen.line_height ? dzen.line_height-2 : recth-1;
-							recty = (dzen.line_height - recth)/2;
+							recty =	recty == ~0 ? (dzen.line_height - recth)/2 : recty;
+							px = (rectx == ~0) ? px : rectx+px;
 							/* prevent from stairs effect when rounding recty */
 							if (!((dzen.line_height - recth) % 2)) recty--;
 							setcolor(&pm, px, rectw, lastfg, lastbg, reverse, nobg);
-							XDrawRectangle(dzen.dpy, pm, dzen.tgc, px, (int)recty, rectw-1, recth);
+							XDrawRectangle(dzen.dpy, pm, dzen.tgc, (int)px, (int)recty<0 ? dzen.line_height + recty : recty, rectw-1, recth);
 							px += rectw;
 							break;
 
@@ -494,27 +509,29 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 					break;
 
 				case rect:
-					get_rect_vals(tval, &rectw, &recth);
+					get_rect_vals(tval, &rectw, &recth, &rectx, &recty);
 					rectw = rectw+px > dzen.w ? dzen.w-px : rectw;
 					recth = recth > dzen.line_height ? dzen.line_height : recth;
-					recty = (dzen.line_height - recth)/2;
+					recty =	(recty == ~0) ? (dzen.line_height - recth)/2 : recty;
+					px = (rectx == ~0) ? px : rectx+px;
 					setcolor(&pm, px, rectw, lastfg, lastbg, reverse, nobg);
-					XFillRectangle(dzen.dpy, pm, dzen.tgc, px, (int)recty, rectw, recth);
+					XFillRectangle(dzen.dpy, pm, dzen.tgc, (int)px, (int)recty<0 ? dzen.line_height + recty : recty, rectw, recth);
 
 					px += rectw;
 					break;
 
 				case recto:
-					get_rect_vals(tval, &rectw, &recth);
+					get_rect_vals(tval, &rectw, &recth, &rectx, &recty);
 					if (!rectw) break;
 
 					rectw = rectw+px > dzen.w ? dzen.w-px : rectw;
 					recth = recth > dzen.line_height ? dzen.line_height-2 : recth-1;
-					recty = (dzen.line_height - recth)/2;
+					recty =	recty == ~0 ? (dzen.line_height - recth)/2 : recty;
+					px = (rectx == ~0) ? px : rectx+px;
 					/* prevent from stairs effect when rounding recty */
 					if (!((dzen.line_height - recth) % 2)) recty--;
 					setcolor(&pm, px, rectw, lastfg, lastbg, reverse, nobg);
-					XDrawRectangle(dzen.dpy, pm, dzen.tgc, px, (int)recty, rectw-1, recth);
+					XDrawRectangle(dzen.dpy, pm, dzen.tgc, px, (int)recty<0 ? dzen.line_height + recty : recty, rectw-1, recth);
 					px += rectw;
 					break;
 

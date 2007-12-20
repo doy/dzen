@@ -52,13 +52,13 @@ pbar(const char* label, double perc, int maxc, int height, int pnl, int mode) {
 		rp = (int)perc;
 
 	if(mode)
-		printf("%s %3d%% ^ib(1)^fg(%s)^ro(%dx%d)^p(%d)^fg(%s)^r(%dx%d)^p(%d)^ib(0)^fg()%s", 
+		printf("%s%3d%% ^ib(1)^fg(%s)^ro(%dx%d)^p(%d)^fg(%s)^r(%dx%d)^p(%d)^ib(0)^fg()%s", 
 				label ? label : "", rp, 
 				bg, (int)maxc, height, -1*(maxc-1),
 				fg, (int)l, height-2,
 				maxc-(int)l-1, pnl ? "\n" : "");
 	else
-		printf("%s %3d%% ^fg(%s)^r(%dx%d)^fg(%s)^r(%dx%d)^fg()%s", 
+		printf("%s%3d%% ^fg(%s)^r(%dx%d)^fg(%s)^r(%dx%d)^fg()%s", 
 				label ? label : "", rp, 
 				fg, (int)l, height,
 				bg, maxc-(int)l, height,
