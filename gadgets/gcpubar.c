@@ -27,12 +27,16 @@ THE SOFTWARE.
 #include<unistd.h>
 #include<string.h>
 
-/* critical % value */
+/* critical % value, color */
 #define CPUCRIT 75
-/* bar color for critical values */
-#define CRITCOL "red"
+#define CRITCOL "#D56F6C"
+/* medium % value, color */
+#define CPUMED 50
+#define MEDCOL "#EBA178"
 
-static void pbar (const char *, double, int, int, int, int);
+#define MAX_GRAPH_VALUES 512
+
+static void pbar (const char *, double, int, int, int, int, int);
 
 struct cpu_info {
 	unsigned long long user;
@@ -42,35 +46,59 @@ struct cpu_info {
 } ncpu, ocpu;
 
 char *bg, *fg;
+char graphbuf[MAX_GRAPH_VALUES];
+int graphcnt, mv;
+int gtw = 1;
 
 static void
-pbar(const char *label, double perc, int maxc, int height, int print_nl, int mode) {
-	int i, rp;
+pbar(const char *label, double perc, int maxc, int height, int print_nl, int mode, int gspacing) {
+	int i, rp, p;
+	int ov_s, nv_s;
 	double l;
 
-	l = perc * ((mode ? (double)(maxc-2) : (double) maxc) / 100);
-	if((int)(l + 0.5) >= (int)l)
-		l = l + 0.5;
-
-	if((int)(perc + 0.5) >= (int)perc)
-		rp = (int)(perc + 0.5);
+	if(mode != 2)
+		l = perc * ((mode ? (double)(maxc-2) : (double) maxc) / 100);
 	else
-		rp = (int)perc;
+		l = perc * ((double)height / 100);
 
-	if(mode)
+	l=(int)(l + 0.5) >= (int)l ? l+0.5 : l;
+	rp=(int)(perc + 0.5) >= (int)perc ? (int)(perc + 0.5) : (int)perc;
+
+	if(mode == 1)
 		printf("%s %3d%% ^ib(1)^fg(%s)^ro(%dx%d)^p(%d)^fg(%s)^r(%dx%d)^p(%d)^ib(0)^fg()%s", 
 				label ? label : "", rp, bg, maxc, height, -1*(maxc-1),
 				(rp>=CPUCRIT) ? CRITCOL : fg, (int)l, height-2, (maxc-1)-(int)l, print_nl ? "\n" : "");
+	else if(mode == 2) {
+		graphcnt = graphcnt < 128 && 
+			(gspacing == 0 ? graphcnt : graphcnt*gspacing+graphcnt*gtw) < maxc ? 
+			++graphcnt : 0;
+		graphbuf[graphcnt] = l;
+
+		printf("%s", label ? label : "");
+		for(i=graphcnt+1; i<128 && (i*gspacing+i*gtw < maxc); ++i) {
+			p=100*graphbuf[i]/height;
+			p=(int)p+0.5 >= (int)p ? (int)(p+0.5) : (int)p;
+			printf("^fg(%s)^p(%d)^r(%dx%d+0-%d)", 
+					p>=CPUMED ? (p >= CPUCRIT ? CRITCOL : MEDCOL) : fg, gspacing,
+					gtw, (int)graphbuf[i], (int)graphbuf[i]+1); 
+		}
+
+	for(i=0; i < graphcnt; ++i) {
+		p=100*graphbuf[i]/height;
+		p=(int)p+0.5 >= (int)p ? (int)(p+0.5) : (int)p;
+		printf("^fg(%s)^p(%d)^r(%dx%d+0-%d)", 
+				p>=CPUMED ? (p >= CPUCRIT ? CRITCOL : MEDCOL) : fg, gspacing,
+				gtw, (int)graphbuf[i], (int)graphbuf[i]+1); 
+	}
+	printf("^fg()%s", print_nl ? "\n" : "");
+	}
 	else
 		printf("%s %3d%% ^fg(%s)^r(%dx%d)^fg(%s)^r(%dx%d)^fg()%s", 
 				label ? label : "", rp, (rp>=CPUCRIT) ? CRITCOL : fg, (int)l, 
 				height, bg, maxc-(int)l, height, print_nl ? "\n" : "");
 
-	fflush(stdout);
-}
 
-static void
-mkstat() {
+	fflush(stdout);
 }
 
 int 
@@ -90,6 +118,7 @@ main(int argc, char *argv[])
 	int barwidth  = 100;
 	int barheight = 10;
 	int print_nl  = 1;
+	int gspacing  = 1;
 
 	for(i=1; i < argc; i++) {
 		if(!strncmp(argv[i], "-i", 3)) {
@@ -103,12 +132,32 @@ main(int argc, char *argv[])
 					i++;
 			}
 		}
-		else if(!strncmp(argv[i], "-o", 3)) {
-				mode = 1;
+		else if(!strncmp(argv[i], "-s", 3)) {
+			if(++i < argc) {
+				switch(argv[i][0]) {
+					case 'o':
+						mode = 1;
+						break;
+					case 'g':
+						mode = 2;
+						break;
+					default:
+						mode = 0;
+						break;
+				}
+			}
 		}
 		else if(!strncmp(argv[i], "-c", 3)) {
 			if(++i < argc)
 				counts = atoi(argv[i]);
+		}
+		else if(!strncmp(argv[i], "-gs", 4)) {
+			if(++i < argc)
+				gspacing = atoi(argv[i]);
+		}
+		else if(!strncmp(argv[i], "-gw", 4)) {
+			if(++i < argc)
+				gtw = atoi(argv[i]);
 		}
 		else if(!strncmp(argv[i], "-w", 3)) {
 			if(++i < argc)
@@ -142,7 +191,7 @@ main(int argc, char *argv[])
 			print_nl = 0;
 		}
 		else {
-			printf("usage: %s [-l <label>] [-i <interval>] [-c <count>] [-fg <color>] [-bg <color>] [-w <pixel>] [-h <pixel>] [-o] [-nonl]\n", argv[0]);
+			printf("usage: %s [-l <label>] [-i <interval>] [-c <count>] [-fg <color>] [-bg <color>] [-w <pixel>] [-h <pixel>] [-s <o|g>] [-gs <pixel>] [-gw <pixel>] [-nonl]\n", argv[0]);
 			return EXIT_FAILURE;
 		}
 	}
@@ -184,7 +233,7 @@ main(int argc, char *argv[])
 				total  = (mcpu.user + mcpu.sys + mcpu.idle + mcpu.iowait) / 100.0;
 				myload = (mcpu.user + mcpu.sys + mcpu.iowait) / total;
 
-				pbar(label, myload, barwidth, barheight, print_nl, mode);
+				pbar(label, myload, barwidth, barheight, print_nl, mode, gspacing);
 				ocpu = ncpu;
 			}
 		}

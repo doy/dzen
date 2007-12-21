@@ -26,7 +26,14 @@ Command line options:
 
   -bg :  Meter background color        (default: darkgrey)
 
-  -o  :  Toggle conky style meter drawing
+  -s  :  Style, can be either o(utlined)
+         gauge, g(raph) or the default
+		 gauge if no parameter is specified
+
+  -gw :  Width of the graph elements    (default: 1)
+
+  -gs :  Space between the graph 
+         elemements                     (default: 0)
 
   -nonl:  no new line, don't put
           '\n' at the end of the bar    (default: do print '\n')
