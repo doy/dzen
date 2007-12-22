@@ -372,7 +372,6 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 							recth = recth > dzen.line_height ? dzen.line_height : recth;
 							recty =	(recty == 0) ? (dzen.line_height - recth)/2 : recty;
 							px = (rectx == 0) ? px : rectx+px;
-							printf("rect1: w=%d h=%d x=%d y=%d\n", rectw, recth, rectx, recty);
 							setcolor(&pm, px, rectw, lastfg, lastbg, reverse, nobg);
 							XFillRectangle(dzen.dpy, pm, dzen.tgc, (int)px, (int)recty<0 ? dzen.line_height + recty : recty, rectw, recth);
 
@@ -515,7 +514,6 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 					recth = recth > dzen.line_height ? dzen.line_height : recth;
 					recty =	(recty == 0) ? (dzen.line_height - recth)/2 : recty;
 					px = (rectx == 0) ? px : rectx+px;
-					printf("rect2: w=%d h=%d x=%d y=%d\n", rectw, recth, rectx, recty);
 					setcolor(&pm, px, rectw, lastfg, lastbg, reverse, nobg);
 					XFillRectangle(dzen.dpy, pm, dzen.tgc, (int)px, (int)recty<0 ? dzen.line_height + recty : recty, rectw, recth);
 
