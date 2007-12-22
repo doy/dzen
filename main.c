@@ -722,6 +722,7 @@ main(int argc, char *argv[]) {
 	dzen.xinescreen = 0;
 	dzen.tsupdate = 0;
 	dzen.line_height = 0;
+	dzen.title_win.expand = noexpand;
 
 	/* cmdline args */
 	for(i = 1; i < argc; i++)
@@ -750,6 +751,23 @@ main(int argc, char *argv[]) {
 		}
 		else if(!strncmp(argv[i], "-u", 3)){
 			dzen.tsupdate = True;
+		}
+		else if(!strncmp(argv[i], "-expand", 8)){
+			if(++i < argc) {
+				switch(argv[i][0]){
+					case 'l':
+						dzen.title_win.expand = left;
+						break;
+					case 'c':
+						dzen.title_win.expand = both;
+						break;
+					case 'r':
+						dzen.title_win.expand = right;
+						break;
+					default:
+						dzen.title_win.expand = noexpand;
+				}
+			}
 		}
 		else if(!strncmp(argv[i], "-p", 3)) {
 			dzen.ispersistent = True;
@@ -871,7 +889,9 @@ main(int argc, char *argv[]) {
 			!dzen.slave_win.max_lines)
 		dzen.slave_win.max_lines = 1;
 
+
 	x_create_windows();
+	dzen.title_win.x_right_corner = dzen.title_win.x + dzen.title_win.width;
 	
 	if(!dzen.slave_win.ishmenu)
 		x_map_window(dzen.title_win.win);

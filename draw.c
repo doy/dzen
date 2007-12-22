@@ -15,6 +15,8 @@
 
 #define ARGLEN 256
 
+int otx;
+
 /* command types for the in-text parser */
 enum ctype {bg, fg, icon, rect, recto, circle, circleo, pos, abspos, titlewin, ibg};
 
@@ -257,6 +259,7 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 	XpmColorSymbol xpms;
 #endif
 
+
 	/* parse line and return the text without control commands */
 	if(nodraw) {
 		rbuf = emalloc(MAX_LINE_LEN);
@@ -366,7 +369,6 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 
 						case rect:
 							get_rect_vals(tval, &rectw, &recth, &rectx, &recty);
-							//rectw = rectw+px > dzen.w ? dzen.w-px : rectw;
 							recth = recth > dzen.line_height ? dzen.line_height : recth;
 							recty =	(recty == 0) ? (dzen.line_height - recth)/2 : recty;
 							px = (rectx == 0) ? px : rectx+px;
@@ -381,7 +383,6 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 							get_rect_vals(tval, &rectw, &recth, &rectx, &recty);
 							if (!rectw) break;
 
-							//rectw = rectw+px > dzen.w ? dzen.w-px : rectw;
 							recth = recth > dzen.line_height ? dzen.line_height-2 : recth-1;
 							recty =	recty == 0 ? (dzen.line_height - recth)/2 : recty;
 							px = (rectx == 0) ? px : rectx+px;
@@ -511,7 +512,6 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 
 				case rect:
 					get_rect_vals(tval, &rectw, &recth, &rectx, &recty);
-					//rectw = rectw+px > dzen.w ? dzen.w-px : rectw;
 					recth = recth > dzen.line_height ? dzen.line_height : recth;
 					recty =	(recty == 0) ? (dzen.line_height - recth)/2 : recty;
 					px = (rectx == 0) ? px : rectx+px;
@@ -526,7 +526,6 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 					get_rect_vals(tval, &rectw, &recth, &rectx, &recty);
 					if (!rectw) break;
 
-					//rectw = rectw+px > dzen.w ? dzen.w-px : rectw;
 					recth = recth > dzen.line_height ? dzen.line_height-2 : recth-1;
 					recty =	recty == 0 ? (dzen.line_height - recth)/2 : recty;
 					px = (rectx == 0) ? px : rectx+px;
@@ -609,36 +608,33 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 		px += tw;
 
 		/* expand/shrink dynamically */
-		/*
-		i = px;
-		if(lnr == -1)
-			XResizeWindow(dzen.dpy, dzen.title_win.win, px, dzen.line_height);
+		if(dzen.title_win.expand && lnr == -1){
+			i = px;
+			switch(dzen.title_win.expand) {
+				case left:
+					/* grow left end */
+					otx = dzen.title_win.x_right_corner - i > 0 ?
+						dzen.title_win.x_right_corner - i : dzen.title_win.x; 
+					XMoveResizeWindow(dzen.dpy, dzen.title_win.win, otx, dzen.title_win.y, px, dzen.line_height);
+					break;
+				case right:
+					XResizeWindow(dzen.dpy, dzen.title_win.win, px, dzen.line_height);
+					break;
+			}
 
-		if(align == ALIGNLEFT)
-			xorig = 0;
-		if(align == ALIGNCENTER) {
-			xorig = (lnr != -1) ?
-				(dzen.slave_win.width - px)/2 :
-				(i - px)/2;
-		}
-		else if(align == ALIGNRIGHT) {
-			xorig = (lnr != -1) ?
-				(dzen.slave_win.width - px) :
-				(i - px)/2;
-		}
-		*/
-		
-		if(align == ALIGNLEFT)
-			xorig = 0;
-		if(align == ALIGNCENTER) {
-			xorig = (lnr != -1) ?
-				(dzen.slave_win.width - px)/2 :
-				(dzen.title_win.width - px)/2;
-		}
-		else if(align == ALIGNRIGHT) {
-			xorig = (lnr != -1) ?
-				(dzen.slave_win.width - px) :
-				(dzen.title_win.width - px); 
+		} else {
+			if(align == ALIGNLEFT)
+				xorig = 0;
+			if(align == ALIGNCENTER) {
+				xorig = (lnr != -1) ?
+					(dzen.slave_win.width - px)/2 :
+					(dzen.title_win.width - px)/2;
+			}
+			else if(align == ALIGNRIGHT) {
+				xorig = (lnr != -1) ?
+					(dzen.slave_win.width - px) :
+					(dzen.title_win.width - px); 
+			}
 		}
 		
 

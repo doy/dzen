@@ -32,6 +32,9 @@
 /* gui data structures */
 enum { ColFG, ColBG, ColLast };
 
+/* exapansion directions */
+enum { noexpand, left, right, both };
+
 typedef struct DZEN Dzen;
 typedef struct Fnt Fnt;
 typedef struct TW TWIN;
@@ -53,6 +56,8 @@ struct TW {
 	Window win;
 	Drawable drawable;
 	char alignment;
+	int expand;
+	int x_right_corner;
 	Bool ishidden;
 };
 
