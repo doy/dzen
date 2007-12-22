@@ -215,20 +215,20 @@ get_rect_vals(char *s, int *w, int *h, int *x, int *y) {
 	int i, j;
 	char buf[128];
 
-	*w = 0; *h = 0; *x=~0; *y=~0;
+	*w = 0; *h = 0; *x=0; *y=0;
 
-	for(i=0; (s[i] != 'x') && i<128; i++) {
+	for(i=0; s[i] && s[i] != 'x' && i<128; i++) {
 		buf[i] = s[i];
 	}
 	buf[i] = '\0';
 	*w = atoi(buf);
 
-	for(j=0, i++; s[i] != '+' && s[i] != '-' && j<128; j++, i++)
+	for(j=0, ++i; s[i] && s[i] != '+' && s[i] != '-' && j<128; j++, i++)
 		buf[j] = s[i];
 	buf[j] = '\0';
 	*h = atoi(buf);
 
-	for(j=0, i++; s[i] != '+' && s[i] != '-' && j<128; j++, i++)
+	for(j=0, ++i; s[i] && s[i] != '+' && s[i] != '-' && j<128; j++, i++)
 		buf[j] = s[i];
 	if(j<2) {
 		buf[j] = '\0';
@@ -366,10 +366,11 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 
 						case rect:
 							get_rect_vals(tval, &rectw, &recth, &rectx, &recty);
-							rectw = rectw+px > dzen.w ? dzen.w-px : rectw;
+							//rectw = rectw+px > dzen.w ? dzen.w-px : rectw;
 							recth = recth > dzen.line_height ? dzen.line_height : recth;
-							recty =	recty == ~0 ? (dzen.line_height - recth)/2 : recty;
-							px = (rectx == ~0) ? px : rectx+px;
+							recty =	(recty == 0) ? (dzen.line_height - recth)/2 : recty;
+							px = (rectx == 0) ? px : rectx+px;
+							printf("rect1: w=%d h=%d x=%d y=%d\n", rectw, recth, rectx, recty);
 							setcolor(&pm, px, rectw, lastfg, lastbg, reverse, nobg);
 							XFillRectangle(dzen.dpy, pm, dzen.tgc, (int)px, (int)recty<0 ? dzen.line_height + recty : recty, rectw, recth);
 
@@ -380,10 +381,10 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 							get_rect_vals(tval, &rectw, &recth, &rectx, &recty);
 							if (!rectw) break;
 
-							rectw = rectw+px > dzen.w ? dzen.w-px : rectw;
+							//rectw = rectw+px > dzen.w ? dzen.w-px : rectw;
 							recth = recth > dzen.line_height ? dzen.line_height-2 : recth-1;
-							recty =	recty == ~0 ? (dzen.line_height - recth)/2 : recty;
-							px = (rectx == ~0) ? px : rectx+px;
+							recty =	recty == 0 ? (dzen.line_height - recth)/2 : recty;
+							px = (rectx == 0) ? px : rectx+px;
 							/* prevent from stairs effect when rounding recty */
 							if (!((dzen.line_height - recth) % 2)) recty--;
 							setcolor(&pm, px, rectw, lastfg, lastbg, reverse, nobg);
@@ -510,10 +511,11 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 
 				case rect:
 					get_rect_vals(tval, &rectw, &recth, &rectx, &recty);
-					rectw = rectw+px > dzen.w ? dzen.w-px : rectw;
+					//rectw = rectw+px > dzen.w ? dzen.w-px : rectw;
 					recth = recth > dzen.line_height ? dzen.line_height : recth;
-					recty =	(recty == ~0) ? (dzen.line_height - recth)/2 : recty;
-					px = (rectx == ~0) ? px : rectx+px;
+					recty =	(recty == 0) ? (dzen.line_height - recth)/2 : recty;
+					px = (rectx == 0) ? px : rectx+px;
+					printf("rect2: w=%d h=%d x=%d y=%d\n", rectw, recth, rectx, recty);
 					setcolor(&pm, px, rectw, lastfg, lastbg, reverse, nobg);
 					XFillRectangle(dzen.dpy, pm, dzen.tgc, (int)px, (int)recty<0 ? dzen.line_height + recty : recty, rectw, recth);
 
@@ -524,10 +526,10 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 					get_rect_vals(tval, &rectw, &recth, &rectx, &recty);
 					if (!rectw) break;
 
-					rectw = rectw+px > dzen.w ? dzen.w-px : rectw;
+					//rectw = rectw+px > dzen.w ? dzen.w-px : rectw;
 					recth = recth > dzen.line_height ? dzen.line_height-2 : recth-1;
-					recty =	recty == ~0 ? (dzen.line_height - recth)/2 : recty;
-					px = (rectx == ~0) ? px : rectx+px;
+					recty =	recty == 0 ? (dzen.line_height - recth)/2 : recty;
+					px = (rectx == 0) ? px : rectx+px;
 					/* prevent from stairs effect when rounding recty */
 					if (!((dzen.line_height - recth) % 2)) recty--;
 					setcolor(&pm, px, rectw, lastfg, lastbg, reverse, nobg);
@@ -606,7 +608,26 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 			XDrawString(dzen.dpy, pm, dzen.tgc, px, py, lbuf, strlen(lbuf)); 
 		px += tw;
 
+		/* expand/shrink dynamically */
+		/*
+		i = px;
+		if(lnr == -1)
+			XResizeWindow(dzen.dpy, dzen.title_win.win, px, dzen.line_height);
 
+		if(align == ALIGNLEFT)
+			xorig = 0;
+		if(align == ALIGNCENTER) {
+			xorig = (lnr != -1) ?
+				(dzen.slave_win.width - px)/2 :
+				(i - px)/2;
+		}
+		else if(align == ALIGNRIGHT) {
+			xorig = (lnr != -1) ?
+				(dzen.slave_win.width - px) :
+				(i - px)/2;
+		}
+		*/
+		
 		if(align == ALIGNLEFT)
 			xorig = 0;
 		if(align == ALIGNCENTER) {
@@ -619,6 +640,7 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 				(dzen.slave_win.width - px) :
 				(dzen.title_win.width - px); 
 		}
+		
 
 		if(lnr != -1) {
 			XCopyArea(dzen.dpy, pm, dzen.slave_win.drawable[lnr], dzen.gc,
