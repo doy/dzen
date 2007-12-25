@@ -226,11 +226,18 @@ x_check_geometry(XRectangle si) {
 	if (dzen.title_win.x < si.x)
 		dzen.title_win.x = si.x;
 
-	if(!dzen.title_win.width)
+	if(!dzen.title_win.width && dzen.title_win.expand != left)
 		dzen.title_win.width = si.width;
 
 	if((dzen.title_win.x + dzen.title_win.width) > (si.x + si.width))
 		dzen.title_win.width = si.width - (dzen.title_win.x - si.x);
+
+	if(dzen.title_win.expand == left) {
+		dzen.title_win.x_right_corner = dzen.title_win.width ? dzen.title_win.width+si.x : dzen.title_win.x;
+		dzen.title_win.width = dzen.title_win.x - si.x;
+		dzen.title_win.x = si.x;
+	}
+
 	if(!dzen.slave_win.width) {
 		dzen.slave_win.x = si.x;
 		dzen.slave_win.width = si.width;
@@ -238,6 +245,7 @@ x_check_geometry(XRectangle si) {
 	if( dzen.title_win.width == dzen.slave_win.width) {
 		dzen.slave_win.x = dzen.title_win.x;
 	}
+
 	if(dzen.slave_win.width != si.width) {
 		dzen.slave_win.x = dzen.title_win.x + (dzen.title_win.width - dzen.slave_win.width)/2;
 		if(dzen.slave_win.x < si.x)
@@ -891,7 +899,7 @@ main(int argc, char *argv[]) {
 
 
 	x_create_windows();
-	dzen.title_win.x_right_corner = dzen.title_win.x + dzen.title_win.width;
+	//dzen.title_win.x_right_corner = dzen.title_win.x + dzen.title_win.width;
 	
 	if(!dzen.slave_win.ishmenu)
 		x_map_window(dzen.title_win.win);

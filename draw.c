@@ -611,7 +611,7 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 			switch(dzen.title_win.expand) {
 				case left:
 					/* grow left end */
-					otx = dzen.title_win.x_right_corner - i > 0 ?
+					otx = dzen.title_win.x_right_corner - i > dzen.title_win.x ?
 						dzen.title_win.x_right_corner - i : dzen.title_win.x; 
 					XMoveResizeWindow(dzen.dpy, dzen.title_win.win, otx, dzen.title_win.y, px, dzen.line_height);
 					break;
