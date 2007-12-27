@@ -70,7 +70,7 @@ pbar(const char* label, double perc, int maxc, int height, int segw, int segh, i
 				printf("^fg(%s)^p(-%d)^r(%dx%d+%d-%d')", bg, segw, segw, segh, 0, (segh+segb+1)*(i+1));
 
 		}
-		printf("%s", pnl ? "\n" : "");
+		printf("^ib(0)^fg()%s", pnl ? "\n" : "");
 	}
 	else
 		printf("%s%3d%% ^fg(%s)^r(%dx%d)^fg(%s)^r(%dx%d)^fg()%s", 
