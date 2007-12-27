@@ -36,7 +36,9 @@ THE SOFTWARE.
 
 #define MAX_GRAPH_VALUES 512
 
-static void pbar (const char *, double, int, int, int, int, int);
+static void pbar (const char *, double, int, int, int, int, int, int, int, int);
+
+enum style { norm, outlined, gauge, vertical };
 
 struct cpu_info {
 	unsigned long long user;
@@ -51,9 +53,10 @@ int graphcnt, mv;
 int gtw = 1;
 
 static void
-pbar(const char *label, double perc, int maxc, int height, int print_nl, int mode, int gspacing) {
+pbar(const char *label, double perc, int maxc, int height, int segh, int segb, 
+     int segw, int print_nl, int mode, int gspacing ) {
 	int i, rp, p;
-	int ov_s, nv_s;
+	int ov_s, nv_s, segs, segsa;
 	double l;
 
 	if(mode != 2)
@@ -64,11 +67,11 @@ pbar(const char *label, double perc, int maxc, int height, int print_nl, int mod
 	l=(int)(l + 0.5) >= (int)l ? l+0.5 : l;
 	rp=(int)(perc + 0.5) >= (int)perc ? (int)(perc + 0.5) : (int)perc;
 
-	if(mode == 1)
+	if(mode == outlined)
 		printf("%s %3d%% ^ib(1)^fg(%s)^ro(%dx%d)^p(%d)^fg(%s)^r(%dx%d)^p(%d)^ib(0)^fg()%s", 
 				label ? label : "", rp, bg, maxc, height, -1*(maxc-1),
 				(rp>=CPUCRIT) ? CRITCOL : fg, (int)l, height-2, (maxc-1)-(int)l, print_nl ? "\n" : "");
-	else if(mode == 2) {
+	else if(mode == gauge) {
 		graphcnt = graphcnt < 128 && 
 			(gspacing == 0 ? graphcnt : graphcnt*gspacing+graphcnt*gtw) < maxc ? 
 			++graphcnt : 0;
@@ -83,14 +86,28 @@ pbar(const char *label, double perc, int maxc, int height, int print_nl, int mod
 					gtw, (int)graphbuf[i], (int)graphbuf[i]+1); 
 		}
 
-	for(i=0; i < graphcnt; ++i) {
-		p=100*graphbuf[i]/height;
-		p=(int)p+0.5 >= (int)p ? (int)(p+0.5) : (int)p;
-		printf("^fg(%s)^p(%d)^r(%dx%d+0-%d)", 
-				p>=CPUMED ? (p >= CPUCRIT ? CRITCOL : MEDCOL) : fg, gspacing,
-				gtw, (int)graphbuf[i], (int)graphbuf[i]+1); 
-	}
+                for(i=0; i < graphcnt; ++i) {
+                        p=100*graphbuf[i]/height;
+                        p=(int)p+0.5 >= (int)p ? (int)(p+0.5) : (int)p;
+                        printf("^fg(%s)^p(%d)^r(%dx%d+0-%d)", 
+                                        p>=CPUMED ? (p >= CPUCRIT ? CRITCOL : MEDCOL) : fg, gspacing,
+                                        gtw, (int)graphbuf[i], (int)graphbuf[i]+1); 
+                }
 	printf("^fg()%s", print_nl ? "\n" : "");
+	}
+	else if(mode == vertical) {
+		segs  = height / (segh + segb);
+		segsa = rp * segs / 100;
+
+		printf("%s^ib(1)", label ? label : "");
+		for(i=0; i < segs; i++) {
+			if(i<segsa)
+				printf("^fg(%s)^p(-%d)^r(%dx%d+%d-%d')", rp >= CPUMED ? (rp>=CPUCRIT ? CRITCOL : MEDCOL) : fg, i?segw:0, segw, segh, 0, (segh+segb)*(i+1));
+			else
+				printf("^fg(%s)^p(-%d)^r(%dx%d+%d-%d')", bg, i?segw:0, segw, segh, 0, (segh+segb)*(i+1));
+
+		}
+		printf("^ib(0)^fg()%s", print_nl ? "\n" : "");
 	}
 	else
 		printf("%s %3d%% ^fg(%s)^r(%dx%d)^fg(%s)^r(%dx%d)^fg()%s", 
@@ -119,6 +136,9 @@ main(int argc, char *argv[])
 	int barheight = 10;
 	int print_nl  = 1;
 	int gspacing  = 1;
+	int segw      =    6;
+	int segh      =    2;
+	int segb      =    1;
 
 	for(i=1; i < argc; i++) {
 		if(!strncmp(argv[i], "-i", 3)) {
@@ -136,13 +156,16 @@ main(int argc, char *argv[])
 			if(++i < argc) {
 				switch(argv[i][0]) {
 					case 'o':
-						mode = 1;
+						mode = outlined;
 						break;
 					case 'g':
-						mode = 2;
+						mode = gauge;
 						break;
+                                        case 'v':
+                                                mode = vertical;
+                                                break;
 					default:
-						mode = 0;
+						mode = norm;
 						break;
 				}
 			}
@@ -166,6 +189,18 @@ main(int argc, char *argv[])
 		else if(!strncmp(argv[i], "-h", 3)) {
 			if(++i < argc)
 				barheight = atoi(argv[i]);
+		}
+		else if(!strncmp(argv[i], "-sw", 4)) {
+			if(++i < argc)
+				segw = atoi(argv[i]);
+		}
+		else if(!strncmp(argv[i], "-sh", 4)) {
+			if(++i < argc)
+				segh = atoi(argv[i]);
+		}
+		else if(!strncmp(argv[i], "-ss", 4)) {
+			if(++i < argc)
+				segb = atoi(argv[i]);
 		}
 		else if(!strncmp(argv[i], "-fg", 4)) {
 			if(++i < argc)
@@ -191,7 +226,7 @@ main(int argc, char *argv[])
 			print_nl = 0;
 		}
 		else {
-			printf("usage: %s [-l <label>] [-i <interval>] [-c <count>] [-fg <color>] [-bg <color>] [-w <pixel>] [-h <pixel>] [-s <o|g>] [-gs <pixel>] [-gw <pixel>] [-nonl]\n", argv[0]);
+			printf("usage: %s [-l <label>] [-i <interval>] [-c <count>] [-fg <color>] [-bg <color>] [-w <pixel>] [-h <pixel>] [-s <o|g|v>] [-sw <pixel>] [-sh <pixel>] [-ss <pixel>] [-gs <pixel>] [-gw <pixel>] [-nonl]\n", argv[0]);
 			return EXIT_FAILURE;
 		}
 	}
@@ -233,7 +268,8 @@ main(int argc, char *argv[])
 				total  = (mcpu.user + mcpu.sys + mcpu.idle + mcpu.iowait) / 100.0;
 				myload = (mcpu.user + mcpu.sys + mcpu.iowait) / total;
 
-				pbar(label, myload, barwidth, barheight, print_nl, mode, gspacing);
+				pbar(label, myload, barwidth, barheight, segh, segb, segw, 
+                                     print_nl, mode, gspacing);
 				ocpu = ncpu;
 			}
 		}
