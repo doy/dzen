@@ -181,7 +181,7 @@ main(int argc, char *argv[])
 			print_nl = 0;
 		}
 		else {
-			fprintf(stderr, "usage: dbar [-w <pixel>] [-h <pixel>] [-fg <color>] [-bg <color>] [-min <minvalue>] [-max <maxvalue>] [-l <string>] [-nonl] [-o]\n");
+			fprintf(stderr, "usage: dbar [-s <o|v>] [-w <pixel>] [-h <pixel>] [-sw <pixel>] [-ss <pixel>] [-sw <pixel>] [-fg <color>] [-bg <color>] [-min <minvalue>] [-max <maxvalue>] [-l <string>] [-nonl] \n");
 			return EXIT_FAILURE;
 		}
 	}
