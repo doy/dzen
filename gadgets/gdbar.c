@@ -29,16 +29,17 @@ THE SOFTWARE.
 #include<string.h>
 #include<X11/Xlib.h>
 
-#define MAXLEN 512
+#define MAXLEN 1024
 
-static void pbar (const char *, double, int, int, int, int);
+static void pbar (const char *, double, int, int, int, int, int, int, int);
 
+enum style { norm, outlined, vertical };
 char *bg, *fg;
 
-
 static void
-pbar(const char* label, double perc, int maxc, int height, int pnl, int mode) {
+pbar(const char* label, double perc, int maxc, int height, int segw, int segh, int segb, int pnl, int mode) {
 	int i, rp;
+	int segs, segsa;
 	double l;
 
 
@@ -51,12 +52,26 @@ pbar(const char* label, double perc, int maxc, int height, int pnl, int mode) {
 	else
 		rp = (int)perc;
 
-	if(mode)
+	if(mode == outlined)
 		printf("%s%3d%% ^ib(1)^fg(%s)^ro(%dx%d)^p(%d)^fg(%s)^r(%dx%d)^p(%d)^ib(0)^fg()%s", 
 				label ? label : "", rp, 
 				bg, (int)maxc, height, -1*(maxc-1),
 				fg, (int)l, height-2,
 				maxc-(int)l-1, pnl ? "\n" : "");
+	else if(mode == vertical) {
+		segs  = height / (segh + segb);
+		segsa = rp * segs / 100;
+
+		printf("%s^ib(1)", label ? label : "");
+		for(i=0; i < segs; i++) {
+			if(i<segsa)
+				printf("^fg(%s)^p(-%d)^r(%dx%d+%d-%d')", fg, segw, segw, segh, 0, (segh+segb+1)*(i+1));
+			else
+				printf("^fg(%s)^p(-%d)^r(%dx%d+%d-%d')", bg, segw, segw, segh, 0, (segh+segb+1)*(i+1));
+
+		}
+		printf("%s", pnl ? "\n" : "");
+	}
 	else
 		printf("%s%3d%% ^fg(%s)^r(%dx%d)^fg(%s)^r(%dx%d)^fg()%s", 
 				label ? label : "", rp, 
@@ -75,9 +90,12 @@ main(int argc, char *argv[])
 	char aval[MAXLEN], *endptr;
 
 	/* defaults */
-	int mode      =    0; 
+	int mode      = norm; 
 	int barwidth  =   80;
 	int barheight =   10;
+	int segw      =    6;
+	int segh      =    2;
+	int segb      =    1;
 	double minval =    0;
 	double maxval =  100.0;
 	int print_nl  =    1;
@@ -93,9 +111,34 @@ main(int argc, char *argv[])
 			if(++i < argc)
 				barheight = atoi(argv[i]);
 		}
-		else if(!strncmp(argv[i], "-o", 3)) {
-				mode = 1;
+		else if(!strncmp(argv[i], "-sw", 4)) {
+			if(++i < argc)
+				segw = atoi(argv[i]);
 		}
+		else if(!strncmp(argv[i], "-sh", 4)) {
+			if(++i < argc)
+				segh = atoi(argv[i]);
+		}
+		else if(!strncmp(argv[i], "-ss", 4)) {
+			if(++i < argc)
+				segb = atoi(argv[i]);
+		}
+		else if(!strncmp(argv[i], "-s", 3)) {
+			if(++i < argc) {
+				switch(argv[i][0]) {
+					case 'o':
+						mode = outlined;
+						break;
+					case 'v':
+						mode = vertical;
+						break;
+					default:
+						mode = norm;
+						break;
+				}
+			}
+		}
+
 		else if(!strncmp(argv[i], "-fg", 4)) {
 			if(++i < argc)
 				fg = argv[i];
@@ -159,7 +202,9 @@ main(int argc, char *argv[])
 			minval = 0;
 		}
 
-		pbar(label, (100*(val-minval))/(maxval-minval), barwidth, barheight, print_nl, mode);
+		pbar(label, (100*(val-minval))/(maxval-minval), 
+				barwidth, barheight, segw, segh, segb,
+				print_nl, mode);
 	}
 
 	return EXIT_SUCCESS;
