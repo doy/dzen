@@ -65,9 +65,9 @@ pbar(const char* label, double perc, int maxc, int height, int segw, int segh, i
 		printf("%s^ib(1)", label ? label : "");
 		for(i=0; i < segs; i++) {
 			if(i<segsa)
-				printf("^fg(%s)^p(-%d)^r(%dx%d+%d-%d')", fg, segw, segw, segh, 0, (segh+segb+1)*(i+1));
+				printf("^fg(%s)^p(-%d)^r(%dx%d+%d-%d')", fg, segw, segw, segh, 0, (segh+segb)*(i+1));
 			else
-				printf("^fg(%s)^p(-%d)^r(%dx%d+%d-%d')", bg, segw, segw, segh, 0, (segh+segb+1)*(i+1));
+				printf("^fg(%s)^p(-%d)^r(%dx%d+%d-%d')", bg, segw, segw, segh, 0, (segh+segb)*(i+1));
 
 		}
 		printf("^ib(0)^fg()%s", pnl ? "\n" : "");
