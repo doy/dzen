@@ -38,7 +38,7 @@ THE SOFTWARE.
 
 static void pbar (const char *, double, int, int, int, int, int, int, int, int);
 
-enum style { norm, outlined, gauge, vertical };
+enum style { norm, outlined, gauge, vertical, graph };
 
 struct cpu_info {
 	unsigned long long user;
@@ -59,10 +59,10 @@ pbar(const char *label, double perc, int maxc, int height, int segh, int segb,
 	int ov_s, nv_s, segs, segsa;
 	double l;
 
-	if(mode != 2)
-		l = perc * ((mode ? (double)(maxc-2) : (double) maxc) / 100);
-	else
+	if(mode == graph || mode == vertical)
 		l = perc * ((double)height / 100);
+	else
+		l = perc * ((mode ? (double)(maxc-2) : (double) maxc) / 100);
 
 	l=(int)(l + 0.5) >= (int)l ? l+0.5 : l;
 	rp=(int)(perc + 0.5) >= (int)perc ? (int)(perc + 0.5) : (int)perc;
@@ -100,12 +100,21 @@ pbar(const char *label, double perc, int maxc, int height, int segh, int segb,
 		segsa = rp * segs / 100;
 
 		printf("%s^ib(1)", label ? label : "");
-		for(i=0; i < segs; i++) {
-			if(i<segsa)
-				printf("^fg(%s)^p(-%d)^r(%dx%d+%d-%d')", rp >= CPUMED ? (rp>=CPUCRIT ? CRITCOL : MEDCOL) : fg, i?segw:0, segw, segh, 0, (segh+segb)*(i+1));
-			else
-				printf("^fg(%s)^p(-%d)^r(%dx%d+%d-%d')", bg, i?segw:0, segw, segh, 0, (segh+segb)*(i+1));
+		/* in case of no spacing, we draw just 2 rectangles */
+		if(segb == 0) {
+			printf("^fg(%s)^r(%dx%d+%d-%d)^fg(%s)^p(-%d)^r(%dx%d+%d-%d)",
+					bg,
+					segw, height, 0, height+1,
+					rp >= CPUMED ? (rp>=CPUCRIT ? CRITCOL : MEDCOL) : fg, segw,
+					segw, (int)l, 0, (int)l+1);
+		} else {
+			for(i=0; i < segs; i++) {
+				if(i<segsa)
+					printf("^fg(%s)^p(-%d)^r(%dx%d+%d-%d)", rp >= CPUMED ? (rp>=CPUCRIT ? CRITCOL : MEDCOL) : fg, i?segw:0, segw, segh, 0, (segh+segb)*(i+1));
+				else
+					printf("^fg(%s)^p(-%d)^r(%dx%d+%d-%d)", bg, i?segw:0, segw, segh, 0, (segh+segb)*(i+1));
 
+			}
 		}
 		printf("^ib(0)^fg()%s", print_nl ? "\n" : "");
 	}
