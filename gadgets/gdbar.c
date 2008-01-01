@@ -3,24 +3,24 @@
 
 	Copyright (c) 2007 by Robert Manea  <rob dot manea at gmail dot com>
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+	Permission is hereby granted, free of charge, to any person obtaining a copy
+	of this software and associated documentation files (the "Software"), to deal
+	in the Software without restriction, including without limitation the rights
+	to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+	copies of the Software, and to permit persons to whom the Software is
+	furnished to do so, subject to the following conditions:
 
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
+	The above copyright notice and this permission notice shall be included in
+	all copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
-*/
+	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+	IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+	FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+	AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+	LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+	OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+	THE SOFTWARE.
+	*/
 
 
 #include<stdio.h>
@@ -71,29 +71,45 @@ pbar(const char* label, double perc, int maxc, int height, int segw, int segh, i
 					segw, height, 0, height+1,
 					fg, segw,
 					segw, (int)l, 0, (int)l+1
-					);
+				  );
 		} else {
 			for(i=0; i < segs; i++) {
 				if(i<segsa)
-					printf("^fg(%s)^p(-%d)^r(%dx%d+%d-%d')", fg, i?segw:0, segw, segh, 0, (segh+segb)*(i+1));
+					printf("^fg(%s)^p(-%d)^r(%dx%d+%d-%d)", fg, i?segw:0, segw, segh, 0, (segh+segb)*(i+1));
 				else
-					printf("^fg(%s)^p(-%d)^r(%dx%d+%d-%d')", bg, i?segw:0, segw, segh, 0, (segh+segb)*(i+1));
+					printf("^fg(%s)^p(-%d)^r(%dx%d+%d-%d)", bg, i?segw:0, segw, segh, 0, (segh+segb)*(i+1));
 
 			}
 		}
 		printf("^ib(0)^fg()%s", pnl ? "\n" : "");
 	}
-	else
-		printf("%s%3d%% ^fg(%s)^r(%dx%d)^fg(%s)^r(%dx%d)^fg()%s", 
-				label ? label : "", rp, 
-				fg, (int)l, height,
-				bg, maxc-(int)l, height,
-				pnl ? "\n" : "");
+	else {
+		if(segb == 0)
+			printf("%s%3d%% ^fg(%s)^r(%dx%d)^fg(%s)^r(%dx%d)^fg()%s", 
+					label ? label : "", rp, 
+					fg, (int)l, height,
+					bg, maxc-(int)l, height,
+					pnl ? "\n" : "");
+		else {
+			segs  = maxc / (segw+segb);
+			segsa = rp * segs / 100;
+
+			printf("%s%3d%% ", label ? label : "", rp);
+			for(i=0; i < segs; i++) {
+				if(i<segsa)
+					printf("^fg(%s)^r(%dx%d+%d+%d')", fg, segw, height, i?segb:0, 0);
+				else
+					printf("^fg(%s)^r(%dx%d+%d+%d')", bg, segw, height, i?segb:0, 0);
+			}
+			printf("^fg()%s", pnl ? "\n" : "");
+		}
+	}
+
 
 	fflush(stdout);
 }
 
-int
+	int
 main(int argc, char *argv[])
 {
 	int i, nv;
@@ -106,7 +122,7 @@ main(int argc, char *argv[])
 	int barheight =   10;
 	int segw      =    6;
 	int segh      =    2;
-	int segb      =    1;
+	int segb      =    0;
 	double minval =    0;
 	double maxval =  100.0;
 	int print_nl  =    1;
