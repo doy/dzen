@@ -43,14 +43,14 @@ pbar(const char* label, double perc, int maxc, int height, int segw, int segh, i
 	double l;
 
 
-	l = perc * ((mode ? (double)(maxc-2) : (double) maxc) / 100);
-	if((int)(l + 0.5) >= (int)l)
-		l += 0.5;
 
-	if((int)(perc + 0.5) >= (int)perc)
-		rp = (int)(perc + 0.5);
+	if(mode == vertical)
+		l = perc * ((double)height / 100);
 	else
-		rp = (int)perc;
+		l = perc * ((mode == outlined ? (double)(maxc-2) : (double) maxc) / 100);
+
+	l=(int)(l + 0.5) >= (int)l ? l+0.5 : l;
+	rp=(int)(perc + 0.5) >= (int)perc ? (int)(perc + 0.5) : (int)perc;
 
 	if(mode == outlined)
 		printf("%s%3d%% ^ib(1)^fg(%s)^ro(%dx%d)^p(%d)^fg(%s)^r(%dx%d)^p(%d)^ib(0)^fg()%s", 
@@ -62,13 +62,24 @@ pbar(const char* label, double perc, int maxc, int height, int segw, int segh, i
 		segs  = height / (segh + segb);
 		segsa = rp * segs / 100;
 
-		printf("%s^ib(1)", label ? label : "");
-		for(i=0; i < segs; i++) {
-			if(i<segsa)
-				printf("^fg(%s)^p(-%d)^r(%dx%d+%d-%d')", fg, i?segw:0, segw, segh, 0, (segh+segb)*(i+1));
-			else
-				printf("^fg(%s)^p(-%d)^r(%dx%d+%d-%d')", bg, i?segw:0, segw, segh, 0, (segh+segb)*(i+1));
 
+		printf("%s^ib(1)", label ? label : "");
+		/* in case of no spacing, we draw just 2 rectangles */
+		if(segb == 0) {
+			printf("^fg(%s)^r(%dx%d+%d-%d)^fg(%s)^p(-%d)^r(%dx%d+%d-%d)",
+					bg, 
+					segw, height, 0, height+1,
+					fg, segw,
+					segw, (int)l, 0, (int)l+1
+					);
+		} else {
+			for(i=0; i < segs; i++) {
+				if(i<segsa)
+					printf("^fg(%s)^p(-%d)^r(%dx%d+%d-%d')", fg, i?segw:0, segw, segh, 0, (segh+segb)*(i+1));
+				else
+					printf("^fg(%s)^p(-%d)^r(%dx%d+%d-%d')", bg, i?segw:0, segw, segh, 0, (segh+segb)*(i+1));
+
+			}
 		}
 		printf("^ib(0)^fg()%s", pnl ? "\n" : "");
 	}
