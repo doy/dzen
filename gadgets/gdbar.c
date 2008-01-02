@@ -52,12 +52,29 @@ pbar(const char* label, double perc, int maxc, int height, int segw, int segh, i
 	l=(int)(l + 0.5) >= (int)l ? l+0.5 : l;
 	rp=(int)(perc + 0.5) >= (int)perc ? (int)(perc + 0.5) : (int)perc;
 
-	if(mode == outlined)
-		printf("%s%3d%% ^ib(1)^fg(%s)^ro(%dx%d)^p(%d)^fg(%s)^r(%dx%d)^p(%d)^ib(0)^fg()%s", 
-				label ? label : "", rp, 
-				bg, (int)maxc, height, -1*(maxc-1),
-				fg, (int)l, height-2,
-				maxc-(int)l-1, pnl ? "\n" : "");
+	if(mode == outlined) {
+		if(segb == 0) {
+			printf("%s%3d%% ^ib(1)^fg(%s)^ro(%dx%d)^p(%d)^fg(%s)^r(%dx%d)^p(%d)^ib(0)^fg()%s", 
+					label ? label : "", rp, 
+					bg, (int)maxc, height, -1*(maxc-2),
+					fg, (int)l, height-4>0?height-4:1,
+					maxc-(int)l-1, pnl ? "\n" : "");
+		} else {
+			segs  = (maxc-2) / (segw+segb);
+			segsa = rp * segs / 100;
+
+			printf("%s%3d%% ^ib(1)^fg(%s)^ro(%dx%d)^p(%d)", 
+					label ? label : "", rp,
+					bg, (int)maxc, height, -1*(maxc-2));
+			for(i=0; i < segs; i++) {
+				if(i<segsa)
+					printf("^fg(%s)^r(%dx%d+%d+%d')", fg, segw, height-4>0?height-4:1, i?segb:0, 0);
+				else
+					break;
+			}
+			printf("^fg()^p(%d)^ib(0)%s", (segw+segb)*(segs-segsa+1), pnl ? "\n" : "");
+		}
+	}
 	else if(mode == vertical) {
 		segs  = height / (segh + segb);
 		segsa = rp * segs / 100;
