@@ -15,8 +15,8 @@ Command line options:
          less than 1 for intervals 
          shorter than a second
 
-  -c  :  Terminate after diplaying     (default: infinite)
-         argument to '-c' values
+  -c  :  Number of times to display    (default: infinite)
+         the meter
 
   -w  :  Width of the meter in pixels  (default: 100)
 
@@ -27,7 +27,7 @@ Command line options:
   -bg :  Meter background color        (default: darkgrey)
 
   -s  :  Style, can be either o(utlined)
-         gauge, g(raph) or the default
+         v(ertical), g(raph) or the default
 		 gauge if no parameter is specified
 
   -gw :  Width of the graph elements    (default: 1)

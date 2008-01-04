@@ -1,256 +1,97 @@
-/*  
-	gdbar - graphical percentage meter, to be used with dzen
-
-	Copyright (c) 2007 by Robert Manea  <rob dot manea at gmail dot com>
-
-	Permission is hereby granted, free of charge, to any person obtaining a copy
-	of this software and associated documentation files (the "Software"), to deal
-	in the Software without restriction, including without limitation the rights
-	to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-	copies of the Software, and to permit persons to whom the Software is
-	furnished to do so, subject to the following conditions:
-
-	The above copyright notice and this permission notice shall be included in
-	all copies or substantial portions of the Software.
-
-	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-	IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-	FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-	AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-	LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-	OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-	THE SOFTWARE.
-	*/
-
-
-#include<stdio.h>
-#include<stdlib.h>
-#include<unistd.h>
-#include<string.h>
-#include<X11/Xlib.h>
+#include <stdio.h>
+#include "dbar.h"
 
 #define MAXLEN 1024
 
-static void pbar (const char *, double, int, int, int, int, int, int, int);
+int main(int argc, char *argv[]) {
+  int i, nv;
+  char aval[MAXLEN], *endptr;
+  Dbar dbar;
 
-enum style { norm, outlined, vertical };
-char *bg, *fg;
+  dbardefaults(&dbar, graphical);
 
-static void
-pbar(const char* label, double perc, int maxc, int height, int segw, int segh, int segb, int pnl, int mode) {
-	int i, rp;
-	int segs, segsa;
-	double l;
-
-
-
-	if(mode == vertical)
-		l = perc * ((double)height / 100);
-	else
-		l = perc * ((mode == outlined ? (double)(maxc-2) : (double) maxc) / 100);
-
-	l=(int)(l + 0.5) >= (int)l ? l+0.5 : l;
-	rp=(int)(perc + 0.5) >= (int)perc ? (int)(perc + 0.5) : (int)perc;
-
-	if(mode == outlined) {
-		if(segb == 0) {
-			printf("%s%3d%% ^ib(1)^fg(%s)^ro(%dx%d)^p(%d)^fg(%s)^r(%dx%d)^p(%d)^ib(0)^fg()%s", 
-					label ? label : "", rp, 
-					bg, (int)maxc, height, -1*(maxc-2),
-					fg, (int)l, height-4>0?height-4:1,
-					maxc-(int)l-1, pnl ? "\n" : "");
-		} else {
-			segs  = (maxc-2) / (segw+segb);
-			segsa = rp * segs / 100;
-
-			printf("%s%3d%% ^ib(1)^fg(%s)^ro(%dx%d)^p(%d)", 
-					label ? label : "", rp,
-					bg, (int)maxc, height, -1*(maxc-2));
-			for(i=0; i < segs; i++) {
-				if(i<segsa)
-					printf("^fg(%s)^r(%dx%d+%d+%d')", fg, segw, height-4>0?height-4:1, i?segb:0, 0);
-				else
-					break;
-			}
-			printf("^fg()^p(%d)^ib(0)%s", (segw+segb)*(segs-segsa+1), pnl ? "\n" : "");
-		}
+  for(i=1; i < argc; i++) {
+    if(!strncmp(argv[i], "-w", 3)) {
+      if(++i < argc)
+	dbar.width = atoi(argv[i]);
+    }
+    else if(!strncmp(argv[i], "-h", 3)) {
+      if(++i < argc)
+	dbar.height = atoi(argv[i]);
+    }
+    else if(!strncmp(argv[i], "-sw", 4)) {
+      if(++i < argc)
+	dbar.segw = atoi(argv[i]);
+    }
+    else if(!strncmp(argv[i], "-sh", 4)) {
+      if(++i < argc)
+	dbar.segh = atoi(argv[i]);
+    }
+    else if(!strncmp(argv[i], "-ss", 4)) {
+      if(++i < argc)
+	dbar.segb = atoi(argv[i]);
+    }
+    else if(!strncmp(argv[i], "-s", 3)) {
+      if(++i < argc) {
+	switch(argv[i][0]) {
+	case 'o':
+	  dbar.style = outlined;
+	  break;
+	case 'v':
+	  dbar.style = vertical;
+	  break;
+	default:
+	  dbar.style = norm;
+	  break;
 	}
-	else if(mode == vertical) {
-		segs  = height / (segh + segb);
-		segsa = rp * segs / 100;
-
-
-		printf("%s^ib(1)", label ? label : "");
-		/* in case of no spacing, we draw just 2 rectangles */
-		if(segb == 0) {
-			printf("^fg(%s)^r(%dx%d+%d-%d)^fg(%s)^p(-%d)^r(%dx%d+%d-%d)",
-					bg, 
-					segw, height, 0, height+1,
-					fg, segw,
-					segw, (int)l, 0, (int)l+1
-				  );
-		} else {
-			for(i=0; i < segs; i++) {
-				if(i<segsa)
-					printf("^fg(%s)^p(-%d)^r(%dx%d+%d-%d)", fg, i?segw:0, segw, segh, 0, (segh+segb)*(i+1));
-				else
-					printf("^fg(%s)^p(-%d)^r(%dx%d+%d-%d)", bg, i?segw:0, segw, segh, 0, (segh+segb)*(i+1));
-
-			}
-		}
-		printf("^ib(0)^fg()%s", pnl ? "\n" : "");
+      }
+    }
+    else if(!strncmp(argv[i], "-fg", 4)) {
+      if(++i < argc)
+	dbar.fg = argv[i];
+    }
+    else if(!strncmp(argv[i], "-bg", 4)) {
+      if(++i < argc)
+	dbar.bg = argv[i];
+    }
+    else if(!strncmp(argv[i], "-max", 5)) {
+      if(++i < argc) {
+	dbar.maxval = strtod(argv[i], &endptr);
+	if(*endptr) {
+	  fprintf(stderr, "gdbar: '%s' incorrect number format", argv[i]);
+	  return EXIT_FAILURE;
 	}
-	else {
-		if(segb == 0)
-			printf("%s%3d%% ^fg(%s)^r(%dx%d)^fg(%s)^r(%dx%d)^fg()%s", 
-					label ? label : "", rp, 
-					fg, (int)l, height,
-					bg, maxc-(int)l, height,
-					pnl ? "\n" : "");
-		else {
-			segs  = maxc / (segw+segb);
-			segsa = rp * segs / 100;
-
-			printf("%s%3d%% ", label ? label : "", rp);
-			for(i=0; i < segs; i++) {
-				if(i<segsa)
-					printf("^fg(%s)^r(%dx%d+%d+%d')", fg, segw, height, i?segb:0, 0);
-				else
-					printf("^fg(%s)^r(%dx%d+%d+%d')", bg, segw, height, i?segb:0, 0);
-			}
-			printf("^fg()%s", pnl ? "\n" : "");
-		}
+      }
+    }
+    else if(!strncmp(argv[i], "-min", 5)) {
+      if(++i < argc) {
+	dbar.minval = strtod(argv[i], &endptr);
+	if(*endptr) {
+	  fprintf(stderr, "gdbar: '%s' incorrect number format", argv[i]);
+	  return EXIT_FAILURE;
 	}
+      }
+    }
+    else if(!strncmp(argv[i], "-l", 3)) {
+      if(++i < argc)
+	dbar.label = argv[i];
+    }
+    else if(!strncmp(argv[i], "-nonl", 6)) {
+      dbar.pnl = 0;
+    }
+    else {
+      fprintf(stderr, "usage: gdbar [-s <o|v>] [-w <pixel>] [-h <pixel>] [-sw <pixel>] [-ss <pixel>] [-sw <pixel>] [-fg <color>] [-bg <color>] [-min <minvalue>] [-max <maxvalue>] [-l <string>] [-nonl] \n");
+      return EXIT_FAILURE;
+    }
+  }
 
+  while(fgets(aval, MAXLEN, stdin)) {
+    nv = sscanf(aval, "%lf %lf %lf", &dbar.val, &dbar.minval, &dbar.maxval);
+    if(nv == 2) {
+      dbar.maxval = dbar.minval;
+      dbar.minval = 0;
+    }
+    fdbar(&dbar, stdout);
+  }
 
-	fflush(stdout);
 }
-
-	int
-main(int argc, char *argv[])
-{
-	int i, nv;
-	double val;
-	char aval[MAXLEN], *endptr;
-
-	/* defaults */
-	int mode      = norm; 
-	int barwidth  =   80;
-	int barheight =   10;
-	int segw      =    6;
-	int segh      =    2;
-	int segb      =    0;
-	double minval =    0;
-	double maxval =  100.0;
-	int print_nl  =    1;
-	const char *label = NULL;
-
-
-	for(i=1; i < argc; i++) {
-		if(!strncmp(argv[i], "-w", 3)) {
-			if(++i < argc)
-				barwidth = atoi(argv[i]);
-		}
-		else if(!strncmp(argv[i], "-h", 3)) {
-			if(++i < argc)
-				barheight = atoi(argv[i]);
-		}
-		else if(!strncmp(argv[i], "-sw", 4)) {
-			if(++i < argc)
-				segw = atoi(argv[i]);
-		}
-		else if(!strncmp(argv[i], "-sh", 4)) {
-			if(++i < argc)
-				segh = atoi(argv[i]);
-		}
-		else if(!strncmp(argv[i], "-ss", 4)) {
-			if(++i < argc)
-				segb = atoi(argv[i]);
-		}
-		else if(!strncmp(argv[i], "-s", 3)) {
-			if(++i < argc) {
-				switch(argv[i][0]) {
-					case 'o':
-						mode = outlined;
-						break;
-					case 'v':
-						mode = vertical;
-						break;
-					default:
-						mode = norm;
-						break;
-				}
-			}
-		}
-
-		else if(!strncmp(argv[i], "-fg", 4)) {
-			if(++i < argc)
-				fg = argv[i];
-			else {
-				fg = malloc(6);
-				strcpy(fg, "white");
-			}
-		}
-		else if(!strncmp(argv[i], "-bg", 4)) {
-			if(++i < argc)
-				bg = argv[i];
-			else {
-				bg = malloc(9);
-				strcpy(bg, "darkgrey");
-			}
-		}
-		else if(!strncmp(argv[i], "-max", 5)) {
-			if(++i < argc) {
-				maxval = strtod(argv[i], &endptr);
-				if(*endptr) {
-					fprintf(stderr, "dbar: '%s' incorrect number format", argv[i]);
-					return EXIT_FAILURE;
-				}
-			}
-		}
-		else if(!strncmp(argv[i], "-min", 5)) {
-			if(++i < argc) {
-				minval = strtod(argv[i], &endptr);
-				if(*endptr) {
-					fprintf(stderr, "dbar: '%s' incorrect number format", argv[i]);
-					return EXIT_FAILURE;
-				}
-			}
-		}
-		else if(!strncmp(argv[i], "-l", 3)) {
-			if(++i < argc)
-				label = argv[i];
-		}
-		else if(!strncmp(argv[i], "-nonl", 6)) {
-			print_nl = 0;
-		}
-		else {
-			fprintf(stderr, "usage: dbar [-s <o|v>] [-w <pixel>] [-h <pixel>] [-sw <pixel>] [-ss <pixel>] [-sw <pixel>] [-fg <color>] [-bg <color>] [-min <minvalue>] [-max <maxvalue>] [-l <string>] [-nonl] \n");
-			return EXIT_FAILURE;
-		}
-	}
-
-	if(!fg) {
-		fg = malloc(6);
-		strcpy(fg, "white");
-	}
-	if(!bg) {
-		bg = malloc(9);
-		strcpy(bg, "darkgrey");
-	}
-
-	while(fgets(aval, MAXLEN, stdin)) {
-		nv = sscanf(aval, "%lf %lf %lf", &val, &minval, &maxval);
-		if(nv == 2) {
-			maxval = minval;
-			minval = 0;
-		}
-
-		pbar(label, (100*(val-minval))/(maxval-minval), 
-				barwidth, barheight, segw, segh, segb,
-				print_nl, mode);
-	}
-
-	return EXIT_SUCCESS;
-}
-

@@ -14,6 +14,11 @@ Options:
 
      -fg  :  foreground color of the meter (default: white)
      -bg  :  background color of the meter (default: darkgrey)
+     -s   :  Style, can be either o(utlined), v(ertical),
+             or the default gauge if no parameter is specified
+     -sw  :  Width of the segments
+     -sh  :  Height of the vertical segments
+     -ss  :  Space between the segments
      -max :  Value to be considered 100%   (default: 100)
      -min :  Value to be considered   0%   (default: 0  )
      -w   :  Size in pixels to be 

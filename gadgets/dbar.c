@@ -1,137 +1,161 @@
-/*  
-	dbar - ascii percentage meter
+#include "dbar.h"
 
-	Copyright (c) 2007 by Robert Manea  <rob dot manea at gmail dot com>
+void
+dbardefaults(Dbar *dbar, int mode) {
+	dbar->bg	= "darkgrey";
+	dbar->fg	= "white";
+	dbar->label	= NULL;
+	dbar->sym	= '=';
+	dbar->val	= 0;
+	dbar->minval	= 0;
+	dbar->maxval	= 100.0;
+	dbar->mode	= mode ? graphical : textual;
+	dbar->style	= norm;
+	dbar->width	= mode ? 80 : 25;
+	dbar->height	= 10;
+	dbar->segw	= 6;
+	dbar->segh	= 2;
+	dbar->segb	= 0;
+	dbar->gs	= 0;
+	dbar->gw	= 1;
+	dbar->gc	= 0;
+	dbar->pnl	= 1;
+	memset(dbar->gb, '\0', MAX_GRAPH_VALS);
+}
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+void
+fdbar(Dbar *dbar, FILE *stream) {
+	int i, rp, p;
+	int segs, segsa;
+	double l, perc;
 
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
+	perc = (100 * (dbar->val - dbar->minval)) / (dbar->maxval - dbar->minval);
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
-*/
-
-
-#include<stdio.h>
-#include<stdlib.h>
-#include<unistd.h>
-#include<string.h>
-
-#define MAXLEN 512
-
-static void pbar (const char*, double, int, char, int);
-
-
-static void
-pbar(const char* label, double perc, int maxc, char sym, int pnl) {
-	int i, rp;
-	double l;
-
-	l = perc * ((double)maxc / 100);
-	if((int)(l + 0.5) >= (int)l)
-		l = l + 0.5;
-
-	if((int)(perc + 0.5) >= (int)perc)
-		rp = (int)(perc + 0.5);
-	else
-		rp = (int)perc;
-
-	if(label)
-		printf("%s %3d%% [", label, rp);
-	else
-		printf("%3d%% [", rp);
-
-	for(i=0; i < (int)l; i++)
-		if(i == maxc) {
-			putchar('>');
+	switch(dbar->style) {
+		case outlined:
+			l = perc * ((double)(dbar->width-2) / 100);
 			break;
-		} else
-			putchar(sym);
-
-		for(; i < maxc; i++)
-			putchar(' ');
-
-		printf("]%s", pnl ? "\n" : "");
-		fflush(stdout);
-}
-
-	int
-main(int argc, char *argv[])
-{
-	int i, nv;
-	double val;
-	char aval[MAXLEN], *endptr;
-
-	/* defaults */
-	int maxchars  =   25;
-	double minval =    0;
-	double maxval =  100.0;
-	char psym     =  '=';
-	int print_nl  =    1;
-	const char *label = NULL;
-
-
-	for(i=1; i < argc; i++) {
-		if(!strncmp(argv[i], "-w", 3)) {
-			if(++i < argc)
-				maxchars = atoi(argv[i]);
-		}
-		else if(!strncmp(argv[i], "-s", 3)) {
-			if(++i < argc)
-				psym = argv[i][0];
-		}
-		else if(!strncmp(argv[i], "-max", 5)) {
-			if(++i < argc) {
-				maxval = strtod(argv[i], &endptr);
-				if(*endptr) {
-					fprintf(stderr, "dbar: '%s' incorrect number format", argv[i]);
-					return EXIT_FAILURE;
-				}
-			}
-		}
-		else if(!strncmp(argv[i], "-min", 5)) {
-			if(++i < argc) {
-				minval = strtod(argv[i], &endptr);
-				if(*endptr) {
-					fprintf(stderr, "dbar: '%s' incorrect number format", argv[i]);
-					return EXIT_FAILURE;
-				}
-			}
-		}
-		else if(!strncmp(argv[i], "-l", 3)) {
-			if(++i < argc)
-				label = argv[i];
-		}
-		else if(!strncmp(argv[i], "-nonl", 6)) {
-			print_nl = 0;
-		}
-		else {
-			fprintf(stderr, "usage: dbar [-w <characters>] [-s <symbol>] [-min <minvalue>] [-max <maxvalue>] [-l <string>] [-nonl]\n");
-			return EXIT_FAILURE;
-		}
+		case vertical:
+			l = perc * ((double)dbar->height / 100);
+			break;
+		case graph:
+			l = perc * ((double)dbar->height / 100);
+			break;
+		default:
+			l = perc * ((double)dbar->width / 100);
+			break;
 	}
 
-	while(fgets(aval, MAXLEN, stdin)) {
-		nv = sscanf(aval, "%lf %lf %lf", &val, &minval, &maxval);
-		if(nv == 2) {
-			maxval = minval;
-			minval = 0;
+	l=(int)(l + 0.5) >= (int)l ? l+0.5 : l;
+	rp=(int)(perc + 0.5) >= (int)perc ? (int)(perc + 0.5) : (int)perc;
+
+	if(dbar->mode == textual) {
+		fprintf(stream, "%s%3d%% [", dbar->label ? dbar->label : "", rp);
+		for(i=0; i < (int)l; i++)
+			if(i == dbar->width) {
+				fputc('>', stream);
+				break;
+			} else
+				fputc(dbar->sym, stream);
+			for(; i < dbar->width; i++)
+				fputc(' ', stream);
+			fprintf(stream, "]%s", dbar->pnl ? "\n" : "");
+	} else {
+		switch(dbar->style) {
+			case outlined:
+				if(dbar->segb == 0) {
+					fprintf(stream, "%s%3d%% ^ib(1)^fg(%s)^ro(%dx%d)^p(%d)^fg(%s)^r(%dx%d)^p(%d)^ib(0)^fg()%s", 
+							dbar->label ? dbar->label : "", rp, 
+							dbar->bg, (int)dbar->width, dbar->height, -1*(dbar->width-2),
+							dbar->fg, (int)l, dbar->height-4>0?dbar->height-4:1,
+							dbar->width-(int)l-1, dbar->pnl ? "\n" : "");
+				} else {
+					segs  = dbar->width / (dbar->segw + dbar->segb);
+					segsa = rp * segs / 100;
+
+					printf("%s%3d%% ^ib(1)^fg(%s)^ro(%dx%d)^p(%d)", 
+							dbar->label ? dbar->label : "", rp,
+							dbar->bg, (int)dbar->width, dbar->height, -1*(dbar->width-2));
+					for(i=0; i < segs; i++) {
+						if(i<segsa)
+							printf("^fg(%s)^r(%dx%d+%d+%d')", dbar->fg, dbar->segw, dbar->height-4>0?dbar->height-4:1, i?dbar->segb:0, 0);
+						else
+							break;
+					}
+					printf("^fg()^p(%d)^ib(0)%s", (dbar->segw+dbar->segb)*(segs-segsa+1), dbar->pnl ? "\n" : "");
+				}
+				break;
+
+			case vertical:
+				segs  = dbar->height / (dbar->segh + dbar->segb);
+				segsa = rp * segs / 100;
+				fprintf(stream, "%s^ib(1)", dbar->label ? dbar->label : "");
+				if(dbar->segb == 0) {
+					fprintf(stream, "^fg(%s)^r(%dx%d+%d-%d)^fg(%s)^p(-%d)^r(%dx%d+%d-%d)",
+							dbar->bg, dbar->segw, dbar->height, 0, dbar->height+1,
+							dbar->fg, dbar->segw, dbar->segw, (int)l, 0, (int)l+1);
+				} else {
+					for(i=0; i < segs; i++) {
+						if(i<segsa)
+							fprintf(stream, "^fg(%s)^p(-%d)^r(%dx%d+%d-%d)",
+									dbar->fg, i?dbar->segw:0, dbar->segw,
+									dbar->segh, 0, (dbar->segh+dbar->segb)*(i+1));
+						else
+							fprintf(stream, "^fg(%s)^p(-%d)^r(%dx%d+%d-%d)",
+									dbar->bg, i?dbar->segw:0, dbar->segw,
+									dbar->segh, 0, (dbar->segh+dbar->segb)*(i+1));
+					}
+				}
+				fprintf(stream, "^ib(0)^fg()%s", dbar->pnl ? "\n" : "");
+				break;
+
+			case graph:
+				dbar->gc = dbar->gc < MAX_GRAPH_VALS && 
+					(dbar->gs == 0 ? dbar->gc : dbar->gc * dbar->gs + dbar->gc * dbar->gw)
+					< dbar->width ? ++dbar->gc : 0;
+				dbar->gb[dbar->gc] = l;
+
+				printf("%s", dbar->label ? dbar->label : "");
+				for(i=dbar->gc+1; i<MAX_GRAPH_VALS && (i*(dbar->gs+dbar->gw)) < dbar->width; ++i) {
+					p=100*dbar->gb[i]/dbar->height;
+					p=(int)p+0.5 >= (int)p ? (int)(p+0.5) : (int)p;
+					fprintf(stream, "^fg(%s)^p(%d)^r(%dx%d+0-%d)", 
+							dbar->fg, dbar->gs, dbar->gw, (int)dbar->gb[i], (int)dbar->gb[i]+1);
+				}
+
+				for(i=0; i < dbar->gc; ++i) {
+					p=100*dbar->gb[i]/dbar->height;
+					p=(int)p+0.5 >= (int)p ? (int)(p+0.5) : (int)p;
+					fprintf(stream, "^fg(%s)^p(%d)^r(%dx%d+0-%d)", 
+							dbar->fg, dbar->gs, dbar->gw, (int)dbar->gb[i], (int)dbar->gb[i]+1); 
+				}
+				fprintf(stream, "^fg()%s", dbar->pnl ? "\n" : "");
+				break;
+
+			default:
+				if(dbar->segb == 0)
+					printf("%s%3d%% ^fg(%s)^r(%dx%d)^fg(%s)^r(%dx%d)^fg()%s", 
+							dbar->label ? dbar->label : "", rp, 
+							dbar->fg, (int)l, dbar->height,
+							dbar->bg, dbar->width-(int)l, dbar->height,
+							dbar->pnl ? "\n" : "");
+				else {
+					segs  = dbar->width / (dbar->segw + dbar->segb);
+					segsa = rp * segs / 100;
+
+					printf("%s%3d%% ", dbar->label ? dbar->label : "", rp);
+					for(i=0; i < segs; i++) {
+						if(i<segsa)
+							fprintf(stream, "^fg(%s)^r(%dx%d+%d+%d')",
+									dbar->fg, dbar->segw, dbar->height, i?dbar->segb:0, 0);
+						else
+							fprintf(stream, "^fg(%s)^r(%dx%d+%d+%d')",
+									dbar->bg, dbar->segw, dbar->height, i?dbar->segb:0, 0);
+					}
+					fprintf(stream, "^fg()%s", dbar->pnl ? "\n" : "");
+				}
+				break;
 		}
-
-		pbar(label, (100*(val-minval))/(maxval-minval), maxchars, psym, print_nl);
 	}
-
-	return EXIT_SUCCESS;
+	fflush(stream);
 }
-
