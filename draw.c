@@ -217,7 +217,7 @@ get_rect_vals(char *s, int *w, int *h, int *x, int *y) {
 	int i, j;
 	char buf[128];
 
-	*w = 0; *h = 0; *x=0; *y=0;
+	*w=*h=*x=*y=0;
 
 	for(i=0; s[i] && s[i] != 'x' && i<128; i++) {
 		buf[i] = s[i];
@@ -238,6 +238,27 @@ get_rect_vals(char *s, int *w, int *h, int *x, int *y) {
 		*y = atoi(s+i);
 	}
 			
+}
+
+static int
+get_circle_vals(char *s, int *d, int *a) {
+	int i, ret;
+	char buf[128];
+	*d=*a=ret=0;
+
+	for(i=0; s[i] && i<128; i++) {
+		if(s[i] == '+' || s[i] == '-') {
+			ret=1;
+			break;
+		} else 
+			buf[i]=s[i];
+	}
+
+	buf[i+1]='\0';
+	*d=atoi(buf);
+	*a=atoi(s+i);
+
+	return ret;
 }
 
 char *
@@ -393,16 +414,20 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 							break;
 
 						case circle:
-							rectw = recth = atoi(tval);
+							rectx = get_circle_vals(tval, &rectw, &recth);
 							setcolor(&pm, px, rectw, lastfg, lastbg, reverse, nobg);
-							XFillArc(dzen.dpy, pm, dzen.tgc, px, (dzen.line_height - recth)/2, rectw, recth, 2880, 23040);
+							XFillArc(dzen.dpy, pm, dzen.tgc, px, (dzen.line_height - rectw)/2, 
+									rectw, rectw, 90*64, rectx?recth*64:64*360);
 							px += rectw;
 							break;
 
 						case circleo:
-							rectw = recth = atoi(tval);
+							rectx = get_circle_vals(tval, &rectw, &recth);
 							setcolor(&pm, px, rectw, lastfg, lastbg, reverse, nobg);
-							XDrawArc(dzen.dpy, pm, dzen.tgc, px, (dzen.line_height - recth)/2, rectw-1, recth-1, 2880, 23040);
+							XDrawArc(dzen.dpy, pm, dzen.tgc, px, (dzen.line_height - rectw)/2, 
+									rectw, rectw, 90*64, rectx?recth*64:64*360);
+							px += rectw;
+							break;
 							px += rectw;
 							break;
 
@@ -535,16 +560,19 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 					break;
 
 				case circle:
-					rectw = recth = atoi(tval);
+					rectx = get_circle_vals(tval, &rectw, &recth);
 					setcolor(&pm, px, rectw, lastfg, lastbg, reverse, nobg);
-					XFillArc(dzen.dpy, pm, dzen.tgc, px, (dzen.line_height - recth)/2, rectw, recth, 2880, 23040);
+					XFillArc(dzen.dpy, pm, dzen.tgc, px, (dzen.line_height - rectw)/2, 
+							rectw, rectw, 90*64, rectx?recth*64:64*360);
 					px += rectw;
 					break;
 
 				case circleo:
-					rectw = recth = atoi(tval);
+					rectx = get_circle_vals(tval, &rectw, &recth);
+					printf("s: %s  -  d=%d a=%d ret=%d\n", tval, rectw, recth, rectx);
 					setcolor(&pm, px, rectw, lastfg, lastbg, reverse, nobg);
-					XDrawArc(dzen.dpy, pm, dzen.tgc, px, (dzen.line_height - recth)/2, rectw-1, recth-1, 2880, 23040);
+					XDrawArc(dzen.dpy, pm, dzen.tgc, px, (dzen.line_height - rectw)/2, 
+							rectw, rectw, 90*64, rectx?recth*64:64*360);
 					px += rectw;
 					break;
 
