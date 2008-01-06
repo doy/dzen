@@ -132,6 +132,13 @@ fdbar(Dbar *dbar, FILE *stream) {
 				fprintf(stream, "^fg()%s", dbar->pnl ? "\n" : "");
 				break;
 
+			case pie:
+				fprintf(stream, "^ib(1)^fg(%s)^c(%d)^p(-%d)^fg(%s)^c(%d-%d)%s",
+						dbar->bg, dbar->width, dbar->width, 
+						dbar->fg, dbar->width, (int)(rp*360/100),
+						dbar->pnl ? "\n" : "");
+				break;
+
 			default:
 				if(dbar->segb == 0)
 					printf("%s%3d%% ^fg(%s)^r(%dx%d)^fg(%s)^r(%dx%d)^fg()%s", 

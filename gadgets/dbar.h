@@ -31,7 +31,7 @@ typedef struct {
 } Dbar; 
 
 enum mode  { textual, graphical };
-enum style { norm, outlined, vertical, graph };
+enum style { norm, outlined, vertical, graph, pie };
 
 void fdbar(Dbar *dbar, FILE *stream);
 void dbardefaults(Dbar *dbar, int mode);
