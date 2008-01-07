@@ -569,7 +569,6 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 
 				case circleo:
 					rectx = get_circle_vals(tval, &rectw, &recth);
-					printf("s: %s  -  d=%d a=%d ret=%d\n", tval, rectw, recth, rectx);
 					setcolor(&pm, px, rectw, lastfg, lastbg, reverse, nobg);
 					XDrawArc(dzen.dpy, pm, dzen.tgc, px, (dzen.line_height - rectw)/2, 
 							rectw, rectw, 90*64, rectx?recth*64:64*360);
