@@ -76,6 +76,9 @@ int main(int argc, char *argv[]) {
 					case 'v':
 						dbar.style = vertical;
 						break;
+					case 'p':
+						dbar.style = pie;
+						break;
 					default:
 						dbar.style = norm;
 						break;
