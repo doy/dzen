@@ -269,9 +269,9 @@ get_circle_vals(char *s, int *d, int *a) {
 
 static int
 get_pos_vals(char *s, int *d, int *a) {
-	int i=0, ret=0;
+	int i=0, ret=3;
 	char buf[128];
-	*d=*a=ret=0;
+	*d=*a=0;
 
 	for(i=0; s[i] && i<128; i++) {
 		if(s[i] == ';') {
@@ -488,7 +488,7 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 									px = px+n_posx<0? 0 : px + n_posx; 
 								if(set_posy != 1)
 									py += n_posy;
-								set_posy = !set_posy || set_posy == 2 ? 1 : 0;
+								set_posy = set_posy == 0 || set_posy == 2 ? 1 : 0;
 							} else {
 								set_posy = 0;
 								py = (dzen.line_height - h) / 2 - dzen.font.descent;
@@ -503,10 +503,9 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 									px = n_posx;
 								if(set_posy != 1)
 									py = n_posy;
-								set_posy = !set_posy || set_posy == 2 ? 1 : 0;
+								set_posy = set_posy == 0 || set_posy == 2 ? 1 : 0;
 							} else {
 								set_posy = 0;
-								//py = dzen.font.ascent + (dzen.line_height - h) / 2;
 								py = (dzen.line_height - h) / 2 - dzen.font.descent;
 							}
 							
@@ -669,7 +668,7 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 							px = px+n_posx<0? 0 : px + n_posx; 
 						if(set_posy != 1)
 							py += n_posy;
-						set_posy = !set_posy || set_posy == 2 ? 1 : 0;
+						set_posy = set_posy == 0 || set_posy == 2 ? 1 : 0;
 					} else {
 						set_posy = 0;
 						py = (dzen.line_height - h) / 2 - dzen.font.descent;
@@ -684,7 +683,7 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 							px = n_posx;
 						if(set_posy != 1)
 							py = n_posy;
-						set_posy = !set_posy || set_posy == 2 ? 1 : 0;
+						set_posy = set_posy == 0 || set_posy == 2 ? 1 : 0;
 					} else {
 						set_posy = 0;
 						py = (dzen.line_height - h) / 2 - dzen.font.descent;
