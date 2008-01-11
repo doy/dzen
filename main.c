@@ -226,16 +226,17 @@ x_check_geometry(XRectangle si) {
 	if (dzen.title_win.x < si.x)
 		dzen.title_win.x = si.x;
 
-	if(!dzen.title_win.width && dzen.title_win.expand != left)
+	if(!dzen.title_win.width)
 		dzen.title_win.width = si.width;
 
-	if((dzen.title_win.x + dzen.title_win.width) > (si.x + si.width))
+	if((dzen.title_win.x + dzen.title_win.width) > (si.x + si.width) && (dzen.title_win.expand != left))
 		dzen.title_win.width = si.width - (dzen.title_win.x - si.x);
 
 	if(dzen.title_win.expand == left) {
-		dzen.title_win.x_right_corner = dzen.title_win.width ? dzen.title_win.width+si.x : dzen.title_win.x;
-		dzen.title_win.width = dzen.title_win.x - si.x;
-		dzen.title_win.x = si.x;
+		dzen.title_win.x_right_corner = dzen.title_win.x + dzen.title_win.width;
+		//dzen.title_win.width = dzen.title_win.width ? dzen.title_win.width : dzen.title_win.x_right_corner - si.x;
+		dzen.title_win.x = dzen.title_win.width ? dzen.title_win.x_right_corner - dzen.title_win.width : si.x;
+		printf("si.x=%d dzen.title_win.width=%d dzen.title_win.x=%d dzen.title_win.x_right_corner=%d\n", si.x, dzen.title_win.width, dzen.title_win.x, dzen.title_win.x_right_corner);
 	}
 
 	if(!dzen.slave_win.width) {
@@ -508,6 +509,10 @@ x_redraw(XEvent e) {
 						0, 0, dzen.slave_win.width, dzen.line_height, 0, 0);
 			}
 	}
+	/*
+	if(dzen.sa_win)
+		XMapWindow(dzen.dpy, dzen.sa_win);
+	*/
 }
 
 static void
@@ -529,7 +534,7 @@ handle_xev(void) {
 					if(ev.xcrossing.window == dzen.slave_win.line[i])
 						x_hilight_line(i);
 			}
-if(!dzen.slave_win.ishmenu 
+			if(!dzen.slave_win.ishmenu 
 					&& ev.xcrossing.window == dzen.title_win.win)
 				do_action(entertitle);
 			if(ev.xcrossing.window == dzen.slave_win.win)
@@ -554,28 +559,36 @@ if(!dzen.slave_win.ishmenu
 					if(ev.xbutton.window == dzen.slave_win.line[i]) 
 						dzen.slave_win.sel_line = i;
 			}
-			switch(ev.xbutton.button) {
-				case Button1:
-					do_action(button1);
-					break;
-				case Button2:
-					do_action(button2);
-					break;
-				case Button3:
-					do_action(button3);
-					break;
-				case Button4:
-					do_action(button4);
-					break;
-				case Button5:
-					do_action(button5);
-					break;
-				case Button6:
-					do_action(button6);
-					break;
-				case Button7:
-					do_action(button7);
-					break;
+			/*
+			else if(ev.xbutton.window == dzen.sa_win) {
+				printf("Button press in sensitive area\n");
+				fflush(stdout);
+			} 
+			*/
+			else {
+				switch(ev.xbutton.button) {
+					case Button1:
+						do_action(button1);
+						break;
+					case Button2:
+						do_action(button2);
+						break;
+					case Button3:
+						do_action(button3);
+						break;
+					case Button4:
+						do_action(button4);
+						break;
+					case Button5:
+						do_action(button5);
+						break;
+					case Button6:
+						do_action(button6);
+						break;
+					case Button7:
+						do_action(button7);
+						break;
+				}
 			}
 			break;
 		case KeyPress:

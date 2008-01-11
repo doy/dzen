@@ -13,6 +13,7 @@
 #define FONT		"-*-fixed-*-*-*-*-*-*-*-*-*-*-*-*"
 #define BGCOLOR		"#111111"
 #define FGCOLOR		"grey70"
+#define ESC_CHAR    '^'
 
 #define ALIGNCENTER 0
 #define ALIGNLEFT   1
@@ -95,6 +96,9 @@ struct DZEN {
 
 	TWIN title_win;
 	SWIN slave_win;
+
+	/* sensitive areas */
+	Window sa_win;
 
 	const char *fnt;
 	const char *bg;

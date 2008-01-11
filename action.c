@@ -426,8 +426,7 @@ a_exec(char * opt[]) {
 
 	if(opt) 
 		for(i=0; opt[i]; i++) 
-			if(opt[i]) 
-				spawn(opt[i]);
+			if(opt[i]) spawn(opt[i]);
 	return 0;
 }
 
