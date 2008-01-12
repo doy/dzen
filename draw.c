@@ -418,8 +418,8 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 									&& (h/2 + px + (signed)bm_w < dzen.w)) {
 								setcolor(pm, px, bm_w, lastfg, lastbg, reverse, nobg);
 								XCopyPlane(dzen.dpy, bm, *pm, dzen.tgc, 
-										0, 0, bm_w, bm_h, px, 
-										dzen.line_height >= (signed)bm_h ? (dzen.line_height - bm_h)/2 : 0, 1);
+										0, 0, bm_w, bm_h, px, set_posy ? py : 
+										(dzen.line_height >= (signed)bm_h ? (dzen.line_height - bm_h)/2 : 0), 1);
 								XFreePixmap(dzen.dpy, bm);
 								px += bm_w;
 							}
@@ -427,8 +427,8 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 							else if(XpmReadFileToPixmap(dzen.dpy, dzen.title_win.win, tval, &xpm_pm, NULL, &xpma) == XpmSuccess) {
 								setcolor(pm, px, xpma.width, lastfg, lastbg, reverse, nobg);
 								XCopyArea(dzen.dpy, xpm_pm, *pm, dzen.tgc, 
-										0, 0, xpma.width, xpma.height, px, 
-										dzen.line_height >= (signed)xpma.height ? (dzen.line_height - xpma.height)/2 : 0);
+										0, 0, xpma.width, xpma.height, px, set_posy ? py :
+										(dzen.line_height >= (signed)xpma.height ? (dzen.line_height - xpma.height)/2 : 0));
 								px += xpma.width;
 
 								XFreePixmap(dzen.dpy, xpm_pm);
@@ -488,7 +488,7 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 									px = px+n_posx<0? 0 : px + n_posx; 
 								if(set_posy != 1)
 									py += n_posy;
-								set_posy = set_posy == 0 || set_posy == 2 ? 1 : 0;
+								set_posy = set_posy == 3 || set_posy == 2 ? 1 : 0;
 							} else {
 								set_posy = 0;
 								py = (dzen.line_height - h) / 2 - dzen.font.descent;
@@ -503,12 +503,11 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 									px = n_posx;
 								if(set_posy != 1)
 									py = n_posy;
-								set_posy = set_posy == 0 || set_posy == 2 ? 1 : 0;
+								set_posy = set_posy == 3 || set_posy == 2 ? 1 : 0;
 							} else {
 								set_posy = 0;
 								py = (dzen.line_height - h) / 2 - dzen.font.descent;
 							}
-							
 							break;
 
 						case ibg:
@@ -598,8 +597,8 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 							&& (h/2 + px + (signed)bm_w < dzen.w)) {
 						setcolor(pm, px, bm_w, lastfg, lastbg, reverse, nobg);
 						XCopyPlane(dzen.dpy, bm, *pm, dzen.tgc, 
-								0, 0, bm_w, bm_h, px, 
-								dzen.line_height >= (signed)bm_h ? (dzen.line_height - bm_h)/2 : 0, 1);
+								0, 0, bm_w, bm_h, px, set_posy ? py :
+								(dzen.line_height >= (signed)bm_h ? (dzen.line_height - bm_h)/2 : 0), 1);
 						XFreePixmap(dzen.dpy, bm);
 						px += bm_w;
 					}
@@ -607,8 +606,8 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 					else if(XpmReadFileToPixmap(dzen.dpy, dzen.title_win.win, tval, &xpm_pm, NULL, &xpma) == XpmSuccess) {
 						setcolor(pm, px, xpma.width, lastfg, lastbg, reverse, nobg);
 						XCopyArea(dzen.dpy, xpm_pm, *pm, dzen.tgc, 
-								0, 0, xpma.width, xpma.height, px, 
-								dzen.line_height >= (signed)xpma.height ? (dzen.line_height - xpma.height)/2 : 0);
+								0, 0, xpma.width, xpma.height, px, set_posy ? py :
+								(dzen.line_height >= (signed)xpma.height ? (dzen.line_height - xpma.height)/2 : 0));
 						px += xpma.width;
 
 						XFreePixmap(dzen.dpy, xpm_pm);
@@ -668,7 +667,7 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 							px = px+n_posx<0? 0 : px + n_posx; 
 						if(set_posy != 1)
 							py += n_posy;
-						set_posy = set_posy == 0 || set_posy == 2 ? 1 : 0;
+						set_posy = set_posy == 3 || set_posy == 2 ? 1 : 0;
 					} else {
 						set_posy = 0;
 						py = (dzen.line_height - h) / 2 - dzen.font.descent;
@@ -683,7 +682,7 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 							px = n_posx;
 						if(set_posy != 1)
 							py = n_posy;
-						set_posy = set_posy == 0 || set_posy == 2 ? 1 : 0;
+						set_posy = set_posy == 3 || set_posy == 2 ? 1 : 0;
 					} else {
 						set_posy = 0;
 						py = (dzen.line_height - h) / 2 - dzen.font.descent;
