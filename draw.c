@@ -275,12 +275,13 @@ get_circle_vals(char *s, int *d, int *a) {
 
 static int
 get_pos_vals(char *s, int *d, int *a) {
-	int i=0, ret=3;
+	int i=0, ret=3, onlyx=1;
 	char buf[128];
 	*d=*a=0;
 
 	for(i=0; s[i] && i<128; i++) {
 		if(s[i] == ';') {
+			onlyx=0;
 			break;
 		} else 
 			buf[i]=s[i];
@@ -289,7 +290,6 @@ get_pos_vals(char *s, int *d, int *a) {
 	if(i) {
 		buf[i]='\0';
 		*d=atoi(buf);
-		//ret=1;
 	} else 
 		ret=2;
 
@@ -298,7 +298,8 @@ get_pos_vals(char *s, int *d, int *a) {
 	} else
 		ret = 1;
 
-	//printf("s=<%s> x=%d, y=%d, ret=%d\n", s, *d, *a, ret);
+	if(onlyx) ret=1;
+
 	return ret;
 }
 
