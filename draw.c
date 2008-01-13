@@ -289,7 +289,7 @@ get_pos_vals(char *s, int *d, int *a) {
 	if(i) {
 		buf[i]='\0';
 		*d=atoi(buf);
-		ret=1;
+		//ret=1;
 	} else 
 		ret=2;
 
@@ -298,19 +298,32 @@ get_pos_vals(char *s, int *d, int *a) {
 	} else
 		ret = 1;
 
+	//printf("s=<%s> x=%d, y=%d, ret=%d\n", s, *d, *a, ret);
 	return ret;
 }
 
 char *
 parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
+	/* bitmaps */
 	unsigned int bm_w, bm_h; 
 	int bm_xh, bm_yh;
+	/* rectangles, cirlcles*/
 	int rectw, recth, rectx, recty;
+	/* positioning */
 	int n_posx, n_posy, set_posy=0;
-	int i, next_pos=0, j=0, px=0, py=0, xorig, h=0, tw, ow;
+	int px=0, py=0, xorig;
+	int i, next_pos=0, j=0, h=0, tw, ow;
+	/* fonts */
+	int font_was_set=0;
+
+	/* temp buffers */
 	char lbuf[MAX_LINE_LEN], *rbuf = NULL;
+
+	/* parser state */
 	int t=-1, nobg=0;
 	char *tval=NULL;
+
+	/* X stuff */
 	long lastfg = dzen.norm[ColFG], lastbg = dzen.norm[ColBG];
 	XGCValues gcv;
 	Drawable *pm, bm;
@@ -537,7 +550,8 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 								gcv.font = dzen.font.xfont->fid;
 								XChangeGC(dzen.dpy, dzen.tgc, GCFont, &gcv);
 							}
-							py = (dzen.line_height - dzen.font.height) / 2;
+							py = set_posy ? py : (dzen.line_height - dzen.font.height) / 2;
+							font_was_set = 1;
 							break;
 						/*
 						case sa:
@@ -729,7 +743,8 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 						gcv.font = dzen.font.xfont->fid;
 						XChangeGC(dzen.dpy, dzen.tgc, GCFont, &gcv);
 					}
-					py = (dzen.line_height - dzen.font.height) / 2;
+					py = set_posy ? py : (dzen.line_height - dzen.font.height) / 2;
+					font_was_set = 1;
 					break;
 				/*
 				case sa:
@@ -819,6 +834,10 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 					0, 0, dzen.w, dzen.line_height, xorig, 0);
 		}
 		XFreePixmap(dzen.dpy, *pm);
+
+		/* reset font to default */
+		if(font_was_set)
+			setfont(dzen.fnt ? dzen.fnt : FONT);
 
 #ifdef DZEN_XPM
 		if(free_xpm_attrib) {
