@@ -18,7 +18,7 @@
 int otx;
 
 /* command types for the in-text parser */
-enum ctype {bg, fg, icon, rect, recto, circle, circleo, pos, abspos, titlewin, ibg, sa};
+enum ctype {bg, fg, icon, rect, recto, circle, circleo, pos, abspos, titlewin, ibg, fn, sa};
 
 int get_tokval(const char* line, char **retdata);
 int get_token(const char*  line, int * t, char **tval);
@@ -193,6 +193,12 @@ get_token(const char *line, int * t, char **tval) {
 		off = 3;
 		next_pos = get_tokval(line+off, &tokval);
 		*t = circleo;
+	}
+	/* ^fn(fontname) change font, type: fn */
+	else if((*line == 'f') && (*(line+1) == 'n') && (*(line+2) == '(')) {
+		off = 3;
+		next_pos = get_tokval(line+off, &tokval);
+		*t = fn;
 	}
 	/* ^sa(string) sensitive areas, type: sa */
 	else if((*line == 's') && (*(line+1) == 'a') && (*(line+2) == '(')) {
@@ -522,6 +528,12 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 							lastfg = tval[0] ? (unsigned)getcolor(tval) : dzen.norm[ColFG];
 							XSetForeground(dzen.dpy, dzen.tgc, lastfg);
 							break;
+						case fn:
+							if(tval[0])
+								setfont(tval);
+							else
+								setfont(dzen.fnt);
+							break;
 						/*
 						case sa:
 							if(tval[0]) {
@@ -701,6 +713,13 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 				case fg:
 					lastfg = tval[0] ? (unsigned)getcolor(tval) : dzen.norm[ColFG];
 					XSetForeground(dzen.dpy, dzen.tgc, lastfg);
+					break;
+
+				case fn:
+					if(tval[0])
+						setfont(tval);
+					else
+						setfont(dzen.fnt);
 					break;
 				/*
 				case sa:
