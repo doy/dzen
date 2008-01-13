@@ -287,9 +287,9 @@ get_pos_vals(char *s, int *d, int *a) {
 	}
 
 	if(i) {
-		buf[i+2]='\0';
+		buf[i]='\0';
 		*d=atoi(buf);
-		
+		ret=1;
 	} else 
 		ret=2;
 
@@ -344,8 +344,7 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 	/* parse line and render text */
 	else {
 		h = dzen.font.height;
-		//py = dzen.font.ascent + (dzen.line_height - h) / 2;
-		py = (dzen.line_height - h) / 2 - dzen.font.descent;
+		py = (dzen.line_height - h) / 2;
 		xorig = 0; 
 
 
@@ -446,8 +445,8 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 						case rect:
 							get_rect_vals(tval, &rectw, &recth, &rectx, &recty);
 							recth = recth > dzen.line_height ? dzen.line_height : recth;
-							recty =	(recty == 0) ? (dzen.line_height - recth)/2 : recty;
-							px = (rectx == 0) ? px : rectx+px;
+							recty =	recty == 0 ? (dzen.line_height - recth)/2 : recty;
+							px = rectx == 0 ? px : rectx+px;
 							setcolor(pm, px, rectw, lastfg, lastbg, reverse, nobg);
 							XFillRectangle(dzen.dpy, *pm, dzen.tgc, (int)px, 
 									set_posy ? py : ((int)recty<0 ? dzen.line_height + recty : recty), rectw, recth);
@@ -497,7 +496,7 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 								set_posy = set_posy == 3 || set_posy == 2 ? 1 : 0;
 							} else {
 								set_posy = 0;
-								py = (dzen.line_height - h) / 2 - dzen.font.descent;
+								py = (dzen.line_height - dzen.font.height) / 2;
 							}
 							break;
 
@@ -512,7 +511,7 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 								set_posy = set_posy == 3 || set_posy == 2 ? 1 : 0;
 							} else {
 								set_posy = 0;
-								py = (dzen.line_height - h) / 2 - dzen.font.descent;
+								py = (dzen.line_height - dzen.font.height) / 2;
 							}
 							break;
 
@@ -538,6 +537,7 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 								gcv.font = dzen.font.xfont->fid;
 								XChangeGC(dzen.dpy, dzen.tgc, GCFont, &gcv);
 							}
+							py = (dzen.line_height - dzen.font.height) / 2;
 							break;
 						/*
 						case sa:
@@ -687,7 +687,7 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 						set_posy = set_posy == 3 || set_posy == 2 ? 1 : 0;
 					} else {
 						set_posy = 0;
-						py = (dzen.line_height - h) / 2 - dzen.font.descent;
+						py = (dzen.line_height - dzen.font.height) / 2;
 					}
 					break;
 
@@ -702,7 +702,7 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 						set_posy = set_posy == 3 || set_posy == 2 ? 1 : 0;
 					} else {
 						set_posy = 0;
-						py = (dzen.line_height - h) / 2 - dzen.font.descent;
+						py = (dzen.line_height - dzen.font.height) / 2;
 					}
 
 					break;
@@ -729,6 +729,7 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 						gcv.font = dzen.font.xfont->fid;
 						XChangeGC(dzen.dpy, dzen.tgc, GCFont, &gcv);
 					}
+					py = (dzen.line_height - dzen.font.height) / 2;
 					break;
 				/*
 				case sa:
