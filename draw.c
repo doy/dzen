@@ -529,10 +529,15 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 							XSetForeground(dzen.dpy, dzen.tgc, lastfg);
 							break;
 						case fn:
-							if(tval[0])
+							if(tval[0]) {
 								setfont(tval);
+							}
 							else
-								setfont(dzen.fnt);
+								setfont(dzen.fnt ? dzen.fnt : FONT);
+							if(!dzen.font.set){ 
+								gcv.font = dzen.font.xfont->fid;
+								XChangeGC(dzen.dpy, dzen.tgc, GCFont, &gcv);
+							}
 							break;
 						/*
 						case sa:
@@ -719,7 +724,11 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 					if(tval[0])
 						setfont(tval);
 					else
-						setfont(dzen.fnt);
+						setfont(dzen.fnt ? dzen.fnt : FONT);
+					if(!dzen.font.set){ 
+						gcv.font = dzen.font.xfont->fid;
+						XChangeGC(dzen.dpy, dzen.tgc, GCFont, &gcv);
+					}
 					break;
 				/*
 				case sa:
