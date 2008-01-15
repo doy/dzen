@@ -129,80 +129,68 @@ get_token(const char *line, int * t, char **tval) {
 
 	line++;
 	/* ^bg(#rrggbb) background color, type: bg */
-	if( (*line == 'b') && (*(line+1) == 'g') && (*(line+2) == '(')) {
-		off = 3;
+
+	if((off = 3) && ! strncmp(line, "bg(", off)) {
 		next_pos = get_tokval(line+off, &tokval);
 		*t = bg;
 	}
 	/* ^ib(bool) ignore background color, type: ibg */
-	else if((*line == 'i') && (*(line+1) == 'b') && (*(line+2) == '(')) {
-		off=3;
+	else if((off=3) && ! strncmp(line, "ib(", off)) {
 		next_pos = get_tokval(line+off, &tokval);
 		*t = ibg;
 	}
 	/* ^fg(#rrggbb) foreground color, type: fg */
-	else if((*line == 'f') && (*(line+1) == 'g') && (*(line+2) == '(')) {
-		off=3;
+	else if((off=3) && ! strncmp(line, "fg(", off)) {
 		next_pos = get_tokval(line+off, &tokval);
 		*t = fg;
 	}
 	/* ^tw() draw to title window, type: titlewin */
-	else if((*line == 't') && (*(line+1) == 'w') && (*(line+2) == '(')) {
-		off=3;
+	else if((off=3) && ! strncmp(line, "tw(", off)) {
 		next_pos = get_tokval(line+off, &tokval);
 		*t = titlewin;
 	}
 	/* ^i(iconname) bitmap icon, type: icon */
-	else if((*line == 'i') && (*(line+1) == '(')) {
-		off = 2;
+	else if((off = 2) && ! strncmp(line, "i(", off)) {
 		next_pos = get_tokval(line+off, &tokval);
 		*t = icon;
 	}
 	/* ^r(widthxheight) filled rectangle, type: rect */
-	else if((*line == 'r') && (*(line+1) == '(')) {
-		off = 2;
+	else if((off = 2) && ! strncmp(line, "r(", off)) {
 		next_pos = get_tokval(line+off, &tokval);
 		*t = rect;
 	}
 	/* ^ro(widthxheight) outlined rectangle, type: recto */
-	else if((*line == 'r') && (*(line+1) == 'o') && (*(line+2) == '(')) {
-		off = 3;
+	else if((off = 3) && ! strncmp(line, "ro(", off)) {
 		next_pos = get_tokval(line+off, &tokval);
 		*t = recto;
 	}
 	/* ^p(pixel) relative position, type: pos */
-	else if((*line == 'p') && (*(line+1) == '(')) {
-		off = 2;
+	else if((off = 2) && ! strncmp(line, "p(", off)) {
 		next_pos = get_tokval(line+off, &tokval);
 		*t = pos;
 	}
 	/* ^pa(pixel) absolute position, type: pos */
-	else if((*line == 'p') && (*(line+1) == 'a') && (*(line+2) == '(')) {
-		off = 3;
+	else if((off = 3) && ! strncmp(line, "pa(", off)) {
 		next_pos = get_tokval(line+off, &tokval);
 		*t = abspos;
 	}
 	/*^c(radius) filled circle, type: circle */
-	else if((*line == 'c') && (*(line+1) == '(')) {
-		off = 2;
+	else if((off = 2) && ! strncmp(line, "c(", off)) {
 		next_pos = get_tokval(line+off, &tokval);
 		*t = circle;
 	}
 	/* ^co(radius) outlined circle, type: circleo */
-	else if((*line == 'c') && (*(line+1) == 'o') && (*(line+2) == '(')) {
-		off = 3;
+	else if((off = 3) && ! strncmp(line, "co(", off)) {
 		next_pos = get_tokval(line+off, &tokval);
 		*t = circleo;
 	}
 	/* ^fn(fontname) change font, type: fn */
-	else if((*line == 'f') && (*(line+1) == 'n') && (*(line+2) == '(')) {
-		off = 3;
+	else if((off = 3) && ! strncmp(line, "fn(", off)) {
 		next_pos = get_tokval(line+off, &tokval);
 		*t = fn;
 	}
 	/* ^sa(string) sensitive areas, type: sa */
-	else if((*line == 's') && (*(line+1) == 'a') && (*(line+2) == '(')) {
-		off = 3;
+	else if((off = 3) && ! strncmp(line, "sa(", off)) {
 		next_pos = get_tokval(line+off, &tokval);
 		*t = sa;
 	}
