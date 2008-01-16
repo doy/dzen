@@ -215,29 +215,30 @@ setcolor(Drawable *pm, int x, int width, long tfg, long tbg, int reverse, int no
 static void
 get_rect_vals(char *s, int *w, int *h, int *x, int *y) {
 	int i, j;
-	char buf[128];
+	char buf[ARGLEN];
 
 	*w=*h=*x=*y=0;
 
-	for(i=0; s[i] && s[i] != 'x' && i<128; i++) {
+	for(i=0; s[i] && s[i] != 'x' && i<ARGLEN; i++) {
 		buf[i] = s[i];
 	}
 	buf[i] = '\0';
 	*w = atoi(buf);
 
-	for(j=0, ++i; s[i] && s[i] != '+' && s[i] != '-' && j<128; j++, i++)
+	for(j=0, ++i; s[i] && s[i] != '+' && s[i] != '-' && i<ARGLEN; j++, i++)
 		buf[j] = s[i];
 	buf[j] = '\0';
 	*h = atoi(buf);
 
-	for(j=0, ++i; s[i] && s[i] != '+' && s[i] != '-' && j<128; j++, i++)
-		buf[j] = s[i];
-	if(j<2) {
-		buf[j] = '\0';
-		*x = atoi(buf);
-		*y = atoi(s+i);
+	if(s[i]) {
+		for(j=0, ++i; s[i] && s[i] != '+' && s[i] != '-' && i<ARGLEN; j++, i++)
+			buf[j] = s[i];
+		if(j<2) {
+			buf[j] = '\0';
+			*x = atoi(buf);
+			*y = atoi(s+i);
+		}
 	}
-			
 }
 
 static int
