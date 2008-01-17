@@ -225,19 +225,20 @@ get_rect_vals(char *s, int *w, int *h, int *x, int *y) {
 	buf[i] = '\0';
 	*w = atoi(buf);
 
+
 	for(j=0, ++i; s[i] && s[i] != '+' && s[i] != '-' && i<ARGLEN; j++, i++)
 		buf[j] = s[i];
 	buf[j] = '\0';
 	*h = atoi(buf);
 
 	if(s[i]) {
-		for(j=0, ++i; s[i] && s[i] != '+' && s[i] != '-' && i<ARGLEN; j++, i++)
+		for(j=0, ++i; s[i] && s[i] != '+' && s[i] != '-' && j<ARGLEN; j++, i++) {
 			buf[j] = s[i];
-		if(j<2) {
-			buf[j] = '\0';
-			*x = atoi(buf);
-			*y = atoi(s+i);
 		}
+		buf[j] = '\0';
+		*x = atoi(buf);
+		if(s[i]) 
+			*y = atoi(s+i);
 	}
 }
 
@@ -302,7 +303,7 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 	/* positioning */
 	int n_posx, n_posy, set_posy=0;
 	int px=0, py=0, xorig;
-	int i, next_pos=0, j=0, h=0, tw, ow;
+	int i, next_pos=0, j=0, h=0, tw=0, ow;
 	/* fonts */
 	int font_was_set=0;
 
@@ -325,7 +326,7 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 	XpmColorSymbol xpms;
 #endif
 
-	/* sensitive areas */
+	/* sensitive areas 
 	Window sa_win=0;
 	Drawable sapm=0;
 	int opx=0;
@@ -333,6 +334,7 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 
 	sawa.background_pixmap = ParentRelative;
 	sawa.event_mask = ExposureMask | ButtonReleaseMask | EnterWindowMask | LeaveWindowMask | KeyPressMask;
+	*/
 
 	/* parse line and return the text without control commands */
 	if(nodraw) {
@@ -359,8 +361,8 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 			opm = XCreatePixmap(dzen.dpy, RootWindow(dzen.dpy, DefaultScreen(dzen.dpy)), dzen.title_win.width, 
 					dzen.line_height, DefaultDepth(dzen.dpy, dzen.screen));
 		}
-		sapm = XCreatePixmap(dzen.dpy, RootWindow(dzen.dpy, DefaultScreen(dzen.dpy)), dzen.slave_win.width, 
-				dzen.line_height, DefaultDepth(dzen.dpy, dzen.screen));
+		//sapm = XCreatePixmap(dzen.dpy, RootWindow(dzen.dpy, DefaultScreen(dzen.dpy)), dzen.slave_win.width, 
+		//		dzen.line_height, DefaultDepth(dzen.dpy, dzen.screen));
 		pm = &opm;
 
 		if(!reverse) {
@@ -451,8 +453,10 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 							recty =	recty == 0 ? (dzen.line_height - recth)/2 : recty;
 							px = rectx == 0 ? px : rectx+px;
 							setcolor(pm, px, rectw, lastfg, lastbg, reverse, nobg);
-							XFillRectangle(dzen.dpy, *pm, dzen.tgc, (int)px, 
-									set_posy ? py : ((int)recty<0 ? dzen.line_height + recty : recty), rectw, recth);
+							XFillRectangle(dzen.dpy, *pm, dzen.tgc, px, 
+									set_posy ? py : 
+									((int)recty < 0 ? dzen.line_height + recty : recty), 
+									rectw, recth);
 
 							px += rectw;
 							break;
@@ -643,7 +647,7 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 					recty =	(recty == 0) ? (dzen.line_height - recth)/2 : recty;
 					px = (rectx == 0) ? px : rectx+px;
 					setcolor(pm, px, rectw, lastfg, lastbg, reverse, nobg);
-					XFillRectangle(dzen.dpy, *pm, dzen.tgc, (int)px,
+					XFillRectangle(dzen.dpy, *pm, dzen.tgc, px,
 							set_posy ? py : ((int)recty<0 ? dzen.line_height + recty : recty), rectw, recth);
 
 					px += rectw;
