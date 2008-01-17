@@ -232,13 +232,16 @@ get_rect_vals(char *s, int *w, int *h, int *x, int *y) {
 	*h = atoi(buf);
 
 	if(s[i]) {
-		for(j=0, ++i; s[i] && s[i] != '+' && s[i] != '-' && j<ARGLEN; j++, i++) {
+		j=0;
+		buf[j] = s[i]; ++j;
+		for(++i; s[i] && s[i] != '+' && s[i] != '-' && j<ARGLEN; j++, i++) {
 			buf[j] = s[i];
 		}
 		buf[j] = '\0';
 		*x = atoi(buf);
-		if(s[i]) 
+		if(s[i])  {
 			*y = atoi(s+i);
+		}
 	}
 }
 
