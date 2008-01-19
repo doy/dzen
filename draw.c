@@ -459,7 +459,7 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 								(dzen.line_height - recth)/2 + recty;
 							px = rectx == 0 ? px : rectx+px;
 							setcolor(pm, px, rectw, lastfg, lastbg, reverse, nobg);
-							/*printf("R2: px=%d py=%d rectw=%d recth=%d\n", px,
+							/*printf("R1: setpy=%d px=%d py=%d rectw=%d recth=%d\n", set_posy, px,
 									set_posy ? py : ((int)recty<0 ? dzen.line_height + recty : recty),
 									rectw, recth);
 							*/
@@ -508,13 +508,16 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 
 						case pos:
 							if(tval[0]) {
-								set_posy = get_pos_vals(tval, &n_posx, &n_posy); 
+								int r=0;
+								if( (r=get_pos_vals(tval, &n_posx, &n_posy)) == 1 && !set_posy)
+									set_posy=0;
+								else
+									set_posy=1;
 
-								if(set_posy != 2)
+								if(r != 2)
 									px = px+n_posx<0? 0 : px + n_posx; 
-								if(set_posy != 1)
+								if(r != 1)
 									py += n_posy;
-								set_posy = set_posy == 3 || set_posy == 2 ? 1 : 0;
 							} else {
 								set_posy = 0;
 								py = (dzen.line_height - dzen.font.height) / 2;
@@ -523,13 +526,17 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 
 						case abspos:
 							if(tval[0]) {
-								set_posy = get_pos_vals(tval, &n_posx, &n_posy);
+								int r=0;
+								if( (r=get_pos_vals(tval, &n_posx, &n_posy)) == 1 && !set_posy)
+									set_posy=0;
+								else
+									set_posy=1;
+
 								n_posx = n_posx < 0 ? n_posx*-1 : n_posx;
-								if(set_posy != 2)
+								if(r != 2)
 									px = n_posx;
-								if(set_posy != 1)
+								if(r != 1)
 									py = n_posy;
-								set_posy = set_posy == 3 || set_posy == 2 ? 1 : 0;
 							} else {
 								set_posy = 0;
 								py = (dzen.line_height - dzen.font.height) / 2;
@@ -664,7 +671,7 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 								(dzen.line_height - recth)/2 + recty;
 					px = (rectx == 0) ? px : rectx+px;
 					setcolor(pm, px, rectw, lastfg, lastbg, reverse, nobg);
-					/*printf("R2: px=%d py=%d rectw=%d recth=%d\n", px,
+					/*printf("R2: setpy=%d px=%d py=%d rectw=%d recth=%d\n", set_posy, px,
 							set_posy ? py : ((int)recty<0 ? dzen.line_height + recty : recty),
 							rectw, recth);
 					*/
@@ -712,13 +719,16 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 
 				case pos:
 					if(tval[0]) {
-						set_posy = get_pos_vals(tval, &n_posx, &n_posy); 
+						int r=0;
+						if( (r=get_pos_vals(tval, &n_posx, &n_posy)) == 1 && !set_posy)
+							set_posy=0;
+						else
+							set_posy=1;
 
-						if(set_posy != 2)
+						if(r != 2)
 							px = px+n_posx<0? 0 : px + n_posx; 
-						if(set_posy != 1)
+						if(r != 1)
 							py += n_posy;
-						set_posy = set_posy == 3 || set_posy == 2 ? 1 : 0;
 					} else {
 						set_posy = 0;
 						py = (dzen.line_height - dzen.font.height) / 2;
@@ -727,18 +737,21 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 
 				case abspos:
 					if(tval[0]) {
-						set_posy = get_pos_vals(tval, &n_posx, &n_posy);
+						int r=0;
+						if( (r=get_pos_vals(tval, &n_posx, &n_posy)) == 1 && !set_posy)
+							set_posy=0;
+						else
+							set_posy=1;
+
 						n_posx = n_posx < 0 ? n_posx*-1 : n_posx;
-						if(set_posy != 2)
+						if(r != 2)
 							px = n_posx;
-						if(set_posy != 1)
+						if(r != 1)
 							py = n_posy;
-						set_posy = set_posy == 3 || set_posy == 2 ? 1 : 0;
 					} else {
 						set_posy = 0;
 						py = (dzen.line_height - dzen.font.height) / 2;
 					}
-
 					break;
 
 				case ibg:
