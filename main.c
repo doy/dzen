@@ -236,7 +236,6 @@ x_check_geometry(XRectangle si) {
 		dzen.title_win.x_right_corner = dzen.title_win.x + dzen.title_win.width;
 		//dzen.title_win.width = dzen.title_win.width ? dzen.title_win.width : dzen.title_win.x_right_corner - si.x;
 		dzen.title_win.x = dzen.title_win.width ? dzen.title_win.x_right_corner - dzen.title_win.width : si.x;
-		printf("si.x=%d dzen.title_win.width=%d dzen.title_win.x=%d dzen.title_win.x_right_corner=%d\n", si.x, dzen.title_win.width, dzen.title_win.x, dzen.title_win.x_right_corner);
 	}
 
 	if(!dzen.slave_win.width) {
@@ -339,16 +338,19 @@ set_net_wm_strut_partial_for(Display *dpy, Window w) {
 
 static void
 x_create_gcs(void) {
+	XGCValues gcv;
+	gcv.graphics_exposures = 0;
+
 	/* normal GC */
-	dzen.gc  = XCreateGC(dzen.dpy, RootWindow(dzen.dpy, dzen.screen), 0, 0);
+	dzen.gc  = XCreateGC(dzen.dpy, RootWindow(dzen.dpy, dzen.screen), GCGraphicsExposures, &gcv);
 	XSetForeground(dzen.dpy, dzen.gc, dzen.norm[ColFG]);
 	XSetBackground(dzen.dpy, dzen.gc, dzen.norm[ColBG]);
 	/* reverse color GC */
-	dzen.rgc = XCreateGC(dzen.dpy, RootWindow(dzen.dpy, dzen.screen), 0, 0);
+	dzen.rgc = XCreateGC(dzen.dpy, RootWindow(dzen.dpy, dzen.screen), GCGraphicsExposures, &gcv);
 	XSetForeground(dzen.dpy, dzen.rgc, dzen.norm[ColBG]);
 	XSetBackground(dzen.dpy, dzen.rgc, dzen.norm[ColFG]);
 	/* temporary GC */
-	dzen.tgc = XCreateGC(dzen.dpy, RootWindow(dzen.dpy, dzen.screen), 0, 0);
+	dzen.tgc = XCreateGC(dzen.dpy, RootWindow(dzen.dpy, dzen.screen), GCGraphicsExposures, &gcv);
 }
 
 static void
@@ -377,7 +379,7 @@ x_create_windows(void) {
 	/* window attributes */
 	wa.override_redirect = 1;
 	wa.background_pixmap = ParentRelative;
-	wa.event_mask = ExposureMask | ButtonReleaseMask | EnterWindowMask | LeaveWindowMask | KeyPressMask;
+	wa.event_mask = ExposureMask | ButtonReleaseMask | ButtonPressMask | ButtonMotionMask | EnterWindowMask | LeaveWindowMask | KeyPressMask;
 
 #ifdef DZEN_XINERAMA
 	queryscreeninfo(dzen.dpy, &si, dzen.xinescreen);
@@ -491,20 +493,20 @@ x_map_window(Window win) {
 }
 
 static void
-x_redraw(XEvent e) {
+x_redraw(Window w) {
 	int i;
 
 	if(!dzen.slave_win.ishmenu
-			&& e.xexpose.window == dzen.title_win.win) 
+			&& w == dzen.title_win.win) 
 		drawheader(NULL);
-	if(!dzen.tsupdate && e.xexpose.window == dzen.slave_win.win) {
+	if(!dzen.tsupdate && w == dzen.slave_win.win) {
 		for(i=0; i < dzen.slave_win.max_lines; i++)
 			XCopyArea(dzen.dpy, dzen.slave_win.drawable[i], dzen.slave_win.line[i], dzen.gc,
 					0, 0, dzen.slave_win.width, dzen.line_height, 0, 0);
 	}
 	else {
 		for(i=0; i < dzen.slave_win.max_lines; i++) 
-			if(e.xcrossing.window == dzen.slave_win.line[i]) {
+			if(w == dzen.slave_win.line[i]) {
 				XCopyArea(dzen.dpy, dzen.slave_win.drawable[i], dzen.slave_win.line[i], dzen.gc,
 						0, 0, dzen.slave_win.width, dzen.line_height, 0, 0);
 			}
@@ -526,7 +528,7 @@ handle_xev(void) {
 	switch(ev.type) {
 		case Expose:
 			if(ev.xexpose.count == 0) 
-				x_redraw(ev);
+				x_redraw(ev.xexpose.window);
 			break;
 		case EnterNotify:
 			if(dzen.slave_win.ismenu) { 
@@ -750,7 +752,8 @@ main(int argc, char *argv[]) {
 		if(!strncmp(argv[i], "-l", 3)){
 			if(++i < argc) {
 				dzen.slave_win.max_lines = atoi(argv[i]);
-				init_input_buffer();
+				if(dzen.slave_win.max_lines)
+					init_input_buffer();
 			}
 		}
 		else if(!strncmp(argv[i], "-geometry", 8)) {
