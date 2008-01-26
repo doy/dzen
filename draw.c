@@ -344,7 +344,7 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 	/* parse line and render text */
 	else {
 		h = dzen.font.height;
-		//py = (dzen.line_height - h) / 2;
+		py = (dzen.line_height - h) / 2;
 		xorig = 0; 
 
 
