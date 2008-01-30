@@ -847,11 +847,12 @@ main(int argc, char *argv[]) {
 		}
 #endif
 		else if(!strncmp(argv[i], "-v", 3)) 
-			eprint("dzen-"VERSION", (C)opyright 2007 Robert Manea\n");
+			eprint("dzen-"VERSION", (C)opyright 2007-2008 Robert Manea\n");
 		else
 			eprint("usage: dzen2 [-v] [-p [seconds]] [-m [v|h]] [-ta <l|c|r>] [-sa <l|c|r>]\n"
-                   "             [-geometry <g>] [-x <pixel>] [-y <pixel>] [-w <pixel>] [-tw <pixel>] [-u] \n"
+                   "             [-x <pixel>] [-y <pixel>] [-w <pixel>] [-tw <pixel>] [-u]\n"
 				   "             [-e <string>] [-l <lines>]  [-fn <font>] [-bg <color>] [-fg <color>]\n"
+				   "             [-geometry <geometry string>] [-expand <left|both|right>]\n"
 #ifdef DZEN_XINERAMA
 				   "             [-xs <screen>]\n"
 #endif
