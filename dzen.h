@@ -112,6 +112,7 @@ struct DZEN {
 	Visual *visual;
 	GC gc, rgc, tgc;
 	Fnt font;
+	Fnt fnpl[64];
 
 	Bool ispersistent;
 	Bool tsupdate;

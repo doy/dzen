@@ -680,6 +680,64 @@ event_loop(void) {
 	return; 
 }
 
+static void
+x_preload(const char *fontstr, int p) {
+	char *def, **missing;
+	int i, n;
+
+	missing = NULL;
+	
+	dzen.fnpl[p].set = XCreateFontSet(dzen.dpy, fontstr, &missing, &n, &def);
+	if(missing)
+		XFreeStringList(missing);
+
+	if(dzen.fnpl[p].set) {
+		XFontSetExtents *font_extents;
+		XFontStruct **xfonts;
+		char **font_names;
+		dzen.fnpl[p].ascent = dzen.fnpl[p].descent = 0;
+		font_extents = XExtentsOfFontSet(dzen.fnpl[p].set);
+		n = XFontsOfFontSet(dzen.fnpl[p].set, &xfonts, &font_names);
+		for(i = 0, dzen.fnpl[p].ascent = 0, dzen.fnpl[p].descent = 0; i < n; i++) {
+			if(dzen.fnpl[p].ascent < (*xfonts)->ascent)
+				dzen.fnpl[p].ascent = (*xfonts)->ascent;
+			if(dzen.fnpl[p].descent < (*xfonts)->descent)
+				dzen.fnpl[p].descent = (*xfonts)->descent;
+			xfonts++;
+		}
+	}
+	else {
+		if(dzen.fnpl[p].xfont)
+			XFreeFont(dzen.dpy, dzen.fnpl[p].xfont);
+		dzen.fnpl[p].xfont = NULL;
+		if(!(dzen.fnpl[p].xfont = XLoadQueryFont(dzen.dpy, fontstr)))
+			eprint("dzen: error, cannot load font: '%s'\n", fontstr);
+		dzen.fnpl[p].ascent = dzen.fnpl[p].xfont->ascent;
+		dzen.fnpl[p].descent = dzen.fnpl[p].xfont->descent;
+	}
+	dzen.fnpl[p].height = dzen.fnpl[p].ascent + dzen.fnpl[p].descent;
+}
+
+static void
+font_preload(char *s) {
+	int i, j, k=0;
+	char buf[512];
+
+	for(i=0, j=0; i<512; i++, j++) {
+		if(s[i] != ',' && s[i])
+			buf[j] = s[i];
+		else {
+			i++;
+			buf[j] = 0;
+			if(k<64)
+				x_preload(buf, k++);
+			j=0;
+			if(!s[i])
+				break;
+		}
+	}
+}
+
 
 static void
 set_alignment(void) {
@@ -725,9 +783,9 @@ init_input_buffer(void) {
 
 int
 main(int argc, char *argv[]) {
-	int i;
+	int i, preload=0;
 	char *action_string = NULL;
-	char *endptr;
+	char *endptr, *fnpre;
 
 	/* default values */
 	dzen.cur_line  = 0;
@@ -841,6 +899,14 @@ main(int argc, char *argv[]) {
 		else if(!strncmp(argv[i], "-tw", 4)) {
 			if(++i < argc) dzen.title_win.width = atoi(argv[i]);
 		}
+		else if(!strncmp(argv[i], "-fn-preload", 12)) {
+			if(++i < argc) {
+				preload=1;
+
+				fnpre=malloc(strlen(argv[i]));
+				strncpy(fnpre, argv[i], strlen(argv[i]));
+			}
+		}
 #ifdef DZEN_XINERAMA
 		else if(!strncmp(argv[i], "-xs", 4)) {
 			if(++i < argc) dzen.xinescreen = atoi(argv[i]);
@@ -925,6 +991,9 @@ main(int argc, char *argv[]) {
 		for(i=0; i < dzen.slave_win.max_lines; i++)
 			XMapWindow(dzen.dpy, dzen.slave_win.line[i]);
 	}
+
+	if(preload)
+		font_preload(fnpre);
 
 	do_action(onstart);
 
