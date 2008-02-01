@@ -64,8 +64,9 @@ fdbar(Dbar *dbar, FILE *stream) {
 		switch(dbar->style) {
 			case outlined:
 				if(dbar->segb == 0) {
-					fprintf(stream, "%s%3d%% ^ib(1)^fg(%s)^ro(%dx%d)^p(%d)^fg(%s)^r(%dx%d)^p(%d)^ib(0)^fg()%s", 
-							dbar->label ? dbar->label : "", rp, 
+					//fprintf(stream, "%s%3d%% ^ib(1)^fg(%s)^ro(%dx%d)^p(%d)^fg(%s)^r(%dx%d)^p(%d)^ib(0)^fg()%s", 
+					fprintf(stream, "%s^ib(1)^fg(%s)^ro(%dx%d)^p(%d)^fg(%s)^r(%dx%d)^p(%d)^ib(0)^fg()%s", 
+							dbar->label ? dbar->label : "",
 							dbar->bg, (int)dbar->width, dbar->height, -1*(dbar->width-2),
 							dbar->fg, (int)l, dbar->height-4>0?dbar->height-4:1,
 							dbar->width-(int)l-1, dbar->pnl ? "\n" : "");
@@ -73,7 +74,8 @@ fdbar(Dbar *dbar, FILE *stream) {
 					segs  = dbar->width / (dbar->segw + dbar->segb);
 					segsa = rp * segs / 100;
 
-					printf("%s%3d%% ^ib(1)^fg(%s)^ro(%dx%d)^p(%d)", 
+					//printf("%s%3d%% ^ib(1)^fg(%s)^ro(%dx%d)^p(%d)", 
+					printf("%s^ib(1)^fg(%s)^ro(%dx%d)^p(%d)", 
 							dbar->label ? dbar->label : "", rp,
 							dbar->bg, (int)dbar->width, dbar->height, -1*(dbar->width-2));
 					for(i=0; i < segs; i++) {
@@ -82,7 +84,7 @@ fdbar(Dbar *dbar, FILE *stream) {
 						else
 							break;
 					}
-					printf("^fg()^p(%d)^ib(0)%s", (dbar->segw+dbar->segb)*(segs-segsa+1), dbar->pnl ? "\n" : "");
+					printf("^fg()^ib(0)^p(%d)%s", dbar->segb, dbar->pnl ? "\n" : "");
 				}
 				break;
 
@@ -91,19 +93,29 @@ fdbar(Dbar *dbar, FILE *stream) {
 				segsa = rp * segs / 100;
 				fprintf(stream, "%s^ib(1)", dbar->label ? dbar->label : "");
 				if(dbar->segb == 0) {
-					fprintf(stream, "^fg(%s)^r(%dx%d+%d-%d)^fg(%s)^p(-%d)^r(%dx%d+%d-%d)",
-							dbar->bg, dbar->segw, dbar->height, 0, dbar->height+1,
-							dbar->fg, dbar->segw, dbar->segw, (int)l, 0, (int)l+1);
+					//fprintf(stream, "^fg(%s)^r(%dx%d+%d-%d)^fg(%s)^p(-%d)^r(%dx%d+%d-%d)",
+					//		dbar->bg, dbar->segw, dbar->height, 0, dbar->height+1,
+					//		dbar->fg, dbar->segw, dbar->segw, (int)l, 0, (int)l+1);
+					fprintf(stream, "^fg(%s)^r(%dx%d)^fg(%s)^r(%dx%d-%d+%d)",
+							dbar->bg, dbar->segw, dbar->height,
+							dbar->fg,  
+							dbar->segw, (int)l, dbar->segw, (int)((dbar->height-l)/2.0 + .5));
 				} else {
 					for(i=0; i < segs; i++) {
 						if(i<segsa)
-							fprintf(stream, "^fg(%s)^p(-%d)^r(%dx%d+%d-%d)",
-									dbar->fg, i?dbar->segw:0, dbar->segw,
-									dbar->segh, 0, (dbar->segh+dbar->segb)*(i+1));
+							fprintf(stream, "^fg(%s)^r(%dx%d-%d-%d)",
+									dbar->fg, dbar->segw, dbar->segh, 
+									i?dbar->segw:0, (dbar->segh+dbar->segb)*i);
+							//fprintf(stream, "^fg(%s)^p(-%d)^r(%dx%d+%d-%d)",
+							//		dbar->fg, i?dbar->segw:0, dbar->segw,
+							//		dbar->segh, 0, (dbar->segh+dbar->segb)*(i+1));
 						else
-							fprintf(stream, "^fg(%s)^p(-%d)^r(%dx%d+%d-%d)",
-									dbar->bg, i?dbar->segw:0, dbar->segw,
-									dbar->segh, 0, (dbar->segh+dbar->segb)*(i+1));
+							fprintf(stream, "^fg(%s)^r(%dx%d-%d-%d)",
+									dbar->bg, dbar->segw,
+									dbar->segh,i?dbar->segw:0, (dbar->segh+dbar->segb)*i);
+							//fprintf(stream, "^fg(%s)^p(-%d)^r(%dx%d+%d-%d)",
+							//		dbar->bg, i?dbar->segw:0, dbar->segw,
+							//		dbar->segh, 0, (dbar->segh+dbar->segb)*(i+1));
 					}
 				}
 				fprintf(stream, "^ib(0)^fg()%s", dbar->pnl ? "\n" : "");
@@ -141,8 +153,9 @@ fdbar(Dbar *dbar, FILE *stream) {
 
 			default:
 				if(dbar->segb == 0)
-					printf("%s%3d%% ^fg(%s)^r(%dx%d)^fg(%s)^r(%dx%d)^fg()%s", 
-							dbar->label ? dbar->label : "", rp, 
+					//printf("%s%3d%% ^fg(%s)^r(%dx%d)^fg(%s)^r(%dx%d)^fg()%s", 
+					printf("%s^fg(%s)^r(%dx%d)^fg(%s)^r(%dx%d)^fg()%s", 
+							dbar->label ? dbar->label : "", 
 							dbar->fg, (int)l, dbar->height,
 							dbar->bg, dbar->width-(int)l, dbar->height,
 							dbar->pnl ? "\n" : "");
@@ -150,16 +163,17 @@ fdbar(Dbar *dbar, FILE *stream) {
 					segs  = dbar->width / (dbar->segw + dbar->segb);
 					segsa = rp * segs / 100;
 
-					printf("%s%3d%% ", dbar->label ? dbar->label : "", rp);
+					//printf("%s%3d%% ", dbar->label ? dbar->label : "", rp);
+					printf("%s", dbar->label ? dbar->label : "");
 					for(i=0; i < segs; i++) {
 						if(i<segsa)
-							fprintf(stream, "^fg(%s)^r(%dx%d+%d+%d')",
+							fprintf(stream, "^fg(%s)^r(%dx%d+%d+%d)",
 									dbar->fg, dbar->segw, dbar->height, i?dbar->segb:0, 0);
 						else
-							fprintf(stream, "^fg(%s)^r(%dx%d+%d+%d')",
+							fprintf(stream, "^fg(%s)^r(%dx%d+%d+%d)",
 									dbar->bg, dbar->segw, dbar->height, i?dbar->segb:0, 0);
 					}
-					fprintf(stream, "^fg()%s", dbar->pnl ? "\n" : "");
+					fprintf(stream, "^p(%d)^fg()%s", dbar->segb, dbar->pnl ? "\n" : "");
 				}
 				break;
 		}

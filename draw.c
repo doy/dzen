@@ -14,7 +14,17 @@
 #endif
 
 #define ARGLEN 256
+#define MAX_ICON_CACHE 32
 
+typedef struct ICON_C {
+	char name[ARGLEN];
+	Pixmap p;
+	
+	int w, h;
+} icon_c;
+
+icon_c icons[MAX_ICON_CACHE];
+int icon_cnt;
 int otx;
 
 /* command types for the in-text parser */
@@ -294,6 +304,34 @@ get_pos_vals(char *s, int *d, int *a) {
 	return ret;
 }
 
+static int
+find_icon(const char* name) {
+	int i;
+
+	for(i=0; i < MAX_ICON_CACHE; i++) 
+		if(!strncmp(icons[i].name, name, ARGLEN))
+			return i;
+
+	return -1;
+}
+
+static void
+insert_icon(const char* name, Pixmap pm, int w, int h) {
+	int i;
+
+	if(icon_cnt >= MAX_ICON_CACHE) 
+		icon_cnt = 0;
+
+	if(icons[icon_cnt].p)
+		XFreePixmap(dzen.dpy, icons[icon_cnt].p);
+
+	strncpy(icons[icon_cnt].name, name, ARGLEN);
+	icons[icon_cnt].w = w;
+	icons[icon_cnt].h = h;
+	icons[icon_cnt].p = pm;
+	icon_cnt++;
+}
+
 char *
 parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 	/* bitmaps */
@@ -327,6 +365,9 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 	XpmAttributes xpma;
 	XpmColorSymbol xpms;
 #endif
+
+	/* icon cache */
+	int ip;
 
 	/* parse line and return the text without control commands */
 	if(nodraw) {
@@ -414,26 +455,36 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 				if(t != -1 && tval) {
 					switch(t) {
 						case icon:
-							if(XReadBitmapFile(dzen.dpy, *pm, tval, &bm_w, 
-										&bm_h, &bm, &bm_xh, &bm_yh) == BitmapSuccess 
-									&& (h/2 + px + (signed)bm_w < dzen.w)) {
-								setcolor(pm, px, bm_w, lastfg, lastbg, reverse, nobg);
-								XCopyPlane(dzen.dpy, bm, *pm, dzen.tgc, 
-										0, 0, bm_w, bm_h, px, set_posy ? py : 
-										(dzen.line_height >= (signed)bm_h ? (dzen.line_height - bm_h)/2 : 0), 1);
-								XFreePixmap(dzen.dpy, bm);
-								px += bm_w;
-							}
+							if( (ip=find_icon(tval)) != -1) {
+								XCopyArea(dzen.dpy, icons[ip].p, *pm, dzen.tgc, 
+										0, 0, icons[ip].w, icons[ip].h, px, set_posy ? py :
+										(dzen.line_height >= (signed)icons[ip].h ? 
+										 (dzen.line_height - icons[ip].h)/2 : 0));
+								px += icons[ip].w;
+							} else {
+								if(XReadBitmapFile(dzen.dpy, *pm, tval, &bm_w, 
+											&bm_h, &bm, &bm_xh, &bm_yh) == BitmapSuccess 
+										&& (h/2 + px + (signed)bm_w < dzen.w)) {
+									setcolor(pm, px, bm_w, lastfg, lastbg, reverse, nobg);
+									XCopyPlane(dzen.dpy, bm, *pm, dzen.tgc, 
+											0, 0, bm_w, bm_h, px, set_posy ? py : 
+											(dzen.line_height >= (signed)bm_h ? (dzen.line_height - bm_h)/2 : 0), 1);
+									XFreePixmap(dzen.dpy, bm);
+									px += bm_w;
+								}
 #ifdef DZEN_XPM
-							else if(XpmReadFileToPixmap(dzen.dpy, dzen.title_win.win, tval, &xpm_pm, NULL, &xpma) == XpmSuccess) {
-								setcolor(pm, px, xpma.width, lastfg, lastbg, reverse, nobg);
-								XCopyArea(dzen.dpy, xpm_pm, *pm, dzen.tgc, 
-										0, 0, xpma.width, xpma.height, px, set_posy ? py :
-										(dzen.line_height >= (signed)xpma.height ? (dzen.line_height - xpma.height)/2 : 0));
-								px += xpma.width;
+								else if(XpmReadFileToPixmap(dzen.dpy, dzen.title_win.win, tval, &xpm_pm, NULL, &xpma) == XpmSuccess) {
+									setcolor(pm, px, xpma.width, lastfg, lastbg, reverse, nobg);
+									insert_icon(tval, xpm_pm, xpma.width, xpma.height);
 
-								XFreePixmap(dzen.dpy, xpm_pm);
-								free_xpm_attrib = 1;
+									XCopyArea(dzen.dpy, xpm_pm, *pm, dzen.tgc, 
+											0, 0, xpma.width, xpma.height, px, set_posy ? py :
+											(dzen.line_height >= (signed)xpma.height ? (dzen.line_height - xpma.height)/2 : 0));
+									px += xpma.width;
+
+									//XFreePixmap(dzen.dpy, xpm_pm);
+									free_xpm_attrib = 1;
+								}
 							}
 #endif
 							break;
@@ -617,26 +668,36 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 		if(t != -1 && tval) {
 			switch(t) {
 				case icon:
-					if(XReadBitmapFile(dzen.dpy, *pm, tval, &bm_w, 
-								&bm_h, &bm, &bm_xh, &bm_yh) == BitmapSuccess 
-							&& (h/2 + px + (signed)bm_w < dzen.w)) {
-						setcolor(pm, px, bm_w, lastfg, lastbg, reverse, nobg);
-						XCopyPlane(dzen.dpy, bm, *pm, dzen.tgc, 
-								0, 0, bm_w, bm_h, px, set_posy ? py :
-								(dzen.line_height >= (signed)bm_h ? (dzen.line_height - bm_h)/2 : 0), 1);
-						XFreePixmap(dzen.dpy, bm);
-						px += bm_w;
-					}
+					if( (ip=find_icon(tval)) != -1) {
+						XCopyArea(dzen.dpy, icons[ip].p, *pm, dzen.tgc, 
+								0, 0, icons[ip].w, icons[ip].h, px, set_posy ? py :
+								(dzen.line_height >= (signed)icons[ip].h ? 
+								 (dzen.line_height - icons[ip].h)/2 : 0));
+						px += icons[ip].w;
+					} else {
+						if(XReadBitmapFile(dzen.dpy, *pm, tval, &bm_w, 
+									&bm_h, &bm, &bm_xh, &bm_yh) == BitmapSuccess 
+								&& (h/2 + px + (signed)bm_w < dzen.w)) {
+							setcolor(pm, px, bm_w, lastfg, lastbg, reverse, nobg);
+							XCopyPlane(dzen.dpy, bm, *pm, dzen.tgc, 
+									0, 0, bm_w, bm_h, px, set_posy ? py : 
+									(dzen.line_height >= (signed)bm_h ? (dzen.line_height - bm_h)/2 : 0), 1);
+							XFreePixmap(dzen.dpy, bm);
+							px += bm_w;
+						}
 #ifdef DZEN_XPM
-					else if(XpmReadFileToPixmap(dzen.dpy, dzen.title_win.win, tval, &xpm_pm, NULL, &xpma) == XpmSuccess) {
-						setcolor(pm, px, xpma.width, lastfg, lastbg, reverse, nobg);
-						XCopyArea(dzen.dpy, xpm_pm, *pm, dzen.tgc, 
-								0, 0, xpma.width, xpma.height, px, set_posy ? py :
-								(dzen.line_height >= (signed)xpma.height ? (dzen.line_height - xpma.height)/2 : 0));
-						px += xpma.width;
+						else if(XpmReadFileToPixmap(dzen.dpy, dzen.title_win.win, tval, &xpm_pm, NULL, &xpma) == XpmSuccess) {
+							setcolor(pm, px, xpma.width, lastfg, lastbg, reverse, nobg);
+							insert_icon(tval, xpm_pm, xpma.width, xpma.height);
 
-						XFreePixmap(dzen.dpy, xpm_pm);
-						free_xpm_attrib = 1;
+							XCopyArea(dzen.dpy, xpm_pm, *pm, dzen.tgc, 
+									0, 0, xpma.width, xpma.height, px, set_posy ? py :
+									(dzen.line_height >= (signed)xpma.height ? (dzen.line_height - xpma.height)/2 : 0));
+							px += xpma.width;
+
+							//XFreePixmap(dzen.dpy, xpm_pm);
+							free_xpm_attrib = 1;
+						}
 					}
 #endif
 					break;
