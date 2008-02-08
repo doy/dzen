@@ -25,7 +25,7 @@ dbardefaults(Dbar *dbar, int mode) {
 
 void
 fdbar(Dbar *dbar, FILE *stream) {
-	int i, rp, p;
+	int i, rp, p, t;
 	int segs, segsa;
 	double l, perc;
 
@@ -102,17 +102,18 @@ fdbar(Dbar *dbar, FILE *stream) {
 							dbar->segw, (int)l, dbar->segw, (int)((dbar->height-l)/2.0 + .5));
 				} else {
 					for(i=0; i < segs; i++) {
-						if(i<segsa)
-							fprintf(stream, "^fg(%s)^r(%dx%d-%d-%d)",
-									dbar->fg, dbar->segw, dbar->segh, 
-									i?dbar->segw:0, (dbar->segh+dbar->segb)*i);
+						t = dbar->height/2-(dbar->segh+dbar->segb)*i;
+						//if(i<segsa)
+							fprintf(stream, "^fg(%s)^r(%dx%d-%d%c%d)",
+									i < segsa ? dbar->fg : dbar->bg, dbar->segw, dbar->segh, 
+									i?dbar->segw:0, t > 0 ? '+' : '-', abs(t));
 							//fprintf(stream, "^fg(%s)^p(-%d)^r(%dx%d+%d-%d)",
 							//		dbar->fg, i?dbar->segw:0, dbar->segw,
 							//		dbar->segh, 0, (dbar->segh+dbar->segb)*(i+1));
-						else
-							fprintf(stream, "^fg(%s)^r(%dx%d-%d-%d)",
-									dbar->bg, dbar->segw,
-									dbar->segh,i?dbar->segw:0, (dbar->segh+dbar->segb)*i);
+						//else
+							//fprintf(stream, "^fg(%s)^r(%dx%d-%d-%d)",
+							//		dbar->bg, dbar->segw,
+							//		dbar->segh,i?dbar->segw:0, (dbar->segh+dbar->segb)*i);
 							//fprintf(stream, "^fg(%s)^p(-%d)^r(%dx%d+%d-%d)",
 							//		dbar->bg, i?dbar->segw:0, dbar->segw,
 							//		dbar->segh, 0, (dbar->segh+dbar->segb)*(i+1));
