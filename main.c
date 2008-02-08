@@ -861,8 +861,11 @@ main(int argc, char *argv[]) {
 		}
 		else if(!strncmp(argv[i], "-m", 3)) {
 			dzen.slave_win.ismenu = True;
-			if(i+1 < argc) 
+			if(i+1 < argc) {
 				dzen.slave_win.ishmenu = (argv[i+1][0] == 'h') ? ++i, True : False;
+				if( argv[i+1][0] == 'v') 
+					++i;
+			}
 		}
 		else if(!strncmp(argv[i], "-fn", 4)) {
 			if(++i < argc) dzen.fnt = argv[i];
