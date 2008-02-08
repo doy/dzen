@@ -561,36 +561,28 @@ handle_xev(void) {
 					if(ev.xbutton.window == dzen.slave_win.line[i]) 
 						dzen.slave_win.sel_line = i;
 			}
-			/*
-			else if(ev.xbutton.window == dzen.sa_win) {
-				printf("Button press in sensitive area\n");
-				fflush(stdout);
-			} 
-			*/
-			else {
-				switch(ev.xbutton.button) {
-					case Button1:
-						do_action(button1);
-						break;
-					case Button2:
-						do_action(button2);
-						break;
-					case Button3:
-						do_action(button3);
-						break;
-					case Button4:
-						do_action(button4);
-						break;
-					case Button5:
-						do_action(button5);
-						break;
-					case Button6:
-						do_action(button6);
-						break;
-					case Button7:
-						do_action(button7);
-						break;
-				}
+			switch(ev.xbutton.button) {
+				case Button1:
+					do_action(button1);
+					break;
+				case Button2:
+					do_action(button2);
+					break;
+				case Button3:
+					do_action(button3);
+					break;
+				case Button4:
+					do_action(button4);
+					break;
+				case Button5:
+					do_action(button5);
+					break;
+				case Button6:
+					do_action(button6);
+					break;
+				case Button7:
+					do_action(button7);
+					break;
 			}
 			break;
 		case KeyPress:

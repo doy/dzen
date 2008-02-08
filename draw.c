@@ -453,7 +453,7 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 				if(t != -1 && tval) {
 					switch(t) {
 						case icon:
-							if( (ip=search_icon_cache(tval)) != -1) {
+							if(MAX_ICON_CACHE && (ip=search_icon_cache(tval)) != -1) {
 								XCopyArea(dzen.dpy, icons[ip].p, pm, dzen.tgc, 
 										0, 0, icons[ip].w, icons[ip].h, px, set_posy ? py :
 										(dzen.line_height >= (signed)icons[ip].h ? 
@@ -474,13 +474,16 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 #ifdef DZEN_XPM
 								else if(XpmReadFileToPixmap(dzen.dpy, dzen.title_win.win, tval, &xpm_pm, NULL, &xpma) == XpmSuccess) {
 									setcolor(&pm, px, xpma.width, lastfg, lastbg, reverse, nobg);
-									cache_icon(tval, xpm_pm, xpma.width, xpma.height);
+
+									if(MAX_ICON_CACHE)
+										cache_icon(tval, xpm_pm, xpma.width, xpma.height);
 
 									XCopyArea(dzen.dpy, xpm_pm, pm, dzen.tgc, 
 											0, 0, xpma.width, xpma.height, px, set_posy ? py :
 											(dzen.line_height >= (signed)xpma.height ? (dzen.line_height - xpma.height)/2 : 0));
 									px += xpma.width;
 
+									/* freed by cache_icon() */
 									//XFreePixmap(dzen.dpy, xpm_pm);
 									free_xpm_attrib = 1;
 								}
@@ -667,7 +670,7 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 		if(t != -1 && tval) {
 			switch(t) {
 				case icon:
-					if( (ip=search_icon_cache(tval)) != -1) {
+					if(MAX_ICON_CACHE && (ip=search_icon_cache(tval)) != -1) {
 						XCopyArea(dzen.dpy, icons[ip].p, pm, dzen.tgc, 
 								0, 0, icons[ip].w, icons[ip].h, px, set_posy ? py :
 								(dzen.line_height >= (signed)icons[ip].h ? 
@@ -687,7 +690,9 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 #ifdef DZEN_XPM
 						else if(XpmReadFileToPixmap(dzen.dpy, dzen.title_win.win, tval, &xpm_pm, NULL, &xpma) == XpmSuccess) {
 							setcolor(&pm, px, xpma.width, lastfg, lastbg, reverse, nobg);
-							cache_icon(tval, xpm_pm, xpma.width, xpma.height);
+
+							if(MAX_ICON_CACHE)
+								cache_icon(tval, xpm_pm, xpma.width, xpma.height);
 
 							XCopyArea(dzen.dpy, xpm_pm, pm, dzen.tgc, 
 									0, 0, xpma.width, xpma.height, px, set_posy ? py :
