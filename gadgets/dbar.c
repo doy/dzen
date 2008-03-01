@@ -64,7 +64,6 @@ fdbar(Dbar *dbar, FILE *stream) {
 		switch(dbar->style) {
 			case outlined:
 				if(dbar->segb == 0) {
-					//fprintf(stream, "%s%3d%% ^ib(1)^fg(%s)^ro(%dx%d)^p(%d)^fg(%s)^r(%dx%d)^p(%d)^ib(0)^fg()%s", 
 					fprintf(stream, "%s^ib(1)^fg(%s)^ro(%dx%d)^p(%d)^fg(%s)^r(%dx%d)^p(%d)^ib(0)^fg()%s", 
 							dbar->label ? dbar->label : "",
 							dbar->bg, (int)dbar->width, dbar->height, -1*(dbar->width-2),
@@ -74,13 +73,12 @@ fdbar(Dbar *dbar, FILE *stream) {
 					segs  = dbar->width / (dbar->segw + dbar->segb);
 					segsa = rp * segs / 100;
 
-					//printf("%s%3d%% ^ib(1)^fg(%s)^ro(%dx%d)^p(%d)", 
-					printf("%s^ib(1)^fg(%s)^ro(%dx%d)^p(%d)", 
-							dbar->label ? dbar->label : "", rp,
+					fprintf(stream, "%s^ib(1)^fg(%s)^ro(%dx%d)^p(%d)", 
+							dbar->label ? dbar->label : "",
 							dbar->bg, (int)dbar->width, dbar->height, -1*(dbar->width-2));
 					for(i=0; i < segs; i++) {
 						if(i<segsa)
-							printf("^fg(%s)^r(%dx%d+%d+%d')", dbar->fg, dbar->segw, dbar->height-4>0?dbar->height-4:1, i?dbar->segb:0, 0);
+							fprintf(stream, "^fg(%s)^r(%dx%d+%d+%d')", dbar->fg, dbar->segw, dbar->height-4>0?dbar->height-4:1, i?dbar->segb:0, 0);
 						else
 							break;
 					}
