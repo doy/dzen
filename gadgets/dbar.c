@@ -82,7 +82,7 @@ fdbar(Dbar *dbar, FILE *stream) {
 						else
 							break;
 					}
-					printf("^fg()^ib(0)^p(%d)%s", dbar->segb, dbar->pnl ? "\n" : "");
+					printf("^fg()^ib(0)^p(%d)%s", dbar->width - i*(dbar->segw + dbar->segb), dbar->pnl ? "\n" : "");
 				}
 				break;
 
