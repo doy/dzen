@@ -290,10 +290,12 @@ queryscreeninfo(Display *dpy, XRectangle *rect, int screen) {
 #endif
 
 static void 
-set_net_wm_strut_partial_for(Display *dpy, Window w) {
+set_docking_ewmh_info(Display *dpy, Window w) {
 	unsigned long strut[12] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 	unsigned long strut_s[4] = { 0, 0, 0, 0 };
 	XWindowAttributes wa;
+	Atom type;
+	unsigned int desktop;
 
 	XGetWindowAttributes(dpy, w, &wa);
 
@@ -334,6 +336,33 @@ set_net_wm_strut_partial_for(Display *dpy, Window w) {
 			4
 		);
 	}
+
+	type = XInternAtom(dpy, "_NET_WM_WINDOW_TYPE_DOCK", False);
+
+	XChangeProperty(
+		dpy, 
+		w,
+		XInternAtom(dpy, "_NET_WM_WINDOW_TYPE", False),
+		XInternAtom(dpy, "ATOM", False),
+		32,
+		PropModeReplace,
+		(unsigned char *)&type,
+		1
+	);
+
+	desktop = 0xffffffff;
+
+	XChangeProperty(
+		dpy, 
+		w,
+		XInternAtom(dpy, "_NET_WM_DESKTOP", False),
+		XInternAtom(dpy, "CARDINAL", False),
+		32,
+		PropModeReplace,
+		(unsigned char *)&desktop,
+		1
+	);
+
 }
 
 static void
@@ -354,7 +383,7 @@ x_create_gcs(void) {
 }
 
 static void
-x_create_windows(void) {
+x_create_windows(int use_ewmh_dock) {
 	XSetWindowAttributes wa;
 	Window root;
 	int i;
@@ -377,7 +406,7 @@ x_create_windows(void) {
 	x_create_gcs();
 
 	/* window attributes */
-	wa.override_redirect = 1;
+	wa.override_redirect = (use_ewmh_dock ? 0 : 1);
 	wa.background_pixmap = ParentRelative;
 	wa.event_mask = ExposureMask | ButtonReleaseMask | ButtonPressMask | ButtonMotionMask | EnterWindowMask | LeaveWindowMask | KeyPressMask;
 
@@ -401,7 +430,8 @@ x_create_windows(void) {
 	XFillRectangle(dzen.dpy, dzen.title_win.drawable, dzen.rgc, 0, 0, dzen.title_win.width, dzen.line_height); 
 
 	/* set some hints for windowmanagers*/
-	set_net_wm_strut_partial_for(dzen.dpy, dzen.title_win.win);
+	if (use_ewmh_dock)
+		set_docking_ewmh_info(dzen.dpy, dzen.title_win.win);
 
 	/* TODO: Smarter approach to window creation so we can reduce the
 	 *       size of this function. 
@@ -775,7 +805,7 @@ init_input_buffer(void) {
 
 int
 main(int argc, char *argv[]) {
-	int i, preload=0;
+	int i, preload=0, use_ewmh_dock=0;
 	char *action_string = NULL;
 	char *endptr, *fnpre;
 
@@ -907,13 +937,15 @@ main(int argc, char *argv[]) {
 			if(++i < argc) dzen.xinescreen = atoi(argv[i]);
 		}
 #endif
+		else if(!strncmp(argv[i], "-dock", 6))
+			use_ewmh_dock = 1;
 		else if(!strncmp(argv[i], "-v", 3)) 
 			eprint("dzen-"VERSION", (C)opyright 2007-2008 Robert Manea\n");
 		else
 			eprint("usage: dzen2 [-v] [-p [seconds]] [-m [v|h]] [-ta <l|c|r>] [-sa <l|c|r>]\n"
                    "             [-x <pixel>] [-y <pixel>] [-w <pixel>] [-tw <pixel>] [-u]\n"
 				   "             [-e <string>] [-l <lines>]  [-fn <font>] [-bg <color>] [-fg <color>]\n"
-				   "             [-geometry <geometry string>] [-expand <left|both|right>]\n"
+				   "             [-geometry <geometry string>] [-expand <left|both|right>] [-dock]\n"
 #ifdef DZEN_XINERAMA
 				   "             [-xs <screen>]\n"
 #endif
@@ -976,7 +1008,7 @@ main(int argc, char *argv[]) {
 		dzen.slave_win.max_lines = 1;
 
 
-	x_create_windows();
+	x_create_windows(use_ewmh_dock);
 	//dzen.title_win.x_right_corner = dzen.title_win.x + dzen.title_win.width;
 	
 	if(!dzen.slave_win.ishmenu)
