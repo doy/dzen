@@ -290,7 +290,7 @@ queryscreeninfo(Display *dpy, XRectangle *rect, int screen) {
 #endif
 
 static void 
-set_docking_ewmh_info(Display *dpy, Window w) {
+set_docking_ewmh_info(Display *dpy, Window w, int dock) {
 	unsigned long strut[12] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 	unsigned long strut_s[4] = { 0, 0, 0, 0 };
 	XWindowAttributes wa;
@@ -337,31 +337,33 @@ set_docking_ewmh_info(Display *dpy, Window w) {
 		);
 	}
 
-	type = XInternAtom(dpy, "_NET_WM_WINDOW_TYPE_DOCK", False);
+	if(dock) {
+		type = XInternAtom(dpy, "_NET_WM_WINDOW_TYPE_DOCK", False);
 
-	XChangeProperty(
-		dpy, 
-		w,
-		XInternAtom(dpy, "_NET_WM_WINDOW_TYPE", False),
-		XInternAtom(dpy, "ATOM", False),
-		32,
-		PropModeReplace,
-		(unsigned char *)&type,
-		1
-	);
+		XChangeProperty(
+				dpy, 
+				w,
+				XInternAtom(dpy, "_NET_WM_WINDOW_TYPE", False),
+				XInternAtom(dpy, "ATOM", False),
+				32,
+				PropModeReplace,
+				(unsigned char *)&type,
+				1
+			       );
 
-	desktop = 0xffffffff;
+		desktop = 0xffffffff;
 
-	XChangeProperty(
-		dpy, 
-		w,
-		XInternAtom(dpy, "_NET_WM_DESKTOP", False),
-		XInternAtom(dpy, "CARDINAL", False),
-		32,
-		PropModeReplace,
-		(unsigned char *)&desktop,
-		1
-	);
+		XChangeProperty(
+				dpy, 
+				w,
+				XInternAtom(dpy, "_NET_WM_DESKTOP", False),
+				XInternAtom(dpy, "CARDINAL", False),
+				32,
+				PropModeReplace,
+				(unsigned char *)&desktop,
+				1
+			       );
+	}
 
 }
 
@@ -430,8 +432,7 @@ x_create_windows(int use_ewmh_dock) {
 	XFillRectangle(dzen.dpy, dzen.title_win.drawable, dzen.rgc, 0, 0, dzen.title_win.width, dzen.line_height); 
 
 	/* set some hints for windowmanagers*/
-	if (use_ewmh_dock)
-		set_docking_ewmh_info(dzen.dpy, dzen.title_win.win);
+	set_docking_ewmh_info(dzen.dpy, dzen.title_win.win, use_ewmh_dock);
 
 	/* TODO: Smarter approach to window creation so we can reduce the
 	 *       size of this function. 
