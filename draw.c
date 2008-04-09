@@ -27,8 +27,10 @@ icon_c icons[MAX_ICON_CACHE];
 int icon_cnt;
 int otx;
 
+
 /* command types for the in-text parser */
-enum ctype {bg, fg, icon, rect, recto, circle, circleo, pos, abspos, titlewin, ibg, fn, sa};
+enum ctype  {bg, fg, icon, rect, recto, circle, circleo, pos, abspos, titlewin, ibg, fn, sa, fixpos};
+enum sctype {LOCK_X, UNLOCK_X, TOP_CENTER, BOTTOM_CENTER, CENTER, LEFT, RIGHT, TOP_LEFT, TOP_RIGHT, BOTTOM_LEFT, BOTTOM_RIGHT};
 
 int get_tokval(const char* line, char **retdata);
 int get_token(const char*  line, int * t, char **tval);
@@ -202,6 +204,11 @@ get_token(const char *line, int * t, char **tval) {
 		next_pos = get_tokval(line+off, &tokval);
 		*t = sa;
 	}
+	/* ^fp(string) sensitive areas, type: fixpos */
+	else if((off = 4) && ! strncmp(line, "pxf(", off)) {
+		next_pos = get_tokval(line+off, &tokval);
+		*t = fixpos;
+	}
 
 	*tval = tokval;
 	return next_pos+off;
@@ -220,12 +227,19 @@ setcolor(Drawable *pm, int x, int width, long tfg, long tbg, int reverse, int no
 	XSetBackground(dzen.dpy, dzen.tgc, reverse ? tfg : tbg);
 }
 
+static int 
+parse_position_vars(char *s, int *val) {
+
+}
+
 static void
 get_rect_vals(char *s, int *w, int *h, int *x, int *y) {
 	int i, j;
 	char buf[ARGLEN];
 
 	*w=*h=*x=*y=0;
+
+
 
 	for(i=0; s[i] && s[i] != 'x' && i<ARGLEN; i++) {
 		buf[i] = s[i];
@@ -280,28 +294,63 @@ get_pos_vals(char *s, int *d, int *a) {
 	char buf[128];
 	*d=*a=0;
 
-	for(i=0; s[i] && i<128; i++) {
-		if(s[i] == ';') {
-			onlyx=0;
-			break;
+	if(s[0] == '_') {
+		if(!strncmp(s, "_LOCK_X", 7)) {
+			*d = LOCK_X;
+		}
+		if(!strncmp(s, "_UNLOCK_X", 8)) {
+			*d = UNLOCK_X;
+		}
+		if(!strncmp(s, "_LEFT", 5)) {
+			*d = LEFT;
+		}
+		if(!strncmp(s, "_RIGHT", 6)) {
+			*d = RIGHT;
+		}
+		if(!strncmp(s, "_CENTER", 7)) {
+			*d = CENTER;
+		}
+		if(!strncmp(s, "_BOTTOM_LEFT", 12)) {
+			*d = BOTTOM_LEFT;
+		}
+		if(!strncmp(s, "_BOTTOM_RIGHT", 13)) {
+			*d = BOTTOM_RIGHT;
+		}
+		if(!strncmp(s, "_TOP_LEFT", 9)) {
+			*d = TOP_LEFT;
+		}
+		if(!strncmp(s, "_TOP_CENTER", 11)) {
+			*d = TOP_CENTER;
+		}
+		if(!strncmp(s, "_TOP_RIGHT", 10)) {
+			*d = TOP_RIGHT;
+		}
+			
+		return 5;
+	} else {
+		for(i=0; s[i] && i<128; i++) {
+			if(s[i] == ';') {
+				onlyx=0;
+				break;
+			} else 
+				buf[i]=s[i];
+		}
+
+		if(i) {
+			buf[i]='\0';
+			*d=atoi(buf);
 		} else 
-			buf[i]=s[i];
+			ret=2;
+
+		if(s[++i]) {
+			*a=atoi(s+i);
+		} else
+			ret = 1;
+
+		if(onlyx) ret=1;
+
+		return ret;
 	}
-
-	if(i) {
-		buf[i]='\0';
-		*d=atoi(buf);
-	} else 
-		ret=2;
-
-	if(s[++i]) {
-		*a=atoi(s+i);
-	} else
-		ret = 1;
-
-	if(onlyx) ret=1;
-
-	return ret;
 }
 
 static int
@@ -345,6 +394,8 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 	int i, next_pos=0, j=0, h=0, tw=0, ow;
 	/* fonts */
 	int font_was_set=0;
+	/* position */
+	int pos_is_fixed = 0;
 
 	/* temp buffers */
 	char lbuf[MAX_LINE_LEN], *rbuf = NULL;
@@ -458,7 +509,7 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 										0, 0, icons[ip].w, icons[ip].h, px, set_posy ? py :
 										(dzen.line_height >= (signed)icons[ip].h ? 
 										 (dzen.line_height - icons[ip].h)/2 : 0));
-								px += icons[ip].w;
+								px += !pos_is_fixed ? icons[ip].w : 0;
 							} else {
 								if(XReadBitmapFile(dzen.dpy, pm, tval, &bm_w, 
 											&bm_h, &bm, &bm_xh, &bm_yh) == BitmapSuccess 
@@ -469,8 +520,7 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 											0, 0, bm_w, bm_h, px, set_posy ? py : 
 											(dzen.line_height >= (signed)bm_h ? (dzen.line_height - bm_h)/2 : 0), 1);
 									XFreePixmap(dzen.dpy, bm);
-									px += bm_w;
-								}
+									px += !pos_is_fixed ? bm_w : 0;								}
 #ifdef DZEN_XPM
 								else if(XpmReadFileToPixmap(dzen.dpy, dzen.title_win.win, tval, &xpm_pm, NULL, &xpma) == XpmSuccess) {
 									setcolor(&pm, px, xpma.width, lastfg, lastbg, reverse, nobg);
@@ -481,7 +531,7 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 									XCopyArea(dzen.dpy, xpm_pm, pm, dzen.tgc, 
 											0, 0, xpma.width, xpma.height, px, set_posy ? py :
 											(dzen.line_height >= (signed)xpma.height ? (dzen.line_height - xpma.height)/2 : 0));
-									px += xpma.width;
+									px += !pos_is_fixed ? xpma.width : 0;
 
 									/* freed by cache_icon() */
 									//XFreePixmap(dzen.dpy, xpm_pm);
@@ -499,7 +549,7 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 								py += recty;
 							recty =	recty == 0 ? (dzen.line_height - recth)/2 : 
 								(dzen.line_height - recth)/2 + recty;
-							px += rectx;
+							px += !pos_is_fixed ? rectx : 0;
 							setcolor(&pm, px, rectw, lastfg, lastbg, reverse, nobg);
 							//printf("R1: setpy=%d px=%d py=%d rectw=%d recth=%d\n", set_posy, px,
 							//		set_posy ? py : ((int)recty<0 ? dzen.line_height + recty : recty),
@@ -510,7 +560,7 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 									((int)recty < 0 ? dzen.line_height + recty : recty), 
 									rectw, recth);
 
-							px += rectw;
+							px += !pos_is_fixed ? rectw : 0;
 							break;
 						
 						case recto:
@@ -529,7 +579,7 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 							XDrawRectangle(dzen.dpy, pm, dzen.tgc, px, 
 									set_posy ? py : 
 									((int)recty<0 ? dzen.line_height + recty : recty), rectw-1, recth);
-							px += rectw;
+							px += !pos_is_fixed ? rectw : 0;
 							break;
 
 						case circle:
@@ -537,7 +587,7 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 							setcolor(&pm, px, rectw, lastfg, lastbg, reverse, nobg);
 							XFillArc(dzen.dpy, pm, dzen.tgc, px, set_posy ? py :(dzen.line_height - rectw)/2, 
 									rectw, rectw, 90*64, rectx?recth*64:64*360);
-							px += rectw;
+							px += !pos_is_fixed ? rectw : 0;
 							break;
 
 						case circleo:
@@ -545,15 +595,64 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 							setcolor(&pm, px, rectw, lastfg, lastbg, reverse, nobg);
 							XDrawArc(dzen.dpy, pm, dzen.tgc, px, set_posy ? py : (dzen.line_height - rectw)/2, 
 									rectw, rectw, 90*64, rectx?recth*64:64*360);
-							px += rectw;
+							px += !pos_is_fixed ? rectw : 0;
 							break;
 
 						case pos:
 							if(tval[0]) {
 								int r=0;
-								if( (r=get_pos_vals(tval, &n_posx, &n_posy)) == 1 && !set_posy)
+                                                                 r = get_pos_vals(tval, &n_posx, &n_posy);
+								if( (r == 1 && !set_posy))
 									set_posy=0;
-								else
+								else if (r == 5) {
+									switch(n_posx) {
+										case LOCK_X: 
+											pos_is_fixed = 1;
+											break;
+										case UNLOCK_X: 
+											pos_is_fixed = 0;
+											break;
+										case LEFT:
+											px = 0;
+											break;
+										case RIGHT:
+											px = dzen.w;
+											break;
+										case CENTER:
+											px = dzen.w/2;
+											break;
+										case BOTTOM_LEFT:
+											set_posy = 1;
+											px = 0;
+											py = dzen.line_height;
+											break;
+										case BOTTOM_CENTER:
+											set_posy = 1;
+											px = dzen.w/2;
+											py = dzen.line_height;
+											break;
+										case BOTTOM_RIGHT:
+											set_posy = 1;
+											px = dzen.w;
+											py = dzen.line_height;
+											break;
+										case TOP_LEFT:
+											set_posy = 1;
+											px = 0;
+											py = 0;
+											break;
+										case TOP_CENTER:
+											set_posy = 1;
+											px = dzen.w/2;
+											py = 0;
+											break;
+										case TOP_RIGHT:
+											set_posy = 1;
+											px = dzen.w;
+											py = 0;
+											break;
+									}		
+								} else
 									set_posy=1;
 
 								if(r != 2)
@@ -597,6 +696,7 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 							lastfg = tval[0] ? (unsigned)getcolor(tval) : dzen.norm[ColFG];
 							XSetForeground(dzen.dpy, dzen.tgc, lastfg);
 							break;
+						
 						case fn:
 							if(tval[0]) {
 								if(!strncmp(tval, "dfnt", 4)) {
@@ -620,6 +720,7 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 							py = set_posy ? py : (dzen.line_height - cur_fnt->height) / 2;
 							font_was_set = 1;
 							break;
+
 					}
 					free(tval);
 				}
@@ -647,7 +748,7 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 							dzen.tgc, px, py + cur_fnt->ascent, lbuf, strlen(lbuf));
 				else 
 					XDrawString(dzen.dpy, pm, dzen.tgc, px, py+dzen.font.ascent, lbuf, strlen(lbuf)); 
-				px += tw;
+				px += !pos_is_fixed ? tw : 0;
 			}
 
 			j=0; t=-1; tval=NULL;
@@ -675,7 +776,7 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 								0, 0, icons[ip].w, icons[ip].h, px, set_posy ? py :
 								(dzen.line_height >= (signed)icons[ip].h ? 
 								 (dzen.line_height - icons[ip].h)/2 : 0));
-						px += icons[ip].w;
+						px += !pos_is_fixed ? icons[ip].w : 0;
 					} else {
 						if(XReadBitmapFile(dzen.dpy, pm, tval, &bm_w, 
 									&bm_h, &bm, &bm_xh, &bm_yh) == BitmapSuccess 
@@ -685,7 +786,7 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 									0, 0, bm_w, bm_h, px, set_posy ? py : 
 									(dzen.line_height >= (signed)bm_h ? (dzen.line_height - bm_h)/2 : 0), 1);
 							XFreePixmap(dzen.dpy, bm);
-							px += bm_w;
+							px += !pos_is_fixed ? bm_w : 0;
 						}
 #ifdef DZEN_XPM
 						else if(XpmReadFileToPixmap(dzen.dpy, dzen.title_win.win, tval, &xpm_pm, NULL, &xpma) == XpmSuccess) {
@@ -697,7 +798,7 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 							XCopyArea(dzen.dpy, xpm_pm, pm, dzen.tgc, 
 									0, 0, xpma.width, xpma.height, px, set_posy ? py :
 									(dzen.line_height >= (signed)xpma.height ? (dzen.line_height - xpma.height)/2 : 0));
-							px += xpma.width;
+							px += !pos_is_fixed ? xpma.width : 0;
 
 							//XFreePixmap(dzen.dpy, xpm_pm);
 							free_xpm_attrib = 1;
@@ -721,7 +822,7 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 							((int)recty < 0 ? dzen.line_height + recty : recty), 
 							rectw, recth);
 
-					px += rectw;
+					px += !pos_is_fixed ? rectw : 0;
 					break;
 
 				case recto:
@@ -740,7 +841,7 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 					XDrawRectangle(dzen.dpy, pm, dzen.tgc, px, 
 							set_posy ? py : 
 							((int)recty<0 ? dzen.line_height + recty : recty), rectw-1, recth);
-					px += rectw;
+					px += !pos_is_fixed ? rectw : 0;
 					break;
 
 				case circle:
@@ -748,7 +849,7 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 					setcolor(&pm, px, rectw, lastfg, lastbg, reverse, nobg);
 					XFillArc(dzen.dpy, pm, dzen.tgc, px, set_posy ? py :(dzen.line_height - rectw)/2, 
 							rectw, rectw, 90*64, rectx?recth*64:64*360);
-					px += rectw;
+					px += !pos_is_fixed ? rectw : 0;
 					break;
 
 				case circleo:
@@ -756,15 +857,64 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 					setcolor(&pm, px, rectw, lastfg, lastbg, reverse, nobg);
 					XDrawArc(dzen.dpy, pm, dzen.tgc, px, set_posy ? py : (dzen.line_height - rectw)/2, 
 							rectw, rectw, 90*64, rectx?recth*64:64*360);
-					px += rectw;
+					px += !pos_is_fixed ? rectw : 0;
 					break;
 
 				case pos:
 					if(tval[0]) {
 						int r=0;
-						if( (r=get_pos_vals(tval, &n_posx, &n_posy)) == 1 && !set_posy)
+						r = get_pos_vals(tval, &n_posx, &n_posy);
+						if( (r == 1 && !set_posy))
 							set_posy=0;
-						else
+						else if (r == 5) {
+							switch(n_posx) {
+								case LOCK_X: 
+									pos_is_fixed = 1;
+									break;
+								case UNLOCK_X: 
+									pos_is_fixed = 0;
+									break;
+								case LEFT:
+									px = 0;
+									break;
+								case RIGHT:
+									px = dzen.w;
+									break;
+								case CENTER:
+									px = dzen.w/2;
+									break;
+								case BOTTOM_LEFT:
+									set_posy = 1;
+									px = 0;
+									py = dzen.line_height;
+									break;
+								case BOTTOM_CENTER:
+									set_posy = 1;
+									px = dzen.w/2;
+									py = dzen.line_height;
+									break;
+								case BOTTOM_RIGHT:
+									set_posy = 1;
+									px = dzen.w;
+									py = dzen.line_height;
+									break;
+								case TOP_LEFT:
+									set_posy = 1;
+									px = 0;
+									py = 0;
+									break;
+								case TOP_CENTER:
+									set_posy = 1;
+									px = dzen.w/2;
+									py = 0;
+									break;
+								case TOP_RIGHT:
+									set_posy = 1;
+									px = dzen.w;
+									py = 0;
+									break;
+							}		
+						} else
 							set_posy=1;
 
 						if(r != 2)
@@ -832,6 +982,7 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 					py = set_posy ? py : (dzen.line_height - cur_fnt->height) / 2;
 					font_was_set = 1;
 					break;
+
 			}
 			free(tval);
 		}
@@ -859,7 +1010,7 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 					dzen.tgc, px, py + cur_fnt->ascent, lbuf, strlen(lbuf));
 		else 
 			XDrawString(dzen.dpy, pm, dzen.tgc, px, py+dzen.font.ascent, lbuf, strlen(lbuf)); 
-		px += tw;
+		px += !pos_is_fixed ? tw : 0;
 
 		/* expand/shrink dynamically */
 		if(dzen.title_win.expand && lnr == -1){
