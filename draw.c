@@ -27,9 +27,32 @@ icon_c icons[MAX_ICON_CACHE];
 int icon_cnt;
 int otx;
 
-
 /* command types for the in-text parser */
 enum ctype  {bg, fg, icon, rect, recto, circle, circleo, pos, abspos, titlewin, ibg, fn, sa, fixpos};
+
+struct command_lookup {
+	const char *name;
+	int id;
+	int off;
+};
+
+struct command_lookup cmd_lookup_table[] = {
+	{ "fg(",        fg,			3},
+	{ "bg(",        bg,			3},
+	{ "i(",			icon,		2},
+	{ "r(",	        rect,		2},
+	{ "ro(",        recto,		3},
+	{ "c(",	        circle,		2},
+	{ "co(",        circleo,	3},
+	{ "p(",	        pos,		2},
+	{ "pa(",        abspos,		3},
+	{ "tw(",        titlewin,	3},
+	{ "ib(",        ibg,		3},
+	{ "fn(",        fn,			3},
+	{ 0,			0,			0}
+};
+
+
 /* positioning helpers */
 enum sctype {LOCK_X, UNLOCK_X, TOP, BOTTOM, CENTER, LEFT, RIGHT};
 
@@ -132,84 +155,22 @@ get_tokval(const char* line, char **retdata) {
 
 int
 get_token(const char *line, int * t, char **tval) {
-	int off=0, next_pos=0;
+	int off=0, next_pos=0, i;
 	char *tokval = NULL;
 
 	if(*(line+1) == ESC_CHAR)
 		return 0;
-
 	line++;
-	/* ^bg(#rrggbb) background color, type: bg */
 
-	if((off = 3) && ! strncmp(line, "bg(", off)) {
-		next_pos = get_tokval(line+off, &tokval);
-		*t = bg;
+	for(i=0; cmd_lookup_table[i].name; ++i) {
+		if( off=cmd_lookup_table[i].off, 
+				!strncmp(line, cmd_lookup_table[i].name, off) ) {
+			next_pos = get_tokval(line+off, &tokval);
+			*t = cmd_lookup_table[i].id;
+			break;
+		}
 	}
-	/* ^ib(bool) ignore background color, type: ibg */
-	else if((off=3) && ! strncmp(line, "ib(", off)) {
-		next_pos = get_tokval(line+off, &tokval);
-		*t = ibg;
-	}
-	/* ^fg(#rrggbb) foreground color, type: fg */
-	else if((off=3) && ! strncmp(line, "fg(", off)) {
-		next_pos = get_tokval(line+off, &tokval);
-		*t = fg;
-	}
-	/* ^tw() draw to title window, type: titlewin */
-	else if((off=3) && ! strncmp(line, "tw(", off)) {
-		next_pos = get_tokval(line+off, &tokval);
-		*t = titlewin;
-	}
-	/* ^i(iconname) bitmap icon, type: icon */
-	else if((off = 2) && ! strncmp(line, "i(", off)) {
-		next_pos = get_tokval(line+off, &tokval);
-		*t = icon;
-	}
-	/* ^r(widthxheight) filled rectangle, type: rect */
-	else if((off = 2) && ! strncmp(line, "r(", off)) {
-		next_pos = get_tokval(line+off, &tokval);
-		*t = rect;
-	}
-	/* ^ro(widthxheight) outlined rectangle, type: recto */
-	else if((off = 3) && ! strncmp(line, "ro(", off)) {
-		next_pos = get_tokval(line+off, &tokval);
-		*t = recto;
-	}
-	/* ^p(pixel) relative position, type: pos */
-	else if((off = 2) && ! strncmp(line, "p(", off)) {
-		next_pos = get_tokval(line+off, &tokval);
-		*t = pos;
-	}
-	/* ^pa(pixel) absolute position, type: pos */
-	else if((off = 3) && ! strncmp(line, "pa(", off)) {
-		next_pos = get_tokval(line+off, &tokval);
-		*t = abspos;
-	}
-	/*^c(radius) filled circle, type: circle */
-	else if((off = 2) && ! strncmp(line, "c(", off)) {
-		next_pos = get_tokval(line+off, &tokval);
-		*t = circle;
-	}
-	/* ^co(radius) outlined circle, type: circleo */
-	else if((off = 3) && ! strncmp(line, "co(", off)) {
-		next_pos = get_tokval(line+off, &tokval);
-		*t = circleo;
-	}
-	/* ^fn(fontname) change font, type: fn */
-	else if((off = 3) && ! strncmp(line, "fn(", off)) {
-		next_pos = get_tokval(line+off, &tokval);
-		*t = fn;
-	}
-	/* ^sa(string) sensitive areas, type: sa */
-	else if((off = 3) && ! strncmp(line, "sa(", off)) {
-		next_pos = get_tokval(line+off, &tokval);
-		*t = sa;
-	}
-	/* ^fp(string) sensitive areas, type: fixpos */
-	else if((off = 4) && ! strncmp(line, "pxf(", off)) {
-		next_pos = get_tokval(line+off, &tokval);
-		*t = fixpos;
-	}
+
 
 	*tval = tokval;
 	return next_pos+off;
