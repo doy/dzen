@@ -30,7 +30,8 @@ int otx;
 
 /* command types for the in-text parser */
 enum ctype  {bg, fg, icon, rect, recto, circle, circleo, pos, abspos, titlewin, ibg, fn, sa, fixpos};
-enum sctype {LOCK_X, UNLOCK_X, TOP_CENTER, BOTTOM_CENTER, CENTER, LEFT, RIGHT, TOP_LEFT, TOP_RIGHT, BOTTOM_LEFT, BOTTOM_RIGHT};
+/* positioning helpers */
+enum sctype {LOCK_X, UNLOCK_X, TOP, BOTTOM, CENTER, LEFT, RIGHT};
 
 int get_tokval(const char* line, char **retdata);
 int get_token(const char*  line, int * t, char **tval);
@@ -227,10 +228,6 @@ setcolor(Drawable *pm, int x, int width, long tfg, long tbg, int reverse, int no
 	XSetBackground(dzen.dpy, dzen.tgc, reverse ? tfg : tbg);
 }
 
-static int 
-parse_position_vars(char *s, int *val) {
-
-}
 
 static void
 get_rect_vals(char *s, int *w, int *h, int *x, int *y) {
@@ -310,20 +307,11 @@ get_pos_vals(char *s, int *d, int *a) {
 		if(!strncmp(s, "_CENTER", 7)) {
 			*d = CENTER;
 		}
-		if(!strncmp(s, "_BOTTOM_LEFT", 12)) {
-			*d = BOTTOM_LEFT;
+		if(!strncmp(s, "_BOTTOM", 7)) {
+			*d = BOTTOM;
 		}
-		if(!strncmp(s, "_BOTTOM_RIGHT", 13)) {
-			*d = BOTTOM_RIGHT;
-		}
-		if(!strncmp(s, "_TOP_LEFT", 9)) {
-			*d = TOP_LEFT;
-		}
-		if(!strncmp(s, "_TOP_CENTER", 11)) {
-			*d = TOP_CENTER;
-		}
-		if(!strncmp(s, "_TOP_RIGHT", 10)) {
-			*d = TOP_RIGHT;
+		if(!strncmp(s, "_TOP", 4)) {
+			*d = TOP;
 		}
 			
 		return 5;
@@ -508,7 +496,7 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 								XCopyArea(dzen.dpy, icons[ip].p, pm, dzen.tgc, 
 										0, 0, icons[ip].w, icons[ip].h, px, set_posy ? py :
 										(dzen.line_height >= (signed)icons[ip].h ? 
-										 (dzen.line_height - icons[ip].h)/2 : 0));
+										(dzen.line_height - icons[ip].h)/2 : 0));
 								px += !pos_is_fixed ? icons[ip].w : 0;
 							} else {
 								if(XReadBitmapFile(dzen.dpy, pm, tval, &bm_w, 
@@ -621,34 +609,12 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 										case CENTER:
 											px = dzen.w/2;
 											break;
-										case BOTTOM_LEFT:
+										case BOTTOM:
 											set_posy = 1;
-											px = 0;
 											py = dzen.line_height;
 											break;
-										case BOTTOM_CENTER:
+										case TOP:
 											set_posy = 1;
-											px = dzen.w/2;
-											py = dzen.line_height;
-											break;
-										case BOTTOM_RIGHT:
-											set_posy = 1;
-											px = dzen.w;
-											py = dzen.line_height;
-											break;
-										case TOP_LEFT:
-											set_posy = 1;
-											px = 0;
-											py = 0;
-											break;
-										case TOP_CENTER:
-											set_posy = 1;
-											px = dzen.w/2;
-											py = 0;
-											break;
-										case TOP_RIGHT:
-											set_posy = 1;
-											px = dzen.w;
 											py = 0;
 											break;
 									}		
@@ -883,34 +849,12 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 								case CENTER:
 									px = dzen.w/2;
 									break;
-								case BOTTOM_LEFT:
+								case BOTTOM:
 									set_posy = 1;
-									px = 0;
 									py = dzen.line_height;
 									break;
-								case BOTTOM_CENTER:
+								case TOP:
 									set_posy = 1;
-									px = dzen.w/2;
-									py = dzen.line_height;
-									break;
-								case BOTTOM_RIGHT:
-									set_posy = 1;
-									px = dzen.w;
-									py = dzen.line_height;
-									break;
-								case TOP_LEFT:
-									set_posy = 1;
-									px = 0;
-									py = 0;
-									break;
-								case TOP_CENTER:
-									set_posy = 1;
-									px = dzen.w/2;
-									py = 0;
-									break;
-								case TOP_RIGHT:
-									set_posy = 1;
-									px = dzen.w;
 									py = 0;
 									break;
 							}		
