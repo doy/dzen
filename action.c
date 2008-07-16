@@ -48,6 +48,7 @@ struct action_lookup  ac_lookup_table[] = {
 	{ "scrollup",       a_scrollup},
 	{ "scrolldown",     a_scrolldown},
 	{ "menuprint",      a_menuprint},
+	{ "menuprint_noparse",      a_menuprint_noparse},
 	{ "menuexec",       a_menuexec},
 	{ "raise",          a_raise},
 	{ "lower",          a_lower},
@@ -451,6 +452,19 @@ a_menuprint(char * opt[]) {
 		puts(text); fflush(stdout);
 		dzen.slave_win.sel_line = -1;
 		free(text);
+	}
+	return 0;
+}
+
+int
+a_menuprint_noparse(char * opt[]) {
+	char *text;
+	(void)opt;
+
+	if(dzen.slave_win.ismenu && dzen.slave_win.sel_line != -1 
+			&& (dzen.slave_win.sel_line + dzen.slave_win.first_line_vis) < dzen.slave_win.tcnt) {
+		puts(dzen.slave_win.tbuf[dzen.slave_win.sel_line]); fflush(stdout);
+		dzen.slave_win.sel_line = -1;
 	}
 	return 0;
 }
