@@ -761,37 +761,15 @@ font_preload(char *s) {
 	}
 }
 
-
-static void
-set_alignment(void) {
-	if(dzen.title_win.alignment) 
-		switch(dzen.title_win.alignment) {
-			case 'l': 
-				dzen.title_win.alignment = ALIGNLEFT;
-				break;
-			case 'c':
-				dzen.title_win.alignment = ALIGNCENTER;
-				break;
-			case 'r':
-				dzen.title_win.alignment = ALIGNRIGHT;
-				break;
-			default:
-				dzen.title_win.alignment = ALIGNCENTER;
-		}
-	if(dzen.slave_win.alignment)
-		switch(dzen.slave_win.alignment) {
-			case 'l': 
-				dzen.slave_win.alignment = ALIGNLEFT;
-				break;
-			case 'c':
-				dzen.slave_win.alignment = ALIGNCENTER;
-				break;
-			case 'r':
-				dzen.slave_win.alignment = ALIGNRIGHT;
-				break;
-			default:
-				dzen.slave_win.alignment = ALIGNLEFT;
-		}
+/* Get alignment from character 'l'eft, 'r'ight and 'c'enter */
+static char
+alignment_from_char(char align) {
+	switch(align) {
+		case 'l' : return ALIGNLEFT;
+		case 'r' : return ALIGNRIGHT;
+		case 'c' : return ALIGNCENTER;
+		default  : return ALIGNCENTER;
+	}
 }
 
 static void
@@ -885,10 +863,10 @@ main(int argc, char *argv[]) {
 			}
 		}
 		else if(!strncmp(argv[i], "-ta", 4)) {
-			if(++i < argc) dzen.title_win.alignment = argv[i][0];
+			if(++i < argc) dzen.title_win.alignment = alignment_from_char(argv[i][0]);
 		}
 		else if(!strncmp(argv[i], "-sa", 4)) {
-			if(++i < argc) dzen.slave_win.alignment = argv[i][0];
+			if(++i < argc) dzen.slave_win.alignment = alignment_from_char(argv[i][0]);
 		}
 		else if(!strncmp(argv[i], "-m", 3)) {
 			dzen.slave_win.ismenu = True;
@@ -1002,8 +980,6 @@ main(int argc, char *argv[]) {
 	if(setup_signal(SIGALRM, catch_alrm) == SIG_ERR)
 		fprintf(stderr, "dzen: error hooking SIGALARM\n");
 
-	set_alignment();
-	
 	if(dzen.slave_win.ishmenu &&
 			!dzen.slave_win.max_lines)
 		dzen.slave_win.max_lines = 1;
