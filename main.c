@@ -743,21 +743,12 @@ x_preload(const char *fontstr, int p) {
 
 static void
 font_preload(char *s) {
-	int i, j, k=0;
-	char buf[512];
-
-	for(i=0, j=0; i<512; i++, j++) {
-		if(s[i] != ',' && s[i])
-			buf[j] = s[i];
-		else {
-			i++;
-			buf[j] = 0;
-			if(k<64)
-				x_preload(buf, k++);
-			j=0;
-			if(!s[i])
-				break;
-		}
+	int k = 0;
+	char *buf = strtok(s,","); 
+	while( buf != NULL ) {
+		if(k<64)
+			x_preload(buf, k++);
+		buf = strtok(NULL,",");
 	}
 }
 
@@ -784,9 +775,9 @@ init_input_buffer(void) {
 
 int
 main(int argc, char *argv[]) {
-	int i, preload=0, use_ewmh_dock=0;
+	int i, use_ewmh_dock=0;
 	char *action_string = NULL;
-	char *endptr, *fnpre;
+	char *endptr, *fnpre = NULL;
 
 	/* default values */
 	dzen.cur_line  = 0;
@@ -905,10 +896,7 @@ main(int argc, char *argv[]) {
 		}
 		else if(!strncmp(argv[i], "-fn-preload", 12)) {
 			if(++i < argc) {
-				preload=1;
-
-				fnpre=malloc(strlen(argv[i]));
-				strncpy(fnpre, argv[i], strlen(argv[i]));
+				fnpre = estrdup(argv[i]);
 			}
 		}
 #ifdef DZEN_XINERAMA
@@ -996,7 +984,7 @@ main(int argc, char *argv[]) {
 			XMapWindow(dzen.dpy, dzen.slave_win.line[i]);
 	}
 
-	if(preload)
+	if( fnpre != NULL )
 		font_preload(fnpre);
 
 	do_action(onstart);
