@@ -6,6 +6,7 @@
 
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
+#include <X11/Xresource.h>
 #ifdef DZEN_XINERAMA
 #include <X11/extensions/Xinerama.h>
 #endif

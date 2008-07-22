@@ -97,6 +97,18 @@ dzen accepts a couple of options:
 
 
 
+^fg(#6fbf47)X resources
+^fg(#6fbf47)-----------
+
+Dzen is able to read font and color setting from X resources.
+As an example you can add following lines to ~/.Xresources
+
+^fg(Khaki)dzen2.font:       -*-fixed-*-*-*-*-*-*-*-*-*-*-*-*
+^fg(Khaki)dzen2.foreground: #22EE11
+^fg(Khaki)dzen2.background: black
+
+
+
 ^fg(#6fbf47)Window layout
 ^fg(#6fbf47)-------------
 

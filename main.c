@@ -385,17 +385,41 @@ x_create_gcs(void) {
 }
 
 static void
+x_connect(void) {
+	dzen.dpy = XOpenDisplay(0);
+	if(!dzen.dpy) 
+		eprint("dzen: cannot open display\n");
+	dzen.screen = DefaultScreen(dzen.dpy);
+}
+
+/* Read display styles from X resources. */
+static void
+x_read_resources(void) {
+	XrmDatabase xdb;
+	char* xrm;
+	char* datatype[20];
+	XrmValue xvalue;
+
+	xrm = XResourceManagerString(dzen.dpy);
+	if( xrm != NULL ) {
+		xdb = XrmGetStringDatabase(xrm);
+		if( XrmGetResource(xdb, "dzen2.font", "*", datatype, &xvalue) == True ) 
+			dzen.fnt = estrdup(xvalue.addr);
+		if( XrmGetResource(xdb, "dzen2.foreground", "*", datatype, &xvalue) == True ) 
+			dzen.fg  = estrdup(xvalue.addr);
+		if( XrmGetResource(xdb, "dzen2.background", "*", datatype, &xvalue) == True ) 
+			dzen.bg  = estrdup(xvalue.addr);
+		XrmDestroyDatabase(xdb);
+	}
+}
+
+static void
 x_create_windows(int use_ewmh_dock) {
 	XSetWindowAttributes wa;
 	Window root;
 	int i;
 	XRectangle si;
 
-	dzen.dpy = XOpenDisplay(0);
-	if(!dzen.dpy) 
-		eprint("dzen: cannot open display\n");
-
-	dzen.screen = DefaultScreen(dzen.dpy);
 	root = RootWindow(dzen.dpy, dzen.screen);
 
 	/* style */
@@ -796,6 +820,10 @@ main(int argc, char *argv[]) {
 	dzen.tsupdate = 0;
 	dzen.line_height = 0;
 	dzen.title_win.expand = noexpand;
+
+	/* Connect to X server */
+	x_connect();
+	x_read_resources();
 
 	/* cmdline args */
 	for(i = 1; i < argc; i++)
