@@ -445,8 +445,8 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 									//XFreePixmap(dzen.dpy, xpm_pm);
 									free_xpm_attrib = 1;
 								}
-							}
 #endif
+							}
 							break;
 
 						
@@ -689,8 +689,8 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 							//XFreePixmap(dzen.dpy, xpm_pm);
 							free_xpm_attrib = 1;
 						}
-					}
 #endif
+					}
 					break;
 
 				case rect:
