@@ -125,7 +125,7 @@ chomp(char *inbuf, char *outbuf, int start, int len) {
 void
 free_buffer(void) {
 	int i;
-	for(i=0; i<dzen.slave_win.tsize; i++) {
+	for(i=0; i<dzen.slave_win.tcnt; i++) {
 		free(dzen.slave_win.tbuf[i]);
 		dzen.slave_win.tbuf[i] = NULL;
 	}
