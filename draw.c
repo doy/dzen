@@ -6,6 +6,8 @@
 */
 
 #include "dzen.h"
+#include "action.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -459,9 +461,6 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 								(dzen.line_height - recth)/2 + recty;
 							px += !pos_is_fixed ? rectx : 0;
 							setcolor(&pm, px, rectw, lastfg, lastbg, reverse, nobg);
-							//printf("R1: setpy=%d px=%d py=%d rectw=%d recth=%d\n", set_posy, px,
-							//		set_posy ? py : ((int)recty<0 ? dzen.line_height + recty : recty),
-							//		rectw, recth);
 							
 							XFillRectangle(dzen.dpy, pm, dzen.tgc, px, 
 									set_posy ? py : 
@@ -634,6 +633,7 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 							dzen.tgc, px, py + cur_fnt->ascent, lbuf, strlen(lbuf));
 				else 
 					XDrawString(dzen.dpy, pm, dzen.tgc, px, py+dzen.font.ascent, lbuf, strlen(lbuf)); 
+
 				px += !pos_is_fixed ? tw : 0;
 			}
 
@@ -932,14 +932,68 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 	return nodraw ? rbuf : NULL;
 }
 
+parse_non_drawing_commands(char * text) {
+
+	if(!text)
+		return 1;
+
+	if(!strncmp(text, "^togglecollapse()", strlen("^togglecollapse()"))) {
+		a_togglecollapse(NULL);
+		return 0;
+	}
+
+	if(!strncmp(text, "^togglestick()", strlen("^togglestick()"))) {
+		a_togglestick(NULL);
+		return 0;
+	}
+
+	if(!strncmp(text, "^togglehide()", strlen("^togglehide()"))) {
+		a_togglehide(NULL);
+		return 0;
+	}
+
+	if(!strncmp(text, "^raise()", strlen("^raise()"))) {
+		a_raise(NULL);
+		return 0;
+	}
+
+	if(!strncmp(text, "^lower()", strlen("^lower()"))) {
+		a_lower(NULL);
+		return 0;
+	}
+
+	if(!strncmp(text, "^scrollhome()", strlen("^scrollhome()"))) {
+		a_scrollhome(NULL);
+		return 0;
+	}
+
+	if(!strncmp(text, "^scrollend()", strlen("^scrollend()"))) {
+		a_scrollend(NULL);
+		return 0;
+	}
+
+	if(!strncmp(text, "^exit()", strlen("^exit()"))) {
+		a_exit(NULL);
+		return 0;
+	}
+
+	return 1;
+}
+	
+
 void
 drawheader(const char * text) {
-	if(text){ 
-		dzen.w = dzen.title_win.width;
-		dzen.h = dzen.line_height;
+	if(parse_non_drawing_commands((char *)text)) { 
+		if (text){ 
+			dzen.w = dzen.title_win.width;
+			dzen.h = dzen.line_height;
 
-		XFillRectangle(dzen.dpy, dzen.title_win.drawable, dzen.rgc, 0, 0, dzen.w, dzen.h);
-		parse_line(text, -1, dzen.title_win.alignment, 0, 0);
+			XFillRectangle(dzen.dpy, dzen.title_win.drawable, dzen.rgc, 0, 0, dzen.w, dzen.h);
+			parse_line(text, -1, dzen.title_win.alignment, 0, 0);
+		}
+	} else {
+		dzen.slave_win.tcnt = -1;
+		dzen.cur_line = 0;
 	}
 
 	XCopyArea(dzen.dpy, dzen.title_win.drawable, dzen.title_win.win, 
@@ -949,12 +1003,14 @@ drawheader(const char * text) {
 void
 drawbody(char * text) {
 	char *ec;
-	int i;
+	int i, write_buffer=1;
 
-	/* draw to title window
-	   this routine should be better integrated into
-	   the actual parsing process
-	   */
+	if(dzen.slave_win.tcnt == -1) {
+		dzen.slave_win.tcnt = 0;
+		drawheader(text);
+		return;
+	}
+
 	if((ec = strstr(text, "^tw()")) && (*(ec-1) != '^')) {
 		dzen.w = dzen.title_win.width;
 		dzen.h = dzen.line_height;
@@ -968,14 +1024,20 @@ drawbody(char * text) {
 
 	if(dzen.slave_win.tcnt == dzen.slave_win.tsize) 
 		free_buffer();
+
+	write_buffer = parse_non_drawing_commands(text);
+
+
 	if(text[0] == '^' && text[1] == 'c' && text[2] == 's') {
 		free_buffer();
+
 		for(i=0; i < dzen.slave_win.max_lines; i++)
 			XFillRectangle(dzen.dpy, dzen.slave_win.drawable[i], dzen.rgc, 0, 0, dzen.slave_win.width, dzen.line_height);
 		x_draw_body();
 		return;
 	}
-	if(dzen.slave_win.tcnt < dzen.slave_win.tsize) {
+
+	if( write_buffer && (dzen.slave_win.tcnt < dzen.slave_win.tsize) ) {
 		dzen.slave_win.tbuf[dzen.slave_win.tcnt] = estrdup(text);
 		dzen.slave_win.tcnt++;
 	}
