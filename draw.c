@@ -932,6 +932,7 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 	return nodraw ? rbuf : NULL;
 }
 
+int
 parse_non_drawing_commands(char * text) {
 
 	if(!text)
