@@ -20,6 +20,10 @@
 #include <sys/time.h>
 #include <sys/types.h>
 
+#ifndef HOST_NAME_MAX 
+#define HOST_NAME_MAX 255 
+#endif
+
 Dzen dzen = {0};
 static int last_cnt = 0;
 typedef void sigfunc(int);
@@ -296,6 +300,32 @@ set_docking_ewmh_info(Display *dpy, Window w, int dock) {
 	XWindowAttributes wa;
 	Atom type;
 	unsigned int desktop;
+	pid_t cur_pid;
+	char *host_name;
+	XTextProperty txt_prop;
+
+	host_name = emalloc(HOST_NAME_MAX);
+	if( (gethostname(host_name, HOST_NAME_MAX) > -1) &&
+			(cur_pid = getpid()) ) {
+
+		XStringListToTextProperty(&host_name, 1, &txt_prop);
+		XSetWMClientMachine(dpy, w, &txt_prop);
+		XFree(txt_prop.value);
+
+		XChangeProperty(
+				dpy, 
+				w,
+				XInternAtom(dpy, "_NET_WM_PID", False),
+				XInternAtom(dpy, "CARDINAL", False),
+				32,
+				PropModeReplace,
+				(unsigned char *)&cur_pid,
+				1
+				);
+
+	}
+	free(host_name);
+
 
 	XGetWindowAttributes(dpy, w, &wa);
 
@@ -316,25 +346,25 @@ set_docking_ewmh_info(Display *dpy, Window w, int dock) {
 
 	if(strut[2] != 0 || strut[3] != 0) {
 		XChangeProperty(
-			dpy, 
-			w, 
-			XInternAtom(dpy, "_NET_WM_STRUT_PARTIAL", False),
-			XInternAtom(dpy, "CARDINAL", False),
-			32, 
-			PropModeReplace,
-			(unsigned char *)&strut,
-			12
-		);
+				dpy, 
+				w, 
+				XInternAtom(dpy, "_NET_WM_STRUT_PARTIAL", False),
+				XInternAtom(dpy, "CARDINAL", False),
+				32, 
+				PropModeReplace,
+				(unsigned char *)&strut,
+				12
+				);
 		XChangeProperty(
-			dpy, 
-			w, 
-			XInternAtom(dpy, "_NET_WM_STRUT", False),
-			XInternAtom(dpy, "CARDINAL", False),
-			32, 
-			PropModeReplace,
-			(unsigned char *)&strut,
-			4
-		);
+				dpy, 
+				w, 
+				XInternAtom(dpy, "_NET_WM_STRUT", False),
+				XInternAtom(dpy, "CARDINAL", False),
+				32, 
+				PropModeReplace,
+				(unsigned char *)&strut,
+				4
+				);
 	}
 
 	if(dock) {
@@ -349,7 +379,7 @@ set_docking_ewmh_info(Display *dpy, Window w, int dock) {
 				PropModeReplace,
 				(unsigned char *)&type,
 				1
-			       );
+				);
 
 		desktop = 0xffffffff;
 
@@ -362,7 +392,7 @@ set_docking_ewmh_info(Display *dpy, Window w, int dock) {
 				PropModeReplace,
 				(unsigned char *)&desktop,
 				1
-			       );
+				);
 	}
 
 }
