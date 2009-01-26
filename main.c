@@ -979,6 +979,7 @@ main(int argc, char *argv[]) {
                    "             [-x <pixel>] [-y <pixel>] [-w <pixel>] [-h <pixel>] [-tw <pixel>] [-u]\n"
 				   "             [-e <string>] [-l <lines>]  [-fn <font>] [-bg <color>] [-fg <color>]\n"
 				   "             [-geometry <geometry string>] [-expand <left|both|right>] [-dock]\n"
+				   "             [-title-name <string>] [-slave-name <string>]\n"
 #ifdef DZEN_XINERAMA
 				   "             [-xs <screen>]\n"
 #endif
