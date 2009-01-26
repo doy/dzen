@@ -479,7 +479,7 @@ x_create_windows(int use_ewmh_dock) {
 			DefaultDepth(dzen.dpy, dzen.screen), CopyFromParent,
 			DefaultVisual(dzen.dpy, dzen.screen),
 			CWOverrideRedirect | CWBackPixmap | CWEventMask, &wa);
-	XStoreName(dzen.dpy, dzen.title_win.win, "dzen title");
+	XStoreName(dzen.dpy, dzen.title_win.win, dzen.title_win.name);
 
 	dzen.title_win.drawable = XCreatePixmap(dzen.dpy, root, dzen.title_win.width, 
 			dzen.line_height, DefaultDepth(dzen.dpy, dzen.screen));
@@ -513,7 +513,7 @@ x_create_windows(int use_ewmh_dock) {
 					DefaultDepth(dzen.dpy, dzen.screen), CopyFromParent,
 					DefaultVisual(dzen.dpy, dzen.screen),
 					CWOverrideRedirect | CWBackPixmap | CWEventMask, &wa);
-			XStoreName(dzen.dpy, dzen.slave_win.win, "dzen slave");
+			XStoreName(dzen.dpy, dzen.slave_win.win, dzen.slave_win.name);
 
 			for(i=0; i < dzen.slave_win.max_lines; i++) {
 				dzen.slave_win.drawable[i] = XCreatePixmap(dzen.dpy, root, ew+r, 
@@ -550,7 +550,7 @@ x_create_windows(int use_ewmh_dock) {
 					DefaultDepth(dzen.dpy, dzen.screen), CopyFromParent,
 					DefaultVisual(dzen.dpy, dzen.screen),
 					CWOverrideRedirect | CWBackPixmap | CWEventMask, &wa);
-			XStoreName(dzen.dpy, dzen.slave_win.win, "dzen slave");
+			XStoreName(dzen.dpy, dzen.slave_win.win, dzen.slave_win.name);
 
 			for(i=0; i < dzen.slave_win.max_lines; i++) {
 				dzen.slave_win.drawable[i] = XCreatePixmap(dzen.dpy, root, dzen.slave_win.width, 
@@ -834,6 +834,8 @@ main(int argc, char *argv[]) {
 	char *endptr, *fnpre = NULL;
 
 	/* default values */
+	dzen.title_win.name = "dzen title";
+	dzen.slave_win.name = "dzen slave";
 	dzen.cur_line  = 0;
 	dzen.ret_val   = 0;
 	dzen.title_win.x = dzen.slave_win.x = 0;
@@ -930,6 +932,12 @@ main(int argc, char *argv[]) {
 		}
 		else if(!strncmp(argv[i], "-e", 3)) {
 			if(++i < argc) action_string = argv[i];
+		}
+		else if(!strncmp(argv[i], "-title-name", 12)) {
+			if(++i < argc) dzen.title_win.name = argv[i];
+		}
+		else if(!strncmp(argv[i], "-slave-name", 12)) {
+			if(++i < argc) dzen.slave_win.name = argv[i];
 		}
 		else if(!strncmp(argv[i], "-bg", 4)) {
 			if(++i < argc) dzen.bg = argv[i];

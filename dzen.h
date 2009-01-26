@@ -31,7 +31,6 @@
 # define Button7 7
 #endif
 
-/* gui data structures */
 enum { ColFG, ColBG, ColLast };
 
 /* exapansion directions */
@@ -55,6 +54,7 @@ struct Fnt {
 struct TW {
 	int x, y, width, height;
 
+	char *name;
 	Window win;
 	Drawable drawable;
 	char alignment;
@@ -67,6 +67,7 @@ struct TW {
 struct SW {
 	int x, y, width, height;
 
+	char *name;
 	Window win;
 	Window *line;
 	Drawable *drawable;
