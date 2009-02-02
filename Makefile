@@ -1,4 +1,4 @@
-# dzen2 
+# dzen2
 #   (C)opyright MMVII Robert Manea
 
 include config.mk

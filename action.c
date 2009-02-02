@@ -1,4 +1,4 @@
-/* 
+/*
 * (C)opyright MMVII Robert Manea <rob dot manea at gmail dot com>
 * See LICENSE file for license details.
 *
@@ -63,7 +63,7 @@ struct action_lookup  ac_lookup_table[] = {
 
 ev_list *head = NULL;
 
-static int 
+static int
 new_event(long evid) {
 	ev_list *item, *newitem;
 
@@ -71,7 +71,7 @@ new_event(long evid) {
 		head = emalloc(sizeof (ev_list));
 		head->id = evid;
 		head->next = NULL;
-	} 
+	}
 	else {
 		item = head;
 		/* check if we already handle this event */
@@ -132,7 +132,7 @@ find_event(long evid) {
 
 	item = head;
 	while(item) {
-		if(item->id == evid) 
+		if(item->id == evid)
 			return item->id;
 		item = item->next;
 	}
@@ -207,9 +207,9 @@ void
 fill_ev_table(char *input) {
 	char *str1, *str2, *str3, *str4,
 		 *token, *subtoken, *kommatoken, *dptoken;
-	char *saveptr1=NULL, 
-		 *saveptr2=NULL, 
-		 *saveptr3=NULL, 
+	char *saveptr1=NULL,
+		 *saveptr2=NULL,
+		 *saveptr3=NULL,
 		 *saveptr4=NULL;
 	int j, i=0, k=0;
 	long eid=0;
@@ -257,7 +257,7 @@ fill_ev_table(char *input) {
 			}
 			new_event(eid);
 			add_handler(eid, i, NULL);
-			i=0; 
+			i=0;
 		}
 	}
 }
@@ -266,7 +266,7 @@ fill_ev_table(char *input) {
 /* actions */
 int
 a_exit(char * opt[]) {
-	if(opt[0]) 
+	if(opt[0])
 		dzen.ret_val = atoi(opt[0]);
 	dzen.running = False;
 	return 0;
@@ -275,8 +275,8 @@ a_exit(char * opt[]) {
 int
 a_collapse(char * opt[]){
 	(void)opt;
-	if(!dzen.slave_win.ishmenu 
-			&& dzen.slave_win.max_lines 
+	if(!dzen.slave_win.ishmenu
+			&& dzen.slave_win.max_lines
 			&& !dzen.slave_win.issticky) {
 		XUnmapWindow(dzen.dpy, dzen.slave_win.win);
 	}
@@ -287,8 +287,8 @@ int
 a_uncollapse(char * opt[]){
 	int i;
 	(void)opt;
-	if(!dzen.slave_win.ishmenu 
-			&& dzen.slave_win.max_lines 
+	if(!dzen.slave_win.ishmenu
+			&& dzen.slave_win.max_lines
 			&& !dzen.slave_win.issticky) {
 		XMapRaised(dzen.dpy, dzen.slave_win.win);
 		for(i=0; i < dzen.slave_win.max_lines; i++)
@@ -302,7 +302,7 @@ a_togglecollapse(char * opt[]){
 	XWindowAttributes wa;
 	(void)opt;
 
-	if(dzen.slave_win.max_lines && 
+	if(dzen.slave_win.max_lines &&
 			(XGetWindowAttributes(dzen.dpy, dzen.slave_win.win, &wa), wa.map_state == IsUnmapped))
 		a_uncollapse(NULL);
 	else
@@ -314,7 +314,7 @@ a_togglecollapse(char * opt[]){
 int
 a_stick(char * opt[]) {
 	(void)opt;
-	if(!dzen.slave_win.ishmenu 
+	if(!dzen.slave_win.ishmenu
 			&& dzen.slave_win.max_lines)
 		dzen.slave_win.issticky = True;
 	return 0;
@@ -323,7 +323,7 @@ a_stick(char * opt[]) {
 int
 a_unstick(char * opt[]) {
 	(void)opt;
-	if(!dzen.slave_win.ishmenu 
+	if(!dzen.slave_win.ishmenu
 			&& dzen.slave_win.max_lines)
 		dzen.slave_win.issticky = False;
 	return 0;
@@ -349,7 +349,7 @@ scroll(int n) {
 	else if(dzen.slave_win.last_line_vis + n > dzen.slave_win.tcnt) {
 		dzen.slave_win.first_line_vis = dzen.slave_win.tcnt - dzen.slave_win.max_lines;
 		dzen.slave_win.last_line_vis = dzen.slave_win.tcnt;
-	} 
+	}
 	else {
 		dzen.slave_win.first_line_vis += n;
 		dzen.slave_win.last_line_vis  += n;
@@ -362,9 +362,9 @@ int
 a_scrollup(char * opt[]) {
 	int n=1;
 
-	if(opt[0]) 
+	if(opt[0])
 		n = atoi(opt[0]);
-	if(dzen.slave_win.max_lines) 
+	if(dzen.slave_win.max_lines)
 			scroll(-1*n);
 
 	return 0;
@@ -374,7 +374,7 @@ int
 a_scrolldown(char * opt[]) {
 	int n=1;
 
-	if(opt[0]) 
+	if(opt[0])
 		n = atoi(opt[0]);
 	if(dzen.slave_win.max_lines)
 		scroll(n);
@@ -414,8 +414,8 @@ int
 a_togglehide(char * opt[]) {
 	(void)opt;
 
-	dzen.title_win.ishidden ? 
-		a_unhide(NULL) : 
+	dzen.title_win.ishidden ?
+		a_unhide(NULL) :
 		a_hide(NULL);
 
 	return 0;
@@ -425,8 +425,8 @@ int
 a_exec(char * opt[]) {
 	int i;
 
-	if(opt) 
-		for(i=0; opt[i]; i++) 
+	if(opt)
+		for(i=0; opt[i]; i++)
 			if(opt[i]) spawn(opt[i]);
 	return 0;
 }
@@ -435,7 +435,7 @@ int
 a_print(char * opt[]) {
 	int i;
 
-	if(opt) 
+	if(opt)
 		for(i=0; opt[i]; i++)
 			puts(opt[i]);
 	return 0;
@@ -446,7 +446,7 @@ a_menuprint(char * opt[]) {
 	char *text;
 	(void)opt;
 
-	if(dzen.slave_win.ismenu && dzen.slave_win.sel_line != -1 
+	if(dzen.slave_win.ismenu && dzen.slave_win.sel_line != -1
 			&& (dzen.slave_win.sel_line + dzen.slave_win.first_line_vis) < dzen.slave_win.tcnt) {
 		text = parse_line(NULL, dzen.slave_win.sel_line, 0, 0, 1);
 		puts(text); fflush(stdout);
@@ -458,10 +458,9 @@ a_menuprint(char * opt[]) {
 
 int
 a_menuprint_noparse(char * opt[]) {
-	char *text;
 	(void)opt;
 
-	if(dzen.slave_win.ismenu && dzen.slave_win.sel_line != -1 
+	if(dzen.slave_win.ismenu && dzen.slave_win.sel_line != -1
 			&& (dzen.slave_win.sel_line + dzen.slave_win.first_line_vis) < dzen.slave_win.tcnt) {
 		puts(dzen.slave_win.tbuf[dzen.slave_win.sel_line]); fflush(stdout);
 		dzen.slave_win.sel_line = -1;
@@ -508,7 +507,7 @@ int
 a_scrollhome(char * opt[]) {
 	(void)opt;
 	if(dzen.slave_win.max_lines) {
-		dzen.slave_win.first_line_vis = 0; 
+		dzen.slave_win.first_line_vis = 0;
 		dzen.slave_win.last_line_vis  = dzen.slave_win.max_lines;
 
 		x_draw_body();
@@ -520,9 +519,9 @@ int
 a_scrollend(char * opt[]) {
 	(void)opt;
 	if(dzen.slave_win.max_lines) {
-		dzen.slave_win.first_line_vis = dzen.slave_win.tcnt - dzen.slave_win.max_lines ; 
+		dzen.slave_win.first_line_vis = dzen.slave_win.tcnt - dzen.slave_win.max_lines ;
 		dzen.slave_win.last_line_vis  = dzen.slave_win.tcnt;
-		
+
 		x_draw_body();
 	}
 	return 0;

@@ -1,8 +1,13 @@
+#  documentation
+
+          o `-dock' and `-geometry' options are undocumented
+
+
 #  X related
 
           o XRandR support (MEDIUM PRIORITY)
-          o cache XPM files in order to improve drawing 
-            performace (HIGH PRIORITY)
+          o cache XPM files in order to improve drawing
+            performace (HIGH PRIORITY, done in svn trunk)
 
 
 #  extend available actions
@@ -13,7 +18,7 @@
 
 # user interface
 
-          o improve in-text command to draw 
-            to the title window (MEDIUM PRIORITY)
-          o auto fit window width to 
-            text length (MEDIUM PRIORITY)
+          o improve in-text command to draw
+            to the title window (MEDIUM PRIORITY, done in svn trunk)
+          o auto fit window width to
+            text length (MEDIUM PRIORITY, done in svn trunk)
