@@ -10,6 +10,9 @@
 #ifdef DZEN_XINERAMA
 #include <X11/extensions/Xinerama.h>
 #endif
+#ifdef DZEN_XFT
+#include <X11/Xft/Xft.h>
+#endif
 
 #define FONT		"-*-fixed-*-*-*-*-*-*-*-*-*-*-*-*"
 #define BGCOLOR		"#111111"
@@ -48,7 +51,13 @@ struct Fnt {
 	int ascent;
 	int descent;
 	int height;
+#ifdef DZEN_XFT
+	XftFont *xftfont;
+	XGlyphInfo *extents;
+	int width;
+#endif
 };
+
 
 /* title window */
 struct TW {
