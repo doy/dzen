@@ -320,7 +320,7 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 	/* positioning */
 	int n_posx, n_posy, set_posy=0;
 	int px=0, py=0, xorig=0;
-	int i, next_pos=0, j=0, h=0, tw=0, ow;
+	int i, next_pos=0, j=0, h=0, tw=0;
 	/* fonts */
 	int font_was_set=0;
 	/* position */
@@ -664,18 +664,10 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 				}
 
 				/* check if text is longer than window's width */
-				ow = j; tw = textnw(cur_fnt, lbuf, strlen_utf8(lbuf));
+				tw = textnw(cur_fnt, lbuf, strlen_utf8(lbuf));
 				while( ((tw + px) > (dzen.w - h)) && j>=0) {
 					lbuf[--j] = '\0';
 					tw = textnw(cur_fnt, lbuf, strlen_utf8(lbuf));
-				}
-				if(j < ow) {
-					if(j > 1)
-						lbuf[j - 1] = '.';
-					if(j > 2)
-						lbuf[j - 2] = '.';
-					if(j > 3)
-						lbuf[j - 3] = '.';
 				}
 
 				if(!nobg)
@@ -934,18 +926,10 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 		}
 
 		/* check if text is longer than window's width */
-		ow = j; tw = textnw(cur_fnt, lbuf, strlen_utf8(lbuf));
+		tw = textnw(cur_fnt, lbuf, strlen_utf8(lbuf));
 		while( ((tw + px) > (dzen.w - h)) && j>=0) {
 			lbuf[--j] = '\0';
 			tw = textnw(cur_fnt, lbuf, strlen_utf8(lbuf));
-		}
-		if(j < ow) {
-			if(j > 1)
-				lbuf[j - 1] = '.';
-			if(j > 2)
-				lbuf[j - 2] = '.';
-			if(j > 3)
-				lbuf[j - 3] = '.';
 		}
 
 		if(!nobg)
