@@ -34,10 +34,12 @@ clean_up(void) {
 	int i;
 
 	free_event_list();
+#ifndef DZEN_XFT
 	if(dzen.font.set)
 		XFreeFontSet(dzen.dpy, dzen.font.set);
 	else
 		XFreeFont(dzen.dpy, dzen.font.xfont);
+#endif
 
 	XFreePixmap(dzen.dpy, dzen.title_win.drawable);
 	if(dzen.slave_win.max_lines) {
