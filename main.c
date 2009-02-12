@@ -104,8 +104,8 @@ chomp(char *inbuf, char *outbuf, int start, int len) {
 	int off=start;
 
 	if(rem) {
-		strncpy(outbuf, rem, strlen(rem));
-		i += strlen(rem);
+		strncpy(outbuf, rem, strlen_utf8(rem));
+		i += strlen_utf8(rem);
 		free(rem);
 		rem = NULL;
 	}

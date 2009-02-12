@@ -72,7 +72,7 @@ textnw(Fnt *font, const char *text, unsigned int len) {
 	}
 	return XTextWidth(font->xfont, text, len);
 #else
-	XftTextExtentsUtf8(dzen.dpy, dzen.font.xftfont, (unsigned const char *) text, strlen(text), dzen.font.extents);
+	XftTextExtentsUtf8(dzen.dpy, dzen.font.xftfont, (unsigned const char *) text, strlen_utf8(text), dzen.font.extents);
 	if(dzen.font.extents->height > dzen.font.height)
 		dzen.font.height = dzen.font.extents->height;
 	return dzen.font.extents->width;
@@ -153,9 +153,9 @@ setfont(const char *fontstr) {
 	if(!dzen.font.xftfont)
 	   fprintf(stderr, "error, cannot load font: '%s'\n", fontstr);
 	dzen.font.extents = malloc(sizeof(XGlyphInfo));
-	XftTextExtentsUtf8(dzen.dpy, dzen.font.xftfont, (unsigned const char *) fontstr, strlen(fontstr), dzen.font.extents);
+	XftTextExtentsUtf8(dzen.dpy, dzen.font.xftfont, (unsigned const char *) fontstr, strlen_utf8(fontstr), dzen.font.extents);
 	dzen.font.height = dzen.font.xftfont->ascent + dzen.font.xftfont->descent;
-	dzen.font.width = (dzen.font.extents->width)/strlen(fontstr);
+	dzen.font.width = (dzen.font.extents->width)/strlen_utf8(fontstr);
 #endif
 }
 
@@ -441,7 +441,7 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 	}
 
 
-	for(i=0; (unsigned)i < strlen(line); i++) {
+	for(i=0; (unsigned)i < strlen_utf8(line); i++) {
 		if(*(line+i) == ESC_CHAR) {
 			lbuf[j] = '\0';
 
@@ -664,10 +664,10 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 				}
 
 				/* check if text is longer than window's width */
-				ow = j; tw = textnw(cur_fnt, lbuf, strlen(lbuf));
+				ow = j; tw = textnw(cur_fnt, lbuf, strlen_utf8(lbuf));
 				while( ((tw + px) > (dzen.w - h)) && j>=0) {
 					lbuf[--j] = '\0';
-					tw = textnw(cur_fnt, lbuf, strlen(lbuf));
+					tw = textnw(cur_fnt, lbuf, strlen_utf8(lbuf));
 				}
 				if(j < ow) {
 					if(j > 1)
@@ -684,15 +684,15 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 #ifndef DZEN_XFT
 				if(cur_fnt->set)
 					XmbDrawString(dzen.dpy, pm, cur_fnt->set,
-							dzen.tgc, px, py + cur_fnt->ascent, lbuf, strlen(lbuf));
+							dzen.tgc, px, py + cur_fnt->ascent, lbuf, strlen_utf8(lbuf));
 				else
-					XDrawString(dzen.dpy, pm, dzen.tgc, px, py+dzen.font.ascent, lbuf, strlen(lbuf));
+					XDrawString(dzen.dpy, pm, dzen.tgc, px, py+dzen.font.ascent, lbuf, strlen_utf8(lbuf));
 #else
 				XftColorAllocName(dzen.dpy, DefaultVisual(dzen.dpy, dzen.screen),
 						DefaultColormap(dzen.dpy, dzen.screen),  xftcs,  &xftc);
 
 				XftDrawStringUtf8(xftd, &xftc, 
-						cur_fnt->xftfont, px, py + dzen.font.xftfont->ascent, lbuf, strlen(lbuf));
+						cur_fnt->xftfont, px, py + dzen.font.xftfont->ascent, lbuf, strlen_utf8(lbuf));
 
 				if(xftcs_f) {
 					free(xftcs);
@@ -934,10 +934,10 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 		}
 
 		/* check if text is longer than window's width */
-		ow = j; tw = textnw(cur_fnt, lbuf, strlen(lbuf));
+		ow = j; tw = textnw(cur_fnt, lbuf, strlen_utf8(lbuf));
 		while( ((tw + px) > (dzen.w - h)) && j>=0) {
 			lbuf[--j] = '\0';
-			tw = textnw(cur_fnt, lbuf, strlen(lbuf));
+			tw = textnw(cur_fnt, lbuf, strlen_utf8(lbuf));
 		}
 		if(j < ow) {
 			if(j > 1)
@@ -954,15 +954,15 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 #ifndef DZEN_XFT
 		if(cur_fnt->set)
 			XmbDrawString(dzen.dpy, pm, cur_fnt->set,
-					dzen.tgc, px, py + cur_fnt->ascent, lbuf, strlen(lbuf));
+					dzen.tgc, px, py + cur_fnt->ascent, lbuf, strlen_utf8(lbuf));
 		else
-			XDrawString(dzen.dpy, pm, dzen.tgc, px, py+dzen.font.ascent, lbuf, strlen(lbuf));
+			XDrawString(dzen.dpy, pm, dzen.tgc, px, py+dzen.font.ascent, lbuf, strlen_utf8(lbuf));
 #else
 		XftColorAllocName(dzen.dpy, DefaultVisual(dzen.dpy, dzen.screen),
 				DefaultColormap(dzen.dpy, dzen.screen), xftcs,  &xftc);
 
 		XftDrawStringUtf8(xftd, &xftc, 
-				cur_fnt->xftfont, px, py + dzen.font.xftfont->ascent, lbuf, strlen(lbuf));
+				cur_fnt->xftfont, px, py + dzen.font.xftfont->ascent, lbuf, strlen_utf8(lbuf));
 
 		if(xftcs_f) {
 			free(xftcs);
@@ -1038,66 +1038,66 @@ parse_non_drawing_commands(char * text) {
 	if(!text)
 		return 1;
 
-	if(!strncmp(text, "^togglecollapse()", strlen("^togglecollapse()"))) {
+	if(!strncmp(text, "^togglecollapse()", strlen_utf8("^togglecollapse()"))) {
 		a_togglecollapse(NULL);
 		return 0;
 	}
-	if(!strncmp(text, "^collapse()", strlen("^collapse()"))) {
+	if(!strncmp(text, "^collapse()", strlen_utf8("^collapse()"))) {
 		a_collapse(NULL);
 		return 0;
 	}
-	if(!strncmp(text, "^uncollapse()", strlen("^uncollapse()"))) {
+	if(!strncmp(text, "^uncollapse()", strlen_utf8("^uncollapse()"))) {
 		a_uncollapse(NULL);
 		return 0;
 	}
 
-	if(!strncmp(text, "^togglestick()", strlen("^togglestick()"))) {
+	if(!strncmp(text, "^togglestick()", strlen_utf8("^togglestick()"))) {
 		a_togglestick(NULL);
 		return 0;
 	}
-	if(!strncmp(text, "^stick()", strlen("^stick()"))) {
+	if(!strncmp(text, "^stick()", strlen_utf8("^stick()"))) {
 		a_stick(NULL);
 		return 0;
 	}
-	if(!strncmp(text, "^unstick()", strlen("^unstick()"))) {
+	if(!strncmp(text, "^unstick()", strlen_utf8("^unstick()"))) {
 		a_unstick(NULL);
 		return 0;
 	}
 
-	if(!strncmp(text, "^togglehide()", strlen("^togglehide()"))) {
+	if(!strncmp(text, "^togglehide()", strlen_utf8("^togglehide()"))) {
 		a_togglehide(NULL);
 		return 0;
 	}
-	if(!strncmp(text, "^hide()", strlen("^ide()"))) {
+	if(!strncmp(text, "^hide()", strlen_utf8("^ide()"))) {
 		a_hide(NULL);
 		return 0;
 	}
-	if(!strncmp(text, "^unhide()", strlen("^unhide()"))) {
+	if(!strncmp(text, "^unhide()", strlen_utf8("^unhide()"))) {
 		a_unhide(NULL);
 		return 0;
 	}
 
-	if(!strncmp(text, "^raise()", strlen("^raise()"))) {
+	if(!strncmp(text, "^raise()", strlen_utf8("^raise()"))) {
 		a_raise(NULL);
 		return 0;
 	}
 
-	if(!strncmp(text, "^lower()", strlen("^lower()"))) {
+	if(!strncmp(text, "^lower()", strlen_utf8("^lower()"))) {
 		a_lower(NULL);
 		return 0;
 	}
 
-	if(!strncmp(text, "^scrollhome()", strlen("^scrollhome()"))) {
+	if(!strncmp(text, "^scrollhome()", strlen_utf8("^scrollhome()"))) {
 		a_scrollhome(NULL);
 		return 0;
 	}
 
-	if(!strncmp(text, "^scrollend()", strlen("^scrollend()"))) {
+	if(!strncmp(text, "^scrollend()", strlen_utf8("^scrollend()"))) {
 		a_scrollend(NULL);
 		return 0;
 	}
 
-	if(!strncmp(text, "^exit()", strlen("^exit()"))) {
+	if(!strncmp(text, "^exit()", strlen_utf8("^exit()"))) {
 		a_exit(NULL);
 		return 0;
 	}
