@@ -1040,14 +1040,38 @@ parse_non_drawing_commands(char * text) {
 		a_togglecollapse(NULL);
 		return 0;
 	}
+	if(!strncmp(text, "^collapse()", strlen("^collapse()"))) {
+		a_collapse(NULL);
+		return 0;
+	}
+	if(!strncmp(text, "^uncollapse()", strlen("^uncollapse()"))) {
+		a_uncollapse(NULL);
+		return 0;
+	}
 
 	if(!strncmp(text, "^togglestick()", strlen("^togglestick()"))) {
 		a_togglestick(NULL);
 		return 0;
 	}
+	if(!strncmp(text, "^stick()", strlen("^stick()"))) {
+		a_stick(NULL);
+		return 0;
+	}
+	if(!strncmp(text, "^unstick()", strlen("^unstick()"))) {
+		a_unstick(NULL);
+		return 0;
+	}
 
 	if(!strncmp(text, "^togglehide()", strlen("^togglehide()"))) {
 		a_togglehide(NULL);
+		return 0;
+	}
+	if(!strncmp(text, "^hide()", strlen("^ide()"))) {
+		a_hide(NULL);
+		return 0;
+	}
+	if(!strncmp(text, "^unhide()", strlen("^unhide()"))) {
+		a_unhide(NULL);
 		return 0;
 	}
 
