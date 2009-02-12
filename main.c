@@ -973,8 +973,21 @@ main(int argc, char *argv[]) {
 #endif
 		else if(!strncmp(argv[i], "-dock", 6))
 			use_ewmh_dock = 1;
-		else if(!strncmp(argv[i], "-v", 3))
-			eprint("dzen-"VERSION", (C)opyright 2007-2008 Robert Manea\n");
+		else if(!strncmp(argv[i], "-v", 3)) {
+			printf("dzen-"VERSION", (C)opyright 2007-2008 Robert Manea\n");
+			printf("Enabled optional features: ");
+#ifdef DZEN_XMP
+			printf(" XPM ");
+#endif
+#ifdef DZEN_XFT
+			printf(" XFT");
+#endif
+#ifdef DZEN_XINERAMA
+			printf(" XINERAMA ");
+#endif
+			printf("\n");
+			return EXIT_SUCCESS;
+		}
 		else
 			eprint("usage: dzen2 [-v] [-p [seconds]] [-m [v|h]] [-ta <l|c|r>] [-sa <l|c|r>]\n"
                    "             [-x <pixel>] [-y <pixel>] [-w <pixel>] [-h <pixel>] [-tw <pixel>] [-u]\n"
