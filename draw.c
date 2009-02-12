@@ -336,7 +336,9 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 	/* X stuff */
 	long lastfg = dzen.norm[ColFG], lastbg = dzen.norm[ColBG];
 	Fnt *cur_fnt = NULL;
+#ifndef DZEN_XFT
 	XGCValues gcv;
+#endif
 	Drawable pm=0, bm;
 #ifdef DZEN_XPM
 	int free_xpm_attrib = 0;
@@ -351,7 +353,7 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 	char *xftcs;
 	int xftcs_f=0;
 
-	xftcs = dzen.fg;
+	xftcs = (char *)dzen.fg;
 #endif
 
 
@@ -621,7 +623,7 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 								xftcs = estrdup(tval);
 								xftcs_f = 1;
 							} else {
-								xftcs = dzen.fg;
+								xftcs = (char *)dzen.fg;
 								xftcs_f = 0;
 							}
 #endif							
@@ -891,7 +893,7 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 						xftcs = estrdup(tval);
 						xftcs_f = 1;
 					} else {
-						xftcs = dzen.fg;
+						xftcs = (char *)dzen.fg;
 						xftcs_f = 0;
 					}
 #endif							
