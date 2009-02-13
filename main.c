@@ -1,5 +1,5 @@
 /*
- * (C)opyright MMVII Robert Manea <rob dot manea at gmail dot com>
+ * (C)opyright 2007-2009 Robert Manea <rob dot manea at gmail dot com>
  * See LICENSE file for license details.
  *
  */
@@ -527,7 +527,7 @@ x_create_windows(int use_ewmh_dock) {
 						CWOverrideRedirect | CWBackPixmap | CWEventMask, &wa);
 
 			/* As we don't use the title window in this mode,
-			 * we reuse it's width value
+			 * we reuse its width value
 			 */
 			dzen.title_win.width = dzen.slave_win.width;
 			dzen.slave_win.width = ew+r;
@@ -592,10 +592,6 @@ x_redraw(Window w) {
 						0, 0, dzen.slave_win.width, dzen.line_height, 0, 0);
 			}
 	}
-	/*
-	if(dzen.sa_win)
-		XMapWindow(dzen.dpy, dzen.sa_win);
-	*/
 }
 
 static void
@@ -672,15 +668,6 @@ handle_xev(void) {
 			break;
 
 		/* TODO: XRandR rotation and size chnages */
-#if 0
-
-#ifdef DZEN_XRANDR
-		case RRScreenChangeNotify:
-			handle_xrandr();
-#endif
-
-#endif
-
 	}
 }
 
@@ -975,17 +962,19 @@ main(int argc, char *argv[]) {
 			use_ewmh_dock = 1;
 		else if(!strncmp(argv[i], "-v", 3)) {
 			printf("dzen-"VERSION", (C)opyright 2007-2008 Robert Manea\n");
-			printf("Enabled optional features: ");
+			printf(
+			"Enabled optional features: "
 #ifdef DZEN_XMP
-			printf(" XPM ");
+			" XPM "
 #endif
 #ifdef DZEN_XFT
-			printf(" XFT");
+			" XFT"
 #endif
 #ifdef DZEN_XINERAMA
-			printf(" XINERAMA ");
+			" XINERAMA "
 #endif
-			printf("\n");
+			"\n"
+			);
 			return EXIT_SUCCESS;
 		}
 		else
