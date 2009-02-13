@@ -668,17 +668,19 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 							font_was_set = 1;
 							break;
 						case ca:
-							if(tval[0]) {
-								if(sens_areas_cnt < MAX_CLICKABLE_AREAS) {
-									get_sens_area(tval, 
-											&sens_areas[sens_areas_cnt].button, 
-											sens_areas[sens_areas_cnt].cmd);
-									sens_areas[sens_areas_cnt].start_x = px;
-								}
-							} else {
-								if(sens_areas_cnt < MAX_CLICKABLE_AREAS) {
-									sens_areas[sens_areas_cnt].end_x = px;
-									sens_areas_cnt++;
+							if(lnr == -1) {
+								if(tval[0]) {
+									if(sens_areas_cnt < MAX_CLICKABLE_AREAS) {
+										get_sens_area(tval, 
+												&sens_areas[sens_areas_cnt].button, 
+												sens_areas[sens_areas_cnt].cmd);
+										sens_areas[sens_areas_cnt].start_x = px;
+									}
+								} else {
+									if(sens_areas_cnt < MAX_CLICKABLE_AREAS) {
+										sens_areas[sens_areas_cnt].end_x = px;
+										sens_areas_cnt++;
+									}
 								}
 							}
 							break;
@@ -945,17 +947,19 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 					font_was_set = 1;
 					break;
 				case ca:
-					if(tval[0]) {
-						if(sens_areas_cnt < MAX_CLICKABLE_AREAS) {
-							get_sens_area(tval, 
-									&sens_areas[sens_areas_cnt].button, 
-									sens_areas[sens_areas_cnt].cmd);
-							sens_areas[sens_areas_cnt].start_x = px;
-						}
-					} else {
-						if(sens_areas_cnt < MAX_CLICKABLE_AREAS) {
-							sens_areas[sens_areas_cnt].end_x = px;
-							sens_areas_cnt++;
+					if(lnr == -1) {
+						if(tval[0]) {
+							if(sens_areas_cnt < MAX_CLICKABLE_AREAS) {
+								get_sens_area(tval, 
+										&sens_areas[sens_areas_cnt].button, 
+										sens_areas[sens_areas_cnt].cmd);
+								sens_areas[sens_areas_cnt].start_x = px;
+							}
+						} else {
+							if(sens_areas_cnt < MAX_CLICKABLE_AREAS) {
+								sens_areas[sens_areas_cnt].end_x = px;
+								sens_areas_cnt++;
+							}
 						}
 					}
 					break;

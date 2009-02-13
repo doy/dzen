@@ -642,13 +642,16 @@ handle_xev(void) {
 			}
 
 			/* clickable areas */
-			for(i=0; i<20; i++) {
+			for(i=0; i<MAX_CLICKABLE_AREAS; i++) {
 				if(ev.xbutton.window == dzen.title_win.win &&
 						ev.xbutton.button == sens_areas[i].button &&
 						(ev.xbutton.x >=  sens_areas[i].start_x+xorig &&
-						 ev.xbutton.x <=  sens_areas[i].end_x+xorig))
+						 ev.xbutton.x <=  sens_areas[i].end_x+xorig)) {
 					spawn(sens_areas[i].cmd);
+					break;
+				}
 			}
+			
 			switch(ev.xbutton.button) {
 				case Button1:
 					do_action(button1);
