@@ -26,6 +26,8 @@
 #define MIN_BUF_SIZE   1024
 #define MAX_LINE_LEN   8192
 
+#define MAX_CLICKABLE_AREAS 256
+
 #ifndef Button6
 # define Button6 6
 #endif
@@ -57,6 +59,17 @@ struct Fnt {
 	int width;
 #endif
 };
+
+/* clickable areas */
+typedef struct _CLICK_A {
+	int button;
+	int start_x;
+	int end_x;
+	char cmd[1024];
+} click_a;
+extern click_a sens_areas[MAX_CLICKABLE_AREAS];
+extern int sens_areas_cnt;
+extern int xorig;
 
 
 /* title window */

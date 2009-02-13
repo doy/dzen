@@ -27,6 +27,8 @@
 Dzen dzen = {0};
 static int last_cnt = 0;
 typedef void sigfunc(int);
+click_a sens_areas[MAX_CLICKABLE_AREAS];
+int sens_areas_cnt=0;
 
 
 static void
@@ -637,6 +639,15 @@ handle_xev(void) {
 				for(i=0; i < dzen.slave_win.max_lines; i++)
 					if(ev.xbutton.window == dzen.slave_win.line[i])
 						dzen.slave_win.sel_line = i;
+			}
+
+			/* clickable areas */
+			for(i=0; i<20; i++) {
+				if(ev.xbutton.window == dzen.title_win.win &&
+						ev.xbutton.button == sens_areas[i].button &&
+						(ev.xbutton.x >=  sens_areas[i].start_x+xorig &&
+						 ev.xbutton.x <=  sens_areas[i].end_x+xorig))
+					spawn(sens_areas[i].cmd);
 			}
 			switch(ev.xbutton.button) {
 				case Button1:

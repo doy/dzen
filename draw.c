@@ -28,9 +28,10 @@ typedef struct ICON_C {
 icon_c icons[MAX_ICON_CACHE];
 int icon_cnt;
 int otx;
+int xorig=0;
 
 /* command types for the in-text parser */
-enum ctype  {bg, fg, icon, rect, recto, circle, circleo, pos, abspos, titlewin, ibg, fn, sa, fixpos};
+enum ctype  {bg, fg, icon, rect, recto, circle, circleo, pos, abspos, titlewin, ibg, fn, fixpos, ca};
 
 struct command_lookup {
 	const char *name;
@@ -51,6 +52,7 @@ struct command_lookup cmd_lookup_table[] = {
 	{ "tw(",        titlewin,	3},
 	{ "ib(",        ibg,		3},
 	{ "fn(",        fn,			3},
+	{ "ca(",        ca,			3},
 	{ 0,			0,			0}
 };
 
@@ -151,7 +153,7 @@ setfont(const char *fontstr) {
 	if(!dzen.font.xftfont)
 	   dzen.font.xftfont = XftFontOpenName(dzen.dpy, dzen.screen, fontstr);
 	if(!dzen.font.xftfont)
-	   fprintf(stderr, "error, cannot load font: '%s'\n", fontstr);
+	   eprint("error, cannot load font: '%s'\n", fontstr);
 	dzen.font.extents = malloc(sizeof(XGlyphInfo));
 	XftTextExtentsUtf8(dzen.dpy, dzen.font.xftfont, (unsigned const char *) fontstr, strlen(fontstr), dzen.font.extents);
 	dzen.font.height = dzen.font.xftfont->ascent + dzen.font.xftfont->descent;
@@ -210,6 +212,12 @@ setcolor(Drawable *pm, int x, int width, long tfg, long tbg, int reverse, int no
 	XSetBackground(dzen.dpy, dzen.tgc, reverse ? tfg : tbg);
 }
 
+int 
+get_sens_area(char *s, int *b, char *cmd) {
+	sscanf(s, "%5d,%1024s", b, cmd);
+
+	return 0;
+}
 
 static int
 get_rect_vals(char *s, int *w, int *h, int *x, int *y) {
@@ -310,6 +318,7 @@ cache_icon(const char* name, Pixmap pm, int w, int h) {
 }
 #endif
 
+
 char *
 parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 	/* bitmaps */
@@ -319,7 +328,7 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 	int rectw, recth, rectx, recty;
 	/* positioning */
 	int n_posx, n_posy, set_posy=0;
-	int px=0, py=0, xorig=0;
+	int px=0, py=0;
 	int i, next_pos=0, j=0, h=0, tw=0;
 	/* fonts */
 	int font_was_set=0;
@@ -356,7 +365,6 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 	xftcs = (char *)dzen.fg;
 #endif
 
-
 	/* icon cache */
 	int ip;
 
@@ -384,6 +392,7 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 		else {
 			pm = XCreatePixmap(dzen.dpy, RootWindow(dzen.dpy, DefaultScreen(dzen.dpy)), dzen.title_win.width,
 					dzen.line_height, DefaultDepth(dzen.dpy, dzen.screen));
+			sens_areas_cnt = 0;
 		}
 
 #ifdef DZEN_XFT
@@ -658,6 +667,21 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 							py = set_posy ? py : (dzen.line_height - cur_fnt->height) / 2;
 							font_was_set = 1;
 							break;
+						case ca:
+							if(tval[0]) {
+								if(sens_areas_cnt < MAX_CLICKABLE_AREAS) {
+									get_sens_area(tval, 
+											&sens_areas[sens_areas_cnt].button, 
+											sens_areas[sens_areas_cnt].cmd);
+									sens_areas[sens_areas_cnt].start_x = px;
+								}
+							} else {
+								if(sens_areas_cnt < MAX_CLICKABLE_AREAS) {
+									sens_areas[sens_areas_cnt].end_x = px;
+									sens_areas_cnt++;
+								}
+							}
+							break;
 
 					}
 					free(tval);
@@ -919,6 +943,21 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 					}
 					py = set_posy ? py : (dzen.line_height - cur_fnt->height) / 2;
 					font_was_set = 1;
+					break;
+				case ca:
+					if(tval[0]) {
+						if(sens_areas_cnt < MAX_CLICKABLE_AREAS) {
+							get_sens_area(tval, 
+									&sens_areas[sens_areas_cnt].button, 
+									sens_areas[sens_areas_cnt].cmd);
+							sens_areas[sens_areas_cnt].start_x = px;
+						}
+					} else {
+						if(sens_areas_cnt < MAX_CLICKABLE_AREAS) {
+							sens_areas[sens_areas_cnt].end_x = px;
+							sens_areas_cnt++;
+						}
+					}
 					break;
 
 			}
