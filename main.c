@@ -975,7 +975,7 @@ main(int argc, char *argv[]) {
 		else if(!strncmp(argv[i], "-dock", 6))
 			use_ewmh_dock = 1;
 		else if(!strncmp(argv[i], "-v", 3)) {
-			printf("dzen-"VERSION", (C)opyright 2007-2008 Robert Manea\n");
+			printf("dzen-"VERSION", (C)opyright 2007-2009 Robert Manea\n");
 			printf(
 			"Enabled optional features: "
 #ifdef DZEN_XMP
