@@ -599,7 +599,7 @@ x_redraw(Window w) {
 static void
 handle_xev(void) {
 	XEvent ev;
-	int i;
+	int i, sa_clicked=0;
 	char buf[32];
 	KeySym ksym;
 
@@ -646,34 +646,38 @@ handle_xev(void) {
 				if(ev.xbutton.window == dzen.title_win.win &&
 						ev.xbutton.button == sens_areas[i].button &&
 						(ev.xbutton.x >=  sens_areas[i].start_x+xorig &&
-						 ev.xbutton.x <=  sens_areas[i].end_x+xorig)) {
+						ev.xbutton.x <=  sens_areas[i].end_x+xorig) &&
+						(ev.xbutton.y >=  sens_areas[i].start_y &&
+						ev.xbutton.y <=  sens_areas[i].end_y)) {
 					spawn(sens_areas[i].cmd);
+					sa_clicked++;
 					break;
 				}
 			}
-			
-			switch(ev.xbutton.button) {
-				case Button1:
-					do_action(button1);
-					break;
-				case Button2:
-					do_action(button2);
-					break;
-				case Button3:
-					do_action(button3);
-					break;
-				case Button4:
-					do_action(button4);
-					break;
-				case Button5:
-					do_action(button5);
-					break;
-				case Button6:
-					do_action(button6);
-					break;
-				case Button7:
-					do_action(button7);
-					break;
+			if(!sa_clicked) {
+				switch(ev.xbutton.button) {
+					case Button1:
+						do_action(button1);
+						break;
+					case Button2:
+						do_action(button2);
+						break;
+					case Button3:
+						do_action(button3);
+						break;
+					case Button4:
+						do_action(button4);
+						break;
+					case Button5:
+						do_action(button5);
+						break;
+					case Button6:
+						do_action(button6);
+						break;
+					case Button7:
+						do_action(button7);
+						break;
+				}
 			}
 			break;
 		case KeyPress:

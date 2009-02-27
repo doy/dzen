@@ -384,7 +384,10 @@ a_scrolldown(char * opt[]) {
 
 int
 a_hide(char * opt[]) {
-	(void)opt;
+	int n=1;
+	
+	
+	printf("n:%d\n", n);
 	if(!dzen.title_win.ishidden) {
 		if(!dzen.slave_win.ishmenu)
 			XResizeWindow(dzen.dpy, dzen.title_win.win, dzen.title_win.width, 1);
@@ -412,11 +415,10 @@ a_unhide(char * opt[]) {
 
 int
 a_togglehide(char * opt[]) {
-	(void)opt;
 
 	dzen.title_win.ishidden ?
 		a_unhide(NULL) :
-		a_hide(NULL);
+		a_hide(opt);
 
 	return 0;
 }
@@ -444,12 +446,17 @@ a_print(char * opt[]) {
 int
 a_menuprint(char * opt[]) {
 	char *text;
-	(void)opt;
+	int i;
 
 	if(dzen.slave_win.ismenu && dzen.slave_win.sel_line != -1
 			&& (dzen.slave_win.sel_line + dzen.slave_win.first_line_vis) < dzen.slave_win.tcnt) {
 		text = parse_line(NULL, dzen.slave_win.sel_line, 0, 0, 1);
-		puts(text); fflush(stdout);
+		printf("%s", text);
+		if(opt)
+			for(i=0; opt[i]; ++i)
+				printf("%s", opt[i]);
+		puts("");
+		fflush(stdout);
 		dzen.slave_win.sel_line = -1;
 		free(text);
 	}
@@ -458,11 +465,16 @@ a_menuprint(char * opt[]) {
 
 int
 a_menuprint_noparse(char * opt[]) {
-	(void)opt;
+	int i;
 
 	if(dzen.slave_win.ismenu && dzen.slave_win.sel_line != -1
 			&& (dzen.slave_win.sel_line + dzen.slave_win.first_line_vis) < dzen.slave_win.tcnt) {
-		puts(dzen.slave_win.tbuf[dzen.slave_win.sel_line]); fflush(stdout);
+		printf("%s", dzen.slave_win.tbuf[dzen.slave_win.sel_line]);
+		if(opt)
+			for(i=0; opt[i]; ++i)
+				printf("%s", opt[i]);
+		puts("");
+		fflush(stdout);
 		dzen.slave_win.sel_line = -1;
 	}
 	return 0;
