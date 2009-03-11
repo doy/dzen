@@ -80,7 +80,7 @@ textnw(Fnt *font, const char *text, unsigned int len) {
 	XftTextExtentsUtf8(dzen.dpy, dzen.font.xftfont, (unsigned const char *) text, strlen(text), dzen.font.extents);
 	if(dzen.font.extents->height > dzen.font.height)
 		dzen.font.height = dzen.font.extents->height;
-	return dzen.font.extents->width;
+	return dzen.font.extents->width + dzen.font.extents->x;
 #endif
 }
 
