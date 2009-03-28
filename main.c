@@ -367,7 +367,6 @@ set_docking_ewmh_info(Display *dpy, Window w, int dock) {
 
 	if(dock) {
 		type = XInternAtom(dpy, "_NET_WM_WINDOW_TYPE_DOCK", False);
-
 		XChangeProperty(
 				dpy,
 				w,
@@ -379,8 +378,33 @@ set_docking_ewmh_info(Display *dpy, Window w, int dock) {
 				1
 				);
 
-		desktop = 0xffffffff;
+		/* some window managers honor this properties*/
+		type = XInternAtom(dpy, "_NET_WM_STATE_ABOVE", False);
+		XChangeProperty(
+				dpy,
+				w,
+				XInternAtom(dpy, "_NET_WM_STATE", False),
+				XInternAtom(dpy, "ATOM", False),
+				32,
+				PropModeReplace,
+				(unsigned char *)&type,
+				1
+				);
 
+		type = XInternAtom(dpy, "_NET_WM_STATE_STICKY", False);
+		XChangeProperty(
+				dpy,
+				w,
+				XInternAtom(dpy, "_NET_WM_STATE", False),
+				XInternAtom(dpy, "ATOM", False),
+				32,
+				PropModeAppend,
+				(unsigned char *)&type,
+				1
+				);
+
+
+		desktop = 0xffffffff;
 		XChangeProperty(
 				dpy,
 				w,
@@ -447,6 +471,7 @@ x_create_windows(int use_ewmh_dock) {
 	Window root;
 	int i;
 	XRectangle si;
+	XClassHint *class_hint;
 
 	root = RootWindow(dzen.dpy, dzen.screen);
 
@@ -477,6 +502,14 @@ x_create_windows(int use_ewmh_dock) {
 			DefaultDepth(dzen.dpy, dzen.screen), CopyFromParent,
 			DefaultVisual(dzen.dpy, dzen.screen),
 			CWOverrideRedirect | CWBackPixmap | CWEventMask, &wa);
+	/* set class property */
+	class_hint = XAllocClassHint();
+	class_hint->res_name  = "dzen2";
+	class_hint->res_class = "dzen";
+	XSetClassHint(dzen.dpy, dzen.title_win.win, class_hint);
+	XFree(class_hint);
+
+	/* title */
 	XStoreName(dzen.dpy, dzen.title_win.win, dzen.title_win.name);
 
 	dzen.title_win.drawable = XCreatePixmap(dzen.dpy, root, dzen.title_win.width,
