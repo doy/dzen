@@ -531,7 +531,7 @@ x_create_windows(int use_ewmh_dock) {
 
 		/* horizontal menu mode */
 		if(dzen.slave_win.ishmenu) {
-			/* calculate width of menuentrieѕ, this is a very simple
+			/* calculate width of menuentries - this is a very simple
 			 * approach but works well for general cases.
 			 */
 			int ew = dzen.slave_win.width / dzen.slave_win.max_lines;

@@ -632,7 +632,7 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 
 								if(r != 2)
 									px = px+n_posx<0? 0 : px + n_posx;
-								if(r != 1)
+								if(r != 1) 
 									py += n_posy;
 							} else {
 								set_posy = 0;
@@ -913,7 +913,7 @@ parse_non_drawing_commands(char * text) {
 		a_togglehide(NULL);
 		return 0;
 	}
-	if(!strncmp(text, "^hide()", strlen("^ide()"))) {
+	if(!strncmp(text, "^hide()", strlen("^hide()"))) {
 		a_hide(NULL);
 		return 0;
 	}
