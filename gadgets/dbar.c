@@ -67,7 +67,7 @@ fdbar(Dbar *dbar, FILE *stream) {
 					fprintf(stream, "%s^ib(1)^fg(%s)^ro(%dx%d)^p(%d)^fg(%s)^r(%dx%d)^p(%d)^ib(0)^fg()%s", 
 							dbar->label ? dbar->label : "",
 							dbar->bg, (int)dbar->width, dbar->height, -1*(dbar->width-2),
-							dbar->fg, (int)l, dbar->height-4>0?dbar->height-4:1,
+							dbar->fg, (int)l>dbar->width-4?dbar->width-4:(int)l, dbar->height-4>0?dbar->height-4:1,
 							dbar->width-(int)l-1, dbar->pnl ? "\n" : "");
 				} else {
 					segs  = dbar->width / (dbar->segw + dbar->segb);
