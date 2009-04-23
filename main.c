@@ -293,8 +293,8 @@ queryscreeninfo(Display *dpy, XRectangle *rect, int screen) {
 
 static void
 set_docking_ewmh_info(Display *dpy, Window w, int dock) {
-	unsigned long strut[12] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-	unsigned long strut_s[4] = { 0, 0, 0, 0 };
+	unsigned long strut[12] = { 0 };
+	unsigned long strut_s[4] = { 0 };
 	XWindowAttributes wa;
 	Atom type;
 	unsigned int desktop;
@@ -1040,7 +1040,7 @@ main(int argc, char *argv[]) {
 			eprint("usage: dzen2 [-v] [-p [seconds]] [-m [v|h]] [-ta <l|c|r>] [-sa <l|c|r>]\n"
                    "             [-x <pixel>] [-y <pixel>] [-w <pixel>] [-h <pixel>] [-tw <pixel>] [-u]\n"
 				   "             [-e <string>] [-l <lines>]  [-fn <font>] [-bg <color>] [-fg <color>]\n"
-				   "             [-geometry <geometry string>] [-expand <left|both|right>] [-dock]\n"
+				   "             [-geometry <geometry string>] [-expand <left|right>] [-dock]\n"
 				   "             [-title-name <string>] [-slave-name <string>]\n"
 #ifdef DZEN_XINERAMA
 				   "             [-xs <screen>]\n"

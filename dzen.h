@@ -160,13 +160,13 @@ void x_draw_body(void);
 extern void drawtext(const char *text,
 		int reverse,
 		int line,
-		int align);	                        
+		int align);
 extern char * parse_line(const char * text, 
 		int linenr, 
 		int align, 
 		int reverse, 
 		int nodraw);
-extern long getcolor(const char *colstr);	    /* returns color of colstr */
+extern long getcolor(const char *colstr);		/* returns color of colstr */
 extern void setfont(const char *fontstr);		/* sets global font */
 extern unsigned int textw(const char *text);	/* returns width of text in px */
 extern void drawheader(const char *text);
@@ -176,4 +176,4 @@ extern void drawbody(char *text);
 extern void *emalloc(unsigned int size);		/* allocates memory, exits on error */
 extern void eprint(const char *errstr, ...);	/* prints errstr and exits with 1 */
 extern char *estrdup(const char *str);			/* duplicates str, exits on allocation error */
-extern void spawn(const char *arg);             /* execute arg */
+extern void spawn(const char *arg);				/* execute arg */
