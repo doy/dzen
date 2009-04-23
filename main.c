@@ -452,6 +452,7 @@ x_read_resources(void) {
 	char* datatype[20];
 	XrmValue xvalue;
 
+	XrmInitialize();
 	xrm = XResourceManagerString(dzen.dpy);
 	if( xrm != NULL ) {
 		xdb = XrmGetStringDatabase(xrm);
@@ -461,6 +462,10 @@ x_read_resources(void) {
 			dzen.fg  = estrdup(xvalue.addr);
 		if( XrmGetResource(xdb, "dzen2.background", "*", datatype, &xvalue) == True )
 			dzen.bg  = estrdup(xvalue.addr);
+		if( XrmGetResource(xdb, "dzen2.titlename", "*", datatype, &xvalue) == True )
+			dzen.title_win.name  = estrdup(xvalue.addr);
+		if( XrmGetResource(xdb, "dzen2.slavename", "*", datatype, &xvalue) == True )
+			dzen.slave_win.name  = estrdup(xvalue.addr);
 		XrmDestroyDatabase(xdb);
 	}
 }
@@ -552,6 +557,7 @@ x_create_windows(int use_ewmh_dock) {
 			XFillRectangle(dzen.dpy, dzen.slave_win.drawable[i], dzen.rgc, 0, 0,
 					ew+r, dzen.line_height);
 			}
+
 
 			/* windows holding the lines */
 			for(i=0; i < dzen.slave_win.max_lines; i++)
@@ -718,7 +724,7 @@ handle_xev(void) {
 			do_action(ksym+keymarker);
 			break;
 
-		/* TODO: XRandR rotation and size chnages */
+		/* TODO: XRandR rotation and size  */
 	}
 }
 
@@ -961,9 +967,11 @@ main(int argc, char *argv[]) {
 		else if(!strncmp(argv[i], "-m", 3)) {
 			dzen.slave_win.ismenu = True;
 			if(i+1 < argc) {
-				dzen.slave_win.ishmenu = (argv[i+1][0] == 'h') ? ++i, True : False;
-				if( argv[i+1][0] == 'v')
+				if( argv[i+1][0] == 'v') {
 					++i;
+					break;
+				}
+				dzen.slave_win.ishmenu = (argv[i+1][0] == 'h') ? ++i, True : False;
 			}
 		}
 		else if(!strncmp(argv[i], "-fn", 4)) {
