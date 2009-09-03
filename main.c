@@ -301,6 +301,11 @@ set_docking_ewmh_info(Display *dpy, Window w, int dock) {
 	pid_t cur_pid;
 	char *host_name;
 	XTextProperty txt_prop;
+	XRectangle si;
+#ifdef DZEN_XINERAMA
+	XineramaScreenInfo *xsi;
+	int screen_count,i,max_height;
+#endif
 
 	host_name = emalloc(HOST_NAME_MAX);
 	if( (gethostname(host_name, HOST_NAME_MAX) > -1) &&
@@ -326,20 +331,36 @@ set_docking_ewmh_info(Display *dpy, Window w, int dock) {
 
 
 	XGetWindowAttributes(dpy, w, &wa);
-
-	if(wa.y == 0) {
-		strut[2] = wa.height;
+#ifdef DZEN_XINERAMA
+	queryscreeninfo(dpy,&si,dzen.xinescreen);
+#else
+	qsi_no_xinerama(dpy,&si);
+#endif
+	if(wa.y - si.y == 0) {
+		strut[2] = si.y + wa.height;
 		strut[8] = wa.x;
 		strut[9] = wa.x + wa.width - 1;
 
-		strut_s[2] = wa.height;
+		strut_s[2] = strut[2];
 	}
-	else if((wa.y + wa.height) == DisplayHeight(dpy, DefaultScreen(dpy))) {
+	else if((wa.y - si.y + wa.height) == si.height) {
+#ifdef DZEN_XINERAMA
+		max_height = si.height;
+		xsi = XineramaQueryScreens(dpy,&screen_count);
+		for(i=0; i < screen_count; i++) {
+			if(xsi[i].height > max_height)
+				max_height = xsi[i].height;
+		}
+		XFree(xsi);
+		/* Adjust strut value if there is a larger screen */ 
+		strut[3] = max_height - (si.height + si.y) + wa.height;
+#else
 		strut[3] = wa.height;
+#endif
 		strut[10] = wa.x;
 		strut[11] = wa.x + wa.width - 1;
 
-		strut_s[3] = wa.height;
+		strut_s[3] = strut[3];
 	}
 
 	if(strut[2] != 0 || strut[3] != 0) {
