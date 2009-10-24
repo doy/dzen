@@ -395,7 +395,8 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 	char *xftcs_bg;
 	int xftcs_bgf=0;
 
-	xftcs = (char *)dzen.fg;
+	xftcs    = (char *)dzen.fg;
+    xftcs_bg = (char *)dzen.bg;
 #endif
 
 	/* icon cache */
