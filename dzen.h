@@ -62,6 +62,7 @@ struct Fnt {
 
 /* clickable areas */
 typedef struct _CLICK_A {
+    int active;
 	int button;
 	int start_x;
 	int end_x;

@@ -739,12 +739,19 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 										sens_areas[sens_areas_cnt].start_y = py;
 										sens_areas[sens_areas_cnt].end_y = py;
 										max_y = py;
+                                        sens_areas[sens_areas_cnt].active = 0;
+                                        sens_areas_cnt++;
 									}
 								} else {
-									if(sens_areas_cnt < MAX_CLICKABLE_AREAS) {
-										sens_areas[sens_areas_cnt].end_x = px;
-										sens_areas[sens_areas_cnt].end_y = max_y;
-										sens_areas_cnt++;
+                                        /* find most recent unclosed area */
+                                        for(i = sens_areas_cnt - 1; i >= 0; i--)
+                                            if(!sens_areas[i].active)
+                                                break;
+                                        if(i >= 0 && i < MAX_CLICKABLE_AREAS) {
+                                            sens_areas[i].end_x = px;
+                                            sens_areas[i].end_y = max_y;
+                                            sens_areas[i].active = 1;
+
 									}
 								}
 							}

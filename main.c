@@ -702,13 +702,14 @@ handle_xev(void) {
 			}
 
 			/* clickable areas */
-			for(i=0; i<sens_areas_cnt; i++) {
+             for(i=sens_areas_cnt; i>=0; i--) {
 				if(ev.xbutton.window == dzen.title_win.win &&
 						ev.xbutton.button == sens_areas[i].button &&
 						(ev.xbutton.x >=  sens_areas[i].start_x+xorig &&
 						ev.xbutton.x <=  sens_areas[i].end_x+xorig) &&
 						(ev.xbutton.y >=  sens_areas[i].start_y &&
-						ev.xbutton.y <=  sens_areas[i].end_y)) {
+						ev.xbutton.y <=  sens_areas[i].end_y) &&
+                        sens_areas[i].active) {
 					spawn(sens_areas[i].cmd);
 					sa_clicked++;
 					break;
