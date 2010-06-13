@@ -218,7 +218,10 @@ setcolor(Drawable *pm, int x, int width, long tfg, long tbg, int reverse, int no
 int 
 get_sens_area(char *s, int *b, char *cmd) {
 	memset(cmd, 0, 1024);
-	sscanf(s, "%5d,%1024c", b, cmd);
+    sscanf(s, "%5d", b);
+    char *comma = strchr(s, ',');
+    if (comma != NULL)
+        strncpy(cmd, comma+1, 1024);
 
 	return 0;
 }
