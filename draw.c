@@ -808,7 +808,7 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 				}
 
 				XftDrawStringUtf8(xftd, &xftc, 
-						cur_fnt->xftfont, px, py + dzen.font.xftfont->ascent, lbuf, strlen(lbuf));
+						cur_fnt->xftfont, px, py + dzen.font.xftfont->ascent, (const FcChar8 *)lbuf, strlen(lbuf));
 
 				if(xftcs_f) {
 					free(xftcs);
