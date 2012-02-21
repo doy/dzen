@@ -181,3 +181,7 @@ extern void spawn(const char *arg);				/* execute arg */
 
 extern long colorcache_get(const char *name); /* gets a cached color */
 extern void colorcache_set(const char *name, long value); /* sets a cached color */
+#ifdef DZEN_XFT
+extern int xftcolorcache_get(const char *name, XftColor *color); /* gets a cached color */
+extern void xftcolorcache_set(const char *name, XftColor *color); /* sets a cached color */
+#endif

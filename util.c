@@ -17,6 +17,10 @@
 
 static char *colorcache_names[COLORCACHE_MAX];
 static long colorcache_values[COLORCACHE_MAX];
+#ifdef DZEN_XFT
+static char *xftcolorcache_names[COLORCACHE_MAX];
+static XftColor xftcolorcache_values[COLORCACHE_MAX];
+#endif
 
 #define ONEMASK ((size_t)(-1) / 0xFF)
 
@@ -95,3 +99,34 @@ void colorcache_set(const char *name, long value) {
 	colorcache_names[i] = strdup(name);
 	colorcache_values[i] = value;
 }
+
+#ifdef DZEN_XFT
+int xftcolorcache_get(const char *name, XftColor *color) {
+	int i;
+
+	for (i = 0; i < COLORCACHE_MAX; ++i) {
+		if (!xftcolorcache_names[i])
+			break;
+		if (!strcmp(xftcolorcache_names[i], name)) {
+			memcpy(color, &xftcolorcache_values[i], sizeof(XftColor));
+			return 1;
+		}
+	}
+
+	return 0;
+}
+
+void xftcolorcache_set(const char *name, XftColor *color) {
+	int i;
+
+	for (i = 0; i < COLORCACHE_MAX; ++i)
+		if (!xftcolorcache_names[i])
+			break;
+
+	if (i >= COLORCACHE_MAX)
+		return;
+
+	xftcolorcache_names[i] = strdup(name);
+	memcpy(&xftcolorcache_values[i], color, sizeof(XftColor));
+}
+#endif

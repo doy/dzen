@@ -806,11 +806,17 @@ parse_line(const char *line, int lnr, int align, int reverse, int nodraw) {
 					XDrawString(dzen.dpy, pm, dzen.tgc, px, py+dzen.font.ascent, lbuf, strlen(lbuf));
 #else
 				if(reverse) {
-				XftColorAllocName(dzen.dpy, DefaultVisual(dzen.dpy, dzen.screen),
-						DefaultColormap(dzen.dpy, dzen.screen),  xftcs_bg,  &xftc);
+					if (!xftcolorcache_get(xftcs_bg, &xftc)) {
+						XftColorAllocName(dzen.dpy, DefaultVisual(dzen.dpy, dzen.screen),
+								DefaultColormap(dzen.dpy, dzen.screen),  xftcs_bg,  &xftc);
+						xftcolorcache_set(xftcs_bg, &xftc);
+					}
 				} else {
-				XftColorAllocName(dzen.dpy, DefaultVisual(dzen.dpy, dzen.screen),
-						DefaultColormap(dzen.dpy, dzen.screen),  xftcs,  &xftc);
+					if (!xftcolorcache_get(xftcs, &xftc)) {
+						XftColorAllocName(dzen.dpy, DefaultVisual(dzen.dpy, dzen.screen),
+								DefaultColormap(dzen.dpy, dzen.screen),  xftcs,  &xftc);
+						xftcolorcache_set(xftcs, &xftc);
+					}
 				}
 
 				XftDrawStringUtf8(xftd, &xftc, 
