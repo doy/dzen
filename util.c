@@ -13,6 +13,11 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
+#define COLORCACHE_MAX 256
+
+static char *colorcache_names[COLORCACHE_MAX];
+static long colorcache_values[COLORCACHE_MAX];
+
 #define ONEMASK ((size_t)(-1) / 0xFF)
 
 void *
@@ -64,3 +69,29 @@ spawn(const char *arg) {
 	wait(0);
 }
 
+long colorcache_get(const char *name) {
+	int i;
+
+	for (i = 0; i < COLORCACHE_MAX; ++i) {
+		if (!colorcache_names[i])
+			break;
+		if (!strcmp(colorcache_names[i], name))
+			return colorcache_values[i];
+	}
+
+	return -1;
+}
+
+void colorcache_set(const char *name, long value) {
+	int i;
+
+	for (i = 0; i < COLORCACHE_MAX; ++i)
+		if (!colorcache_names[i])
+			break;
+
+	if (i >= COLORCACHE_MAX)
+		return;
+
+	colorcache_names[i] = strdup(name);
+	colorcache_values[i] = value;
+}

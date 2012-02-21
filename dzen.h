@@ -178,3 +178,6 @@ extern void *emalloc(unsigned int size);		/* allocates memory, exits on error */
 extern void eprint(const char *errstr, ...);	/* prints errstr and exits with 1 */
 extern char *estrdup(const char *str);			/* duplicates str, exits on allocation error */
 extern void spawn(const char *arg);				/* execute arg */
+
+extern long colorcache_get(const char *name); /* gets a cached color */
+extern void colorcache_set(const char *name, long value); /* sets a cached color */

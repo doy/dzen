@@ -103,13 +103,19 @@ drawtext(const char *text, int reverse, int line, int align) {
 
 long
 getcolor(const char *colstr) {
-	Colormap cmap = DefaultColormap(dzen.dpy, dzen.screen);
-	XColor color;
+	long color;
+	if ((color = colorcache_get(colstr)) != -1)
+		return color;
+	else {
+		Colormap cmap = DefaultColormap(dzen.dpy, dzen.screen);
+		XColor color;
 
-	if(!XAllocNamedColor(dzen.dpy, cmap, colstr, &color, &color))
-		return -1;
+		if(!XAllocNamedColor(dzen.dpy, cmap, colstr, &color, &color))
+			return -1;
 
-	return color.pixel;
+		colorcache_set(colstr, color.pixel);
+		return color.pixel;
+	}
 }
 
 void
